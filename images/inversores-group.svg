@@ -1,0 +1,10 @@
+<svg width="120" height="48" viewBox="0 0 120 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="24" cy="24" r="22" fill="#e2e8f0" stroke="white" stroke-width="2"/>
+  <text x="24" y="32" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#64748b">JP</text>
+  
+  <circle cx="56" cy="24" r="22" fill="#bfdbfe" stroke="white" stroke-width="2"/>
+  <text x="56" y="32" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#1e40af">AS</text>
+  
+  <circle cx="88" cy="24" r="22" fill="#bbf7d0" stroke="white" stroke-width="2"/>
+  <text x="88" y="32" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#166534">MR</text>
+</svg>
