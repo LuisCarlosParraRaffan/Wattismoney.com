@@ -33,10 +33,10 @@ const Landing: React.FC = () => {
         {/* Hero Text Content */}
         <div className="space-y-6">
           <h1 className="text-4xl md:text-6xl font-bold leading-tight tracking-tight">
-            Wattismoney: Tu plataforma de inversión en energía limpia <span className="text-accent-highlight">energía.</span>
+            Wattismoney: Tu plataforma de inversión en <span className="text-accent-highlight">energía limpia.</span>
           </h1>
           <p className="text-gray-600 text-lg md:max-w-md leading-relaxed">
-            Aporta liquidez a contratos de suministro de energía limpia. Genera utilidades atractivas y un impacto sostenible.
+            Aporta liquidez a contratos de suministro de energía limpia. Genera utilidades atractivas y un impacto sostenible para tu región.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 pt-2">
             <Link to="/contratos" className="bg-w-accent text-black px-8 py-3 rounded-full font-semibold hover:bg-yellow-300 transition-colors shadow-sm text-center cursor-pointer hover:opacity-90 flex items-center justify-center">
