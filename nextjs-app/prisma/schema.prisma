@@ -1,0 +1,237 @@
+// Wattismoney - Schema de Base de Datos
+// Fase inicial: Registro, Autenticación y KYC
+// Este schema es extensible para añadir más modelos en el futuro
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// AUTENTICACIÓN (Compatible con Auth.js v5)
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  passwordHash  String?   // Para login con credentials
+  
+  // Datos personales
+  firstName     String?
+  lastName      String?
+  phone         String?
+  dateOfBirth   DateTime?
+  nationality   String?
+  
+  // Estado de la cuenta
+  role          UserRole  @default(INVESTOR)
+  status        UserStatus @default(PENDING_EMAIL_VERIFICATION)
+  
+  // Perfil de inversor (del quiz)
+  investorProfile InvestorProfile?
+  
+  // Gamificación
+  points        Int       @default(0)
+  level         Int       @default(1)
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+  
+  // Relaciones
+  accounts      Account[]
+  sessions      Session[]
+  kycDocuments  KycDocument[]
+  
+  // Índices para búsquedas frecuentes
+  @@index([email])
+  @@index([status])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ============================================
+// KYC (Know Your Customer)
+// ============================================
+
+model KycDocument {
+  id            String          @id @default(cuid())
+  userId        String
+  
+  // Tipo de documento
+  documentType  DocumentType
+  documentNumber String?
+  
+  // Archivos subidos
+  frontImageUrl String?
+  backImageUrl  String?
+  selfieUrl     String?
+  proofOfResidenceUrl String?
+  
+  // Estado de verificación
+  status        KycStatus       @default(PENDING)
+  rejectionReason String?
+  
+  // Metadata
+  submittedAt   DateTime        @default(now())
+  reviewedAt    DateTime?
+  reviewedBy    String?         // ID del admin que revisó
+  expiresAt     DateTime?       // Fecha de expiración del documento
+  
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([status])
+}
+
+model InvestorProfile {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  
+  // Respuestas del quiz
+  investmentGoal    String?  // "passive_income", "capital_growth", "diversification", "environmental_impact"
+  investmentHorizon String?  // "less_1_year", "1_3_years", "3_5_years", "more_5_years"
+  riskTolerance     String?  // "very_conservative", "conservative", "moderate", "aggressive"
+  initialInvestment String?  // "less_1000", "1000_5000", "5000_20000", "more_20000"
+  
+  // Perfil calculado
+  profileType       ProfileType @default(MODERATE)
+  
+  // Límites de inversión
+  monthlyLimit      Decimal?    @db.Decimal(12, 2)
+  
+  // Preferencias
+  preferredProjectTypes String[] // ["solar", "wind", "hydro", "biomass"]
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum UserRole {
+  INVESTOR      // Usuario inversor normal
+  ADMIN         // Administrador de la plataforma
+  SUPER_ADMIN   // Super administrador
+}
+
+enum UserStatus {
+  PENDING_EMAIL_VERIFICATION  // Recién registrado, email no verificado
+  PENDING_KYC                 // Email verificado, KYC pendiente
+  KYC_IN_REVIEW               // KYC enviado, en revisión
+  KYC_REJECTED                // KYC rechazado
+  ACTIVE                      // Usuario completamente verificado
+  SUSPENDED                   // Cuenta suspendida
+  DEACTIVATED                 // Cuenta desactivada por el usuario
+}
+
+enum KycStatus {
+  PENDING     // Documentos no subidos
+  SUBMITTED   // Documentos enviados, pendiente de revisión
+  IN_REVIEW   // En proceso de revisión
+  APPROVED    // Aprobado
+  REJECTED    // Rechazado
+  EXPIRED     // Documentos expirados
+}
+
+enum DocumentType {
+  DNI         // Documento Nacional de Identidad (España)
+  NIE         // Número de Identidad de Extranjero (España)
+  PASSPORT    // Pasaporte
+  DRIVERS_LICENSE
+}
+
+enum ProfileType {
+  VERY_CONSERVATIVE
+  CONSERVATIVE
+  MODERATE
+  AGGRESSIVE
+}
+
+// ============================================
+// MODELOS FUTUROS (Placeholders para expansión)
+// Descomentar cuando se necesiten
+// ============================================
+
+// model Project {
+//   id              String   @id @default(cuid())
+//   name            String
+//   description     String   @db.Text
+//   location        String
+//   country         String
+//   projectType     String   // "solar", "wind", "hydro"
+//   capacityMW      Decimal  @db.Decimal(10, 2)
+//   tirEstimated    Decimal  @db.Decimal(5, 2)
+//   termYears       Int
+//   capitalRequired Decimal  @db.Decimal(15, 2)
+//   capitalRaised   Decimal  @db.Decimal(15, 2) @default(0)
+//   status          String   // "funding", "active", "completed"
+//   createdAt       DateTime @default(now())
+//   updatedAt       DateTime @updatedAt
+// }
+
+// model Investment {
+//   id          String   @id @default(cuid())
+//   userId      String
+//   projectId   String
+//   amount      Decimal  @db.Decimal(15, 2)
+//   status      String   // "pending", "confirmed", "cancelled"
+//   createdAt   DateTime @default(now())
+// }
+
+// model Transaction {
+//   id          String   @id @default(cuid())
+//   userId      String
+//   type        String   // "deposit", "withdrawal", "dividend", "investment"
+//   amount      Decimal  @db.Decimal(15, 2)
+//   status      String
+//   reference   String?
+//   createdAt   DateTime @default(now())
+// }

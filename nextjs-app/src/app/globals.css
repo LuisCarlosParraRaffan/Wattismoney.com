@@ -1,0 +1,162 @@
+/* Google Fonts - Must be at the top before @import "tailwindcss" */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+@import "tailwindcss";
+
+/* ========================================
+   WATTISMONEY - Global Styles
+   Migrated from Vite project
+   ======================================== */
+
+/* ========================================
+   CSS Variables - Design Tokens
+   ======================================== */
+:root {
+  /* Brand Colors */
+  --w-accent: #dced31;
+  --w-dark: #151715;
+  --w-gray: #f5f5f5;
+  --primary: #eeff00;
+  --primary-hover: #dceb00;
+  --neon-yellow: #EAFF04;
+
+  /* Background Colors */
+  --background-light: #ffffff;
+  --background-dark: #222210;
+  --background: #ffffff;
+  --foreground: #171717;
+
+  /* Text Colors */
+  --text-main: #000000;
+
+  /* Border Colors */
+  --border-color: #e6e6db;
+
+  /* Emerald Palette */
+  --emerald-850: #064e3b;
+  --emerald-950: #022c22;
+
+  /* Force Light Mode */
+  color-scheme: light;
+}
+
+/* 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+} 
+*/
+
+/* ========================================
+   Tailwind Theme Extensions
+   ======================================== */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Cairo', sans-serif;
+
+  /* Brand Colors */
+  --color-w-accent: var(--w-accent);
+  --color-w-dark: var(--w-dark);
+  --color-w-gray: var(--w-gray);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-neon-yellow: var(--neon-yellow);
+  --color-background-light: var(--background-light);
+  --color-background-dark: var(--background-dark);
+  --color-text-main: var(--text-main);
+  --color-border-color: var(--border-color);
+  --color-emerald-850: var(--emerald-850);
+  --color-emerald-950: var(--emerald-950);
+
+  /* Shadows */
+  --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  --shadow-neon: 0 0 15px rgba(234, 255, 4, 0.4);
+}
+
+/* ========================================
+   Base Styles
+   ======================================== */
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========================================
+   Custom Utility Classes
+   ======================================== */
+
+/* Font Display (Cairo) */
+.font-display {
+  font-family: 'Cairo', sans-serif;
+}
+
+/* Accent Highlight Text */
+.text-accent-highlight {
+  color: var(--w-accent);
+}
+
+/* Material Icons Styling */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Filled Icons Variant */
+.icon-filled {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Hide Scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* ========================================
+   Animation Utilities
+   ======================================== */
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(234, 255, 4, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(234, 255, 4, 0.6);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
