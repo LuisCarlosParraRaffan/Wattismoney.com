@@ -16,7 +16,7 @@ const protectedRoutes = [
     "/ajustes",
     "/ayuda",
     "/clasificacion",
-    "/contrato",
+    "/contrato/", // Added trailing slash to prevent matching /contratos
 ];
 
 // Rutas públicas de autenticación (redirigir si ya está logueado)
@@ -26,10 +26,20 @@ export default auth((req) => {
     const { nextUrl } = req;
     const isLoggedIn = !!req.auth;
 
-    // Verificar si es una ruta protegida
-    const isProtectedRoute = protectedRoutes.some((route) =>
-        nextUrl.pathname.startsWith(route)
-    );
+    // Verificar si es una ruta protegida (exact match or path segment)
+    const isProtectedRoute = protectedRoutes.some((route) => {
+        // Check if pathname matches route exactly or as a path segment
+        const pathname = nextUrl.pathname;
+        if (pathname === route || pathname === route.replace(/\/$/, '')) {
+            return true;
+        }
+        // For routes with trailing slash, check if pathname starts with it
+        if (route.endsWith('/')) {
+            return pathname.startsWith(route);
+        }
+        // For routes without trailing slash, ensure it's a complete segment
+        return pathname.startsWith(route + '/') || pathname === route;
+    });
 
     // Verificar si es una ruta de auth
     const isAuthRoute = authRoutes.some((route) =>
