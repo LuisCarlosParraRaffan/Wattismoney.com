@@ -122,7 +122,7 @@ const KYCUpload: React.FC = () => {
                                     <label className="text-sm font-medium text-gray-700">Parte Delantera</label>
                                     <div
                                         onClick={() => frontInputRef.current?.click()}
-                                        className={`group relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg transition-all cursor-pointer ${frontFile ? 'border-green-500 bg-green-50 : 'border-gray-300 hover:border-primary hover:bg-primary/5'}`}
+                                        className={`group relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg transition-all cursor-pointer ${frontFile ? 'border-green-500 bg-green-50' : 'border-gray-300 hover:border-primary hover:bg-primary/5'}`}
                                     >
                                         <div className="flex flex-col items-center justify-center pt-5 pb-6 px-4 text-center">
                                             {frontFile ? (
@@ -153,7 +153,7 @@ const KYCUpload: React.FC = () => {
                                     <label className="text-sm font-medium text-gray-700">Parte Trasera</label>
                                     <div
                                         onClick={() => backInputRef.current?.click()}
-                                        className={`group relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg transition-all cursor-pointer ${backFile ? 'border-green-500 bg-green-50 : 'border-gray-300 hover:border-primary hover:bg-primary/5'}`}
+                                        className={`group relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg transition-all cursor-pointer ${backFile ? 'border-green-500 bg-green-50' : 'border-gray-300 hover:border-primary hover:bg-primary/5'}`}
                                     >
                                         <div className="flex flex-col items-center justify-center pt-5 pb-6 px-4 text-center">
                                             {backFile ? (
