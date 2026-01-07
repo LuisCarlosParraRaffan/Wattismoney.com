@@ -8,7 +8,7 @@ const Dashboard: React.FC = () => {
     return (
         <>
             {/* Header */}
-            <header className="h-20 bg-white dark:bg-[#1a1a2e] border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-6 md:px-10 shrink-0">
+            <header className="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-6 md:px-10 shrink-0">
                 {/* Mobile Logo */}
                 <div className="md:hidden flex items-center gap-2">
                     <WattismoneyLogo className="h-8 w-auto" />
@@ -16,15 +16,15 @@ const Dashboard: React.FC = () => {
 
                 {/* Page Title */}
                 <div className="hidden md:flex flex-col">
-                    <h1 className="text-xl font-bold text-text-main dark:text-white">Resumen de Cartera</h1>
+                    <h1 className="text-xl font-bold text-text-main">Resumen de Cartera</h1>
                     <p className="text-sm text-slate-500">Impacto energético y financiero al día de hoy.</p>
                 </div>
 
                 {/* Header Actions */}
                 <div className="flex items-center gap-4">
-                    <button className="relative p-2 text-slate-500 hover:text-black transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <button className="relative p-2 text-slate-500 hover:text-black transition-colors rounded-full hover:bg-gray-100">
                         <span className="material-symbols-outlined">notifications</span>
-                        <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-[#1a1a2e]"></span>
+                        <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
                     </button>
                     <Link href="/mercado-primario" className="bg-primary hover:bg-primary-hover text-text-main px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-lg transition-all">
                         <span className="material-symbols-outlined text-lg">add</span>
@@ -34,21 +34,21 @@ const Dashboard: React.FC = () => {
             </header>
 
             {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto p-6 md:p-10 scroll-smooth bg-white dark:bg-background-dark">
+            <div className="flex-1 overflow-y-auto p-6 md:p-10 scroll-smooth bg-white">
                 <div className="max-w-7xl mx-auto space-y-8 pb-10">
 
                     {/* Metrics Grid */}
                     <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
                         {/* Energy Transactioned */}
-                        <div className="bg-white dark:bg-[#1a1a2e] p-6 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm relative overflow-hidden">
+                        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm relative overflow-hidden">
                             <div className="absolute right-0 top-0 p-4 opacity-5">
                                 <span className="material-symbols-outlined text-9xl">bolt</span>
                             </div>
                             <div className="relative z-10">
                                 <p className="text-slate-500 text-xs font-bold uppercase tracking-wide mb-1">Energía Transaccionada</p>
                                 <div className="flex items-baseline gap-1">
-                                    <h3 className="text-3xl font-bold text-text-main dark:text-white">12.5 GWh</h3>
+                                    <h3 className="text-3xl font-bold text-text-main">12.5 GWh</h3>
                                 </div>
                                 <div className="mt-4 flex items-center gap-2">
                                     <div className="bg-green-50 text-green-700 px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1">
@@ -63,14 +63,14 @@ const Dashboard: React.FC = () => {
                         </div>
 
                         {/* Industries Supported */}
-                        <div className="bg-white dark:bg-[#1a1a2e] p-6 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm relative overflow-hidden">
+                        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm relative overflow-hidden">
                             <div className="absolute right-0 top-0 p-4 opacity-5">
                                 <span className="material-symbols-outlined text-9xl">factory</span>
                             </div>
                             <div className="relative z-10">
                                 <p className="text-slate-500 text-xs font-bold uppercase tracking-wide mb-1">Industrias Apoyadas</p>
                                 <div className="flex items-baseline gap-1">
-                                    <h3 className="text-3xl font-bold text-text-main dark:text-white">8</h3>
+                                    <h3 className="text-3xl font-bold text-text-main">8</h3>
                                 </div>
                                 <div className="mt-4 flex -space-x-2 overflow-hidden">
                                     <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-gray-100 flex items-center justify-center text-xs" title="Agro">🌾</div>
@@ -85,12 +85,12 @@ const Dashboard: React.FC = () => {
                         </div>
 
                         {/* Environmental Impact */}
-                        <div className="bg-white dark:bg-[#1a1a2e] p-6 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm relative overflow-hidden group">
+                        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm relative overflow-hidden group">
                             <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-primary rounded-full opacity-20 group-hover:scale-150 transition-transform duration-500"></div>
                             <div className="relative z-10">
                                 <p className="text-slate-500 text-xs font-bold uppercase tracking-wide mb-1">Impacto Ambiental</p>
                                 <div className="flex items-baseline gap-1">
-                                    <h3 className="text-3xl font-bold text-text-main dark:text-white">450 Ton</h3>
+                                    <h3 className="text-3xl font-bold text-text-main">450 Ton</h3>
                                     <span className="text-sm font-medium text-slate-500">CO2e</span>
                                 </div>
                                 <p className="text-xs text-slate-500 mt-4 leading-relaxed">
@@ -100,11 +100,11 @@ const Dashboard: React.FC = () => {
                         </div>
 
                         {/* Financial Performance */}
-                        <div className="bg-white dark:bg-[#1a1a2e] p-6 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm relative overflow-hidden">
+                        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm relative overflow-hidden">
                             <div className="relative z-10">
                                 <p className="text-slate-500 text-xs font-bold uppercase tracking-wide mb-1">Rendimiento Financiero</p>
                                 <div className="flex items-baseline gap-1">
-                                    <h3 className="text-3xl font-bold text-text-main dark:text-white">$12,450</h3>
+                                    <h3 className="text-3xl font-bold text-text-main">$12,450</h3>
                                 </div>
                                 <div className="mt-4 flex items-center justify-between">
                                     <div className="flex flex-col">
@@ -124,10 +124,10 @@ const Dashboard: React.FC = () => {
                     {/* Visualization Section */}
                     <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Impact Flow */}
-                        <div className="lg:col-span-2 bg-white dark:bg-[#1a1a2e] p-8 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                        <div className="lg:col-span-2 bg-white p-8 rounded-xl border border-gray-200 shadow-sm">
                             <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
                                 <div>
-                                    <h2 className="text-xl font-bold text-text-main dark:text-white">Flujo de Impacto</h2>
+                                    <h2 className="text-xl font-bold text-text-main">Flujo de Impacto</h2>
                                     <p className="text-sm text-slate-500">Tu inversión conectando generación limpia con consumo industrial.</p>
                                 </div>
                                 <button className="text-xs font-bold bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors">Ver Detalles</button>
@@ -190,8 +190,8 @@ const Dashboard: React.FC = () => {
                         </div>
 
                         {/* Benefited Sectors */}
-                        <div className="bg-white dark:bg-[#1a1a2e] p-8 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col">
-                            <h3 className="text-lg font-bold text-text-main dark:text-white mb-6">Sectores Beneficiados</h3>
+                        <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm flex flex-col">
+                            <h3 className="text-lg font-bold text-text-main mb-6">Sectores Beneficiados</h3>
                             <div className="flex-1 flex flex-col justify-center space-y-6">
 
                                 <div className="group">
@@ -254,16 +254,16 @@ const Dashboard: React.FC = () => {
                     {/* Active Contracts Table */}
                     <section>
                         <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-xl font-bold text-text-main dark:text-white">Contratos Activos (PPA)</h2>
+                            <h2 className="text-xl font-bold text-text-main">Contratos Activos (PPA)</h2>
                             <Link href="/cartera" className="text-text-main underline decoration-primary decoration-2 text-sm font-bold hover:text-black flex items-center gap-1">
                                 Ver cartera completa <span className="material-symbols-outlined text-sm">arrow_forward</span>
                             </Link>
                         </div>
-                        <div className="bg-white dark:bg-[#1a1a2e] rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left border-collapse">
                                     <thead>
-                                        <tr className="bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800">
+                                        <tr className="bg-gray-50/50 border-b border-gray-100">
                                             <th className="p-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Fuente de Energía</th>
                                             <th className="p-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Industria Receptora</th>
                                             <th className="p-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Energía Suministrada</th>
@@ -271,15 +271,15 @@ const Dashboard: React.FC = () => {
                                             <th className="p-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Estado</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                                        <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                    <tbody className="divide-y divide-gray-100">
+                                        <tr className="hover:bg-gray-50 transition-colors">
                                             <td className="p-5">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-text-main">
                                                         <span className="material-symbols-outlined">sunny</span>
                                                     </div>
                                                     <div>
-                                                        <p className="font-bold text-sm text-text-main dark:text-white">Solar Andalucía I</p>
+                                                        <p className="font-bold text-sm text-text-main">Solar Andalucía I</p>
                                                         <p className="text-xs text-slate-500">Sevilla, España</p>
                                                     </div>
                                                 </div>
@@ -287,7 +287,7 @@ const Dashboard: React.FC = () => {
                                             <td className="p-5">
                                                 <div className="flex items-center gap-2">
                                                     <span className="material-symbols-outlined text-gray-400 text-lg">factory</span>
-                                                    <span className="text-sm font-medium text-text-main dark:text-white">Grupo AgroSur</span>
+                                                    <span className="text-sm font-medium text-text-main">Grupo AgroSur</span>
                                                 </div>
                                             </td>
                                             <td className="p-5">
@@ -306,14 +306,14 @@ const Dashboard: React.FC = () => {
                                                 </span>
                                             </td>
                                         </tr>
-                                        <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                        <tr className="hover:bg-gray-50 transition-colors">
                                             <td className="p-5">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 rounded-lg bg-black flex items-center justify-center text-primary">
                                                         <span className="material-symbols-outlined">air</span>
                                                     </div>
                                                     <div>
-                                                        <p className="font-bold text-sm text-text-main dark:text-white">Eólica del Norte</p>
+                                                        <p className="font-bold text-sm text-text-main">Eólica del Norte</p>
                                                         <p className="text-xs text-slate-500">Galicia, España</p>
                                                     </div>
                                                 </div>
@@ -321,7 +321,7 @@ const Dashboard: React.FC = () => {
                                             <td className="p-5">
                                                 <div className="flex items-center gap-2">
                                                     <span className="material-symbols-outlined text-gray-400 text-lg">checkroom</span>
-                                                    <span className="text-sm font-medium text-text-main dark:text-white">Textiles Gallegos</span>
+                                                    <span className="text-sm font-medium text-text-main">Textiles Gallegos</span>
                                                 </div>
                                             </td>
                                             <td className="p-5">
@@ -349,7 +349,7 @@ const Dashboard: React.FC = () => {
                 </div>
 
                 {/* Simple Footer */}
-                <footer className="max-w-7xl mx-auto py-6 border-t border-gray-200 dark:border-gray-800 text-center md:text-left flex flex-col md:flex-row justify-between items-center text-slate-500 text-xs">
+                <footer className="max-w-7xl mx-auto py-6 border-t border-gray-200 text-center md:text-left flex flex-col md:flex-row justify-between items-center text-slate-500 text-xs">
                     <p>© 2024 Wattismoney. Inversión responsable y transparente.</p>
                     <div className="flex gap-4 mt-2 md:mt-0">
                         <a className="hover:text-black transition-colors" href="#">Privacidad</a>

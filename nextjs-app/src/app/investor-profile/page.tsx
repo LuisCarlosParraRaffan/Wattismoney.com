@@ -41,8 +41,8 @@ export default function InvestorProfileQuiz() {
     const currentQuestion = questions[step - 1];
 
     return (
-        <div className="bg-background-light dark:bg-background-dark text-text-main font-display min-h-screen flex flex-col">
-            <header className="flex items-center justify-between border-b border-gray-100 bg-white dark:bg-[#1a1a2e] px-6 py-4 lg:px-20">
+        <div className="bg-background-light text-text-main font-display min-h-screen flex flex-col">
+            <header className="flex items-center justify-between border-b border-gray-100 bg-white px-6 py-4 lg:px-20">
                 <Link href="/" className="flex items-center gap-3 group">
                     <WattismoneyLogo className="h-10 md:h-12 w-auto transition-transform group-hover:scale-105" />
                 </Link>
@@ -55,7 +55,7 @@ export default function InvestorProfileQuiz() {
                 <div className="w-full max-w-xl">
                     {/* Progress */}
                     <div className="mb-8">
-                        <div className="h-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
                             <div
                                 className="h-full bg-primary rounded-full transition-all duration-500"
                                 style={{ width: `${(step / 4) * 100}%` }}
@@ -64,7 +64,7 @@ export default function InvestorProfileQuiz() {
                     </div>
 
                     {/* Question */}
-                    <div className="bg-white dark:bg-[#1a1a2e] rounded-2xl border border-gray-100 dark:border-gray-800 p-8 shadow-lg">
+                    <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-lg">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
                                 <span className="material-symbols-outlined text-black text-2xl">psychology</span>
@@ -75,14 +75,14 @@ export default function InvestorProfileQuiz() {
                             </div>
                         </div>
 
-                        <h2 className="text-2xl font-bold mb-6 text-black dark:text-white">{currentQuestion.question}</h2>
+                        <h2 className="text-2xl font-bold mb-6 text-black">{currentQuestion.question}</h2>
 
                         <div className="space-y-3">
                             {currentQuestion.options.map((option, idx) => (
                                 <button
                                     key={idx}
                                     onClick={() => handleAnswer(option)}
-                                    className="w-full text-left p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-primary hover:bg-primary/5 transition-all flex items-center justify-between group"
+                                    className="w-full text-left p-4 bg-gray-50 border border-gray-200 rounded-xl hover:border-primary hover:bg-primary/5 transition-all flex items-center justify-between group"
                                 >
                                     <span className="font-medium">{option}</span>
                                     <span className="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">arrow_forward</span>
