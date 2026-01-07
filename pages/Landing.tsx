@@ -260,7 +260,7 @@ const Landing: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-gray-400 text-xs uppercase tracking-wide">Tu Balance Total</p>
-                  <p className="text-white text-2xl font-bold font-mono text-4xl font-sans">€ 12,490.00</p>
+                  <p className="text-white text-2xl font-bold font-mono text-4xl font-sans"> 12,490.00 USD </p>
                 </div>
               </div>
               {/* List Items */}

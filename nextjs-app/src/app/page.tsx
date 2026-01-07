@@ -243,7 +243,7 @@ const Landing: React.FC = () => {
               <Link href="/signup" className="bg-w-accent text-black px-8 py-3 rounded-full font-bold hover:bg-yellow-300 transition-colors shadow-lg cursor-pointer hover:opacity-90">
                 Crear cuenta gratis
               </Link>
-              <Link href="/mercado-primario" className="bg-white/10 text-white px-8 py-3 rounded-full font-medium hover:bg-white/20 transition-colors backdrop-blur-sm border border-white/10 cursor-pointer hover:opacity-90 flex items-center justify-center">
+              <Link href="/contratos" className="bg-white/10 text-white px-8 py-3 rounded-full font-medium hover:bg-white/20 transition-colors backdrop-blur-sm border border-white/10 cursor-pointer hover:opacity-90 flex items-center justify-center">
                 Explorar proyectos
               </Link>
             </div>
