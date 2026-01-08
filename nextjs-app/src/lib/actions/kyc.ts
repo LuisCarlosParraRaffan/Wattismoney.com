@@ -93,9 +93,13 @@ export async function submitKycDocument(
             select: { email: true, firstName: true },
         });
 
-        // Enviar email de confirmación de documentos recibidos
+        // Enviar email de confirmación de documentos recibidos (no bloqueante)
         if (user?.email && user?.firstName) {
-            await sendKycSubmittedEmail(user.email, user.firstName);
+            try {
+                await sendKycSubmittedEmail(user.email, user.firstName);
+            } catch (emailError) {
+                console.error('Error enviando email KYC submitted (no crítico):', emailError);
+            }
         }
 
         // AUTO-APROBACIÓN PARA MVP: Aprobar automáticamente todos los KYC
@@ -116,9 +120,13 @@ export async function submitKycDocument(
             data: { status: 'ACTIVE' }, // Usuario activo, pero middleware verificará perfil de inversor
         });
 
-        // Enviar email de invitación para completar perfil de inversor
+        // Enviar email de invitación para completar perfil de inversor (no bloqueante)
         if (user?.email && user?.firstName) {
-            await sendProfileInvitationEmail(user.email, user.firstName);
+            try {
+                await sendProfileInvitationEmail(user.email, user.firstName);
+            } catch (emailError) {
+                console.error('Error enviando email profile invitation (no crítico):', emailError);
+            }
         }
 
         revalidatePath('/kyc-upload');
@@ -238,9 +246,13 @@ export async function saveInvestorProfile(
             select: { email: true, firstName: true },
         });
 
-        // Enviar email de felicitaciones
+        // Enviar email de felicitaciones (no bloqueante)
         if (user?.email && user?.firstName) {
-            await sendProfileCompleteEmail(user.email, user.firstName, profileType);
+            try {
+                await sendProfileCompleteEmail(user.email, user.firstName, profileType);
+            } catch (emailError) {
+                console.error('Error enviando email profile complete (no crítico):', emailError);
+            }
         }
 
         revalidatePath('/investor-profile');

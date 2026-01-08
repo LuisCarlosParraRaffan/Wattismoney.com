@@ -77,8 +77,14 @@ export async function signupAction(
             },
         });
 
-        // Enviar email de bienvenida
-        await sendWelcomeEmail(email, firstName);
+        // Enviar email de bienvenida (no bloqueante)
+        // Si falla, el registro continúa pero se logea el error
+        try {
+            await sendWelcomeEmail(email, firstName);
+        } catch (emailError) {
+            console.error('Error enviando email de bienvenida (no crítico):', emailError);
+            // No lanzamos el error - el registro debe continuar
+        }
 
         return { success: true };
     } catch (error) {
