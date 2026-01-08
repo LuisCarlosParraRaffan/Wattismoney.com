@@ -4,6 +4,7 @@ import { z } from 'zod';
 import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
+import { sendKycSubmittedEmail, sendProfileInvitationEmail, sendProfileCompleteEmail } from '@/lib/email';
 
 // Schema de validación para documentos KYC
 const KycDocumentSchema = z.object({
@@ -86,11 +87,39 @@ export async function submitKycDocument(
             });
         }
 
-        // Actualizar estado del usuario
+        // Obtener datos del usuario para emails
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { email: true, firstName: true },
+        });
+
+        // Enviar email de confirmación de documentos recibidos
+        if (user?.email && user?.firstName) {
+            await sendKycSubmittedEmail(user.email, user.firstName);
+        }
+
+        // AUTO-APROBACIÓN PARA MVP: Aprobar automáticamente todos los KYC
+        // TODO: Implementar revisión manual cuando se tenga más volumen
+        await prisma.kycDocument.update({
+            where: { id: document.id },
+            data: {
+                status: 'APPROVED',
+                reviewedAt: new Date(),
+                reviewedBy: 'AUTO_APPROVED_MVP',
+            },
+        });
+
+        // Actualizar estado del usuario a PENDING_INVESTOR_PROFILE
+        // (necesitamos añadir este estado al enum o usar ACTIVE temporalmente)
         await prisma.user.update({
             where: { id: session.user.id },
-            data: { status: 'KYC_IN_REVIEW' },
+            data: { status: 'ACTIVE' }, // Usuario activo, pero middleware verificará perfil de inversor
         });
+
+        // Enviar email de invitación para completar perfil de inversor
+        if (user?.email && user?.firstName) {
+            await sendProfileInvitationEmail(user.email, user.firstName);
+        }
 
         revalidatePath('/kyc-upload');
         revalidatePath('/dashboard');
@@ -153,6 +182,7 @@ export type InvestorProfileState = {
         _form?: string[];
     };
     success?: boolean;
+    profileType?: string;
 };
 
 // Guardar perfil de inversor
@@ -202,10 +232,21 @@ export async function saveInvestorProfile(
             },
         });
 
+        // Obtener datos del usuario para enviar email de felicitaciones
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { email: true, firstName: true },
+        });
+
+        // Enviar email de felicitaciones
+        if (user?.email && user?.firstName) {
+            await sendProfileCompleteEmail(user.email, user.firstName, profileType);
+        }
+
         revalidatePath('/investor-profile');
         revalidatePath('/dashboard');
 
-        return { success: true };
+        return { success: true, profileType };
     } catch (error) {
         console.error('Error al guardar perfil:', error);
         return {

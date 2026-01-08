@@ -2,16 +2,36 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { WattismoneyLogo } from '@/components/Icons';
+import { useOnboardingCheck } from '@/hooks/useOnboardingCheck';
 
 export default function DashboardLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const router = useRouter();
     const pathname = usePathname();
+    const { isLoading, hasKyc, hasInvestorProfile } = useOnboardingCheck();
     const [isOpportunitiesOpen, setIsOpportunitiesOpen] = useState(false);
+
+    // Show loading while checking onboarding status
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-slate-50">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-gray-500">Cargando...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Redirect if onboarding not complete
+    if (!hasKyc || !hasInvestorProfile) {
+        return null; // Hook handles redirect
+    }
 
     // Auto-expand menu if current path is within opportunities
     useEffect(() => {

@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import prisma from '@/lib/prisma';
 import { signIn } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import { sendWelcomeEmail } from '@/lib/email';
 
 // Schema de validación para registro
 const SignupSchema = z.object({
@@ -76,7 +77,8 @@ export async function signupAction(
             },
         });
 
-        // TODO: Enviar email de verificación
+        // Enviar email de bienvenida
+        await sendWelcomeEmail(email, firstName);
 
         return { success: true };
     } catch (error) {

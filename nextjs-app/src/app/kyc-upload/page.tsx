@@ -1,13 +1,16 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { WattismoneyLogo } from '@/components/Icons';
+import { submitKycDocument } from '@/lib/actions/kyc';
 
 const KYCUpload: React.FC = () => {
     const router = useRouter();
-    const [docType, setDocType] = useState<'dni' | 'passport'>('dni');
+    const [isPending, startTransition] = useTransition();
+    const [docType, setDocType] = useState<'DNI' | 'NIE' | 'PASSPORT'>('DNI');
+    const [error, setError] = useState<string | null>(null);
 
     const frontInputRef = useRef<HTMLInputElement>(null);
     const backInputRef = useRef<HTMLInputElement>(null);
@@ -17,15 +20,85 @@ const KYCUpload: React.FC = () => {
     const [backFile, setBackFile] = useState<File | null>(null);
     const [residenceFile, setResidenceFile] = useState<File | null>(null);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, setter: React.Dispatch<React.SetStateAction<File | null>>) => {
+    // Estados para URLs de archivos subidos
+    const [frontUrl, setFrontUrl] = useState<string | null>(null);
+    const [backUrl, setBackUrl] = useState<string | null>(null);
+    const [residenceUrl, setResidenceUrl] = useState<string | null>(null);
+
+    // Función para subir un archivo
+    const uploadFile = async (file: File, type: string): Promise<string | null> => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('type', type);
+
+        try {
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || 'Error al subir archivo');
+            }
+
+            const data = await response.json();
+            return data.url;
+        } catch (err) {
+            console.error(`Error uploading ${type}:`, err);
+            return null;
+        }
+    };
+
+    const handleFileChange = async (
+        e: React.ChangeEvent<HTMLInputElement>,
+        setter: React.Dispatch<React.SetStateAction<File | null>>,
+        urlSetter: React.Dispatch<React.SetStateAction<string | null>>,
+        type: string
+    ) => {
         if (e.target.files && e.target.files[0]) {
-            setter(e.target.files[0]);
+            const file = e.target.files[0];
+            setter(file);
+
+            // Subir automáticamente
+            const url = await uploadFile(file, type);
+            if (url) {
+                urlSetter(url);
+            } else {
+                setError('Error al subir el archivo. Intenta de nuevo.');
+            }
         }
     };
 
     const handleSubmit = () => {
-        router.push('/kyc-success');
+        setError(null);
+
+        // Validar que todos los documentos estén subidos
+        if (!frontUrl || !backUrl || !residenceUrl) {
+            setError('Por favor, sube todos los documentos requeridos');
+            return;
+        }
+
+        startTransition(async () => {
+            const formData = new FormData();
+            formData.set('documentType', docType);
+            formData.set('frontImageUrl', frontUrl);
+            formData.set('backImageUrl', backUrl);
+            formData.set('proofOfResidenceUrl', residenceUrl);
+
+            const result = await submitKycDocument({}, formData);
+
+            if (result.success) {
+                router.push('/kyc-success');
+            } else if (result.errors?._form) {
+                setError(result.errors._form[0]);
+            } else {
+                setError('Error al enviar la documentación');
+            }
+        });
     };
+
+    const isUploading = !frontUrl || !backUrl || !residenceUrl;
 
     return (
         <div className="bg-background-light font-body text-black transition-colors duration-200 min-h-screen flex flex-col">
@@ -91,9 +164,9 @@ const KYCUpload: React.FC = () => {
                                     <input
                                         type="radio"
                                         name="docType"
-                                        value="dni"
-                                        checked={docType === 'dni'}
-                                        onChange={() => setDocType('dni')}
+                                        value="DNI"
+                                        checked={docType === 'DNI'}
+                                        onChange={() => setDocType('DNI')}
                                         className="peer sr-only"
                                     />
                                     <div className="flex items-center justify-center py-2.5 rounded-md text-sm font-bold text-gray-500 peer-checked:bg-primary peer-checked:text-black peer-checked:shadow-sm transition-all">
@@ -104,9 +177,9 @@ const KYCUpload: React.FC = () => {
                                     <input
                                         type="radio"
                                         name="docType"
-                                        value="passport"
-                                        checked={docType === 'passport'}
-                                        onChange={() => setDocType('passport')}
+                                        value="PASSPORT"
+                                        checked={docType === 'PASSPORT'}
+                                        onChange={() => setDocType('PASSPORT')}
                                         className="peer sr-only"
                                     />
                                     <div className="flex items-center justify-center py-2.5 rounded-md text-sm font-bold text-gray-500 peer-checked:bg-primary peer-checked:text-black peer-checked:shadow-sm transition-all">
@@ -143,7 +216,7 @@ const KYCUpload: React.FC = () => {
                                             className="hidden"
                                             ref={frontInputRef}
                                             accept="image/*"
-                                            onChange={(e) => handleFileChange(e, setFrontFile)}
+                                            onChange={(e) => handleFileChange(e, setFrontFile, setFrontUrl, 'front')}
                                         />
                                     </div>
                                 </div>
@@ -174,7 +247,7 @@ const KYCUpload: React.FC = () => {
                                             className="hidden"
                                             ref={backInputRef}
                                             accept="image/*"
-                                            onChange={(e) => handleFileChange(e, setBackFile)}
+                                            onChange={(e) => handleFileChange(e, setBackFile, setBackUrl, 'back')}
                                         />
                                     </div>
                                 </div>
@@ -203,7 +276,7 @@ const KYCUpload: React.FC = () => {
                                     className="hidden"
                                     ref={residenceInputRef}
                                     accept="image/*,.pdf"
-                                    onChange={(e) => handleFileChange(e, setResidenceFile)}
+                                    onChange={(e) => handleFileChange(e, setResidenceFile, setResidenceUrl, 'residence')}
                                 />
                                 <button
                                     onClick={() => residenceInputRef.current?.click()}
@@ -215,18 +288,36 @@ const KYCUpload: React.FC = () => {
                             </div>
                         </div>
 
+                        {/* Error Message */}
+                        {error && (
+                            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                                {error}
+                            </div>
+                        )}
+
                         {/* Actions */}
                         <div className="flex flex-col sm:flex-row gap-4 pt-4">
                             <button
                                 onClick={handleSubmit}
-                                className="flex-1 bg-primary hover:bg-primary-hover text-black font-bold py-3 px-6 rounded-lg shadow-lg shadow-primary/30 transition-all flex items-center justify-center gap-2"
+                                disabled={isPending || isUploading}
+                                className="flex-1 bg-primary hover:bg-primary-hover text-black font-bold py-3 px-6 rounded-lg shadow-lg shadow-primary/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Continuar
-                                <span className="material-symbols-outlined">arrow_forward</span>
+                                {isPending ? (
+                                    <>
+                                        <span className="animate-spin">⏳</span>
+                                        Enviando...
+                                    </>
+                                ) : (
+                                    <>
+                                        Continuar
+                                        <span className="material-symbols-outlined">arrow_forward</span>
+                                    </>
+                                )}
                             </button>
                             <button
                                 onClick={() => router.back()}
-                                className="sm:w-auto bg-transparent border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold py-3 px-6 rounded-lg transition-all"
+                                disabled={isPending}
+                                className="sm:w-auto bg-transparent border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold py-3 px-6 rounded-lg transition-all disabled:opacity-50"
                             >
                                 Atrás
                             </button>
