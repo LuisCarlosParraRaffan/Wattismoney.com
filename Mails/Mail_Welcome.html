@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Wattismoney - Welcome &amp; KYC</title>
+<!-- Google Fonts: Cairo (User requested) and Inter (Theme default) -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#eeff00",
+                        "background-light": "#ffffff",
+                        "background-dark": "#22230f",
+                        "text-black": "#000000",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "cairo": ["Cairo", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom Utilities for Material Symbols */
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-black font-display antialiased min-h-screen flex flex-col">
+<!-- Main Wrapper -->
+<div class="flex-1 flex flex-col relative overflow-x-hidden group/design-root">
+<!-- Header: Minimalist, Logo Only -->
+<header class="flex items-center justify-center border-b border-[#f0f0f0] bg-white px-10 py-6 w-full">
+<div class="flex items-center gap-3">
+<!-- Simulated Logo since actual file isn't available, but keeping structure -->
+<div class="size-8 rounded-full bg-primary flex items-center justify-center text-black">
+<span class="material-symbols-outlined text-[20px] font-bold">bolt</span>
+</div>
+<h2 class="text-black text-2xl font-bold tracking-tight font-cairo">Wattismoney</h2>
+</div>
+</header>
+<!-- Main Content Area: Centered Notification Style -->
+<main class="layout-container flex grow flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+<div class="w-full max-w-[640px] flex flex-col items-center gap-10">
+<!-- Welcome & CTA Section -->
+<div class="flex flex-col items-center text-center gap-6">
+<!-- Success Icon -->
+<div class="size-20 rounded-full bg-primary/20 flex items-center justify-center mb-2">
+<span class="material-symbols-outlined text-black text-[48px] icon-filled">verified</span>
+</div>
+<div class="flex flex-col gap-4">
+<h1 class="text-black text-4xl font-extrabold leading-tight tracking-tight font-cairo">
+                            ¡Bienvenido a Wattismoney!
+                        </h1>
+<p class="text-[#444] text-lg font-normal leading-relaxed max-w-[560px]">
+                            Gracias por unirte a la revolución de la energía sostenible. Tu cuenta ha sido creada exitosamente. 
+                            <br class="hidden sm:block"/>
+                            Para comenzar a invertir en proyectos renovables, necesitamos verificar tu identidad.
+                        </p>
+</div>
+<div class="flex flex-col items-center gap-4 w-full mt-2">
+<button class="flex w-full sm:w-auto min-w-[280px] h-14 cursor-pointer items-center justify-center rounded-lg bg-primary hover:bg-[#dbe600] transition-colors text-black text-lg font-bold tracking-wide shadow-sm font-cairo">
+                            Iniciar proceso de KYC
+                        </button>
+<a class="text-sm text-gray-500 hover:text-black hover:underline transition-colors mt-2" href="#">
+                            Hacer esto más tarde
+                        </a>
+</div>
+</div>
+<!-- Divider -->
+<div class="w-full h-px bg-gray-100 my-2"></div>
+<!-- Trust Indicators (Adapted Feature Grid) -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
+<!-- Feature 1 -->
+<div class="flex flex-col items-center text-center p-4 rounded-xl border border-gray-100 bg-white shadow-sm">
+<span class="material-symbols-outlined text-black text-[32px] mb-3">shield_lock</span>
+<h3 class="text-black text-sm font-bold font-cairo mb-1">100% Seguro</h3>
+<p class="text-gray-500 text-xs leading-normal">Cifrado de grado bancario para tus datos.</p>
+</div>
+<!-- Feature 2 -->
+<div class="flex flex-col items-center text-center p-4 rounded-xl border border-gray-100 bg-white shadow-sm">
+<span class="material-symbols-outlined text-black text-[32px] mb-3">timer</span>
+<h3 class="text-black text-sm font-bold font-cairo mb-1">Solo 2 minutos</h3>
+<p class="text-gray-500 text-xs leading-normal">Verificación automatizada y rápida.</p>
+</div>
+<!-- Feature 3 -->
+<div class="flex flex-col items-center text-center p-4 rounded-xl border border-gray-100 bg-white shadow-sm">
+<span class="material-symbols-outlined text-black text-[32px] mb-3">gavel</span>
+<h3 class="text-black text-sm font-bold font-cairo mb-1">Regulado</h3>
+<p class="text-gray-500 text-xs leading-normal">Cumplimos con la normativa vigente.</p>
+</div>
+</div>
+<!-- Decorative Subtle Image (Abstract Energy) -->
+<div class="w-full h-32 mt-4 rounded-2xl overflow-hidden relative opacity-80">
+<img alt="Abstract minimalist white and light gray geometric architectural pattern representing structure" class="w-full h-full object-cover" data-alt="Abstract minimalist white and light gray geometric architectural pattern representing structure" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmvBVlpL9YjSuv2KLh8BwmylENKmlAsInwswqevTjsPcJYgx56TzeUWu2y3orMOdZ6mxlwmrTId5kMLhXImk70ZT7gAhFsOY-mkYDGuibhbrYUU8q6ZPzC2OKyMvg30pPNUId3CUVa-exCv8_xtB_TDM0mTCQqi2NxEGWuOze3isxuY5ab162iH7mi5X7p6R7Crw0sE1ZJgALWUZcRy7hyQ_63TOhLIVhhH_vpR6Ekoyak_q9CIp3P2DyreI1h2mStdQ9rWQNEsBY"/>
+<div class="absolute inset-0 bg-gradient-to-t from-white via-white/20 to-transparent"></div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="flex flex-col gap-6 py-8 border-t border-[#f0f0f0] mt-auto">
+<div class="flex flex-wrap items-center justify-center gap-8 text-sm text-gray-500">
+<a class="hover:text-black transition-colors" href="#">Política de Privacidad</a>
+<a class="hover:text-black transition-colors" href="#">Términos y Condiciones</a>
+<a class="hover:text-black transition-colors" href="#">Soporte</a>
+</div>
+<p class="text-gray-400 text-xs text-center">© 2024 Wattismoney. Todos los derechos reservados.</p>
+</footer>
+</div>
+</body></html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Wattismoney - KYC Fallido</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#e8f906",
+                        "background-light": "#f8f8f5",
+                        "background-dark": "#21230f",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="font-display antialiased">
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-x-hidden">
+<!-- Header -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#e5e6db] dark:border-[#3a3d24] bg-white dark:bg-[#181811] px-10 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 text-[#181811] dark:text-white">
+<svg class="w-full h-full" fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z" fill="currentColor"></path>
+</svg>
+</div>
+<h2 class="text-[#181811] dark:text-white text-xl font-bold leading-tight tracking-tight">Wattismoney</h2>
+</div>
+</header>
+<div class="layout-container flex h-full grow flex-col items-center justify-center p-4 sm:p-8">
+<div class="w-full max-w-[600px] bg-white dark:bg-[#1a1c0d] rounded-xl shadow-sm border border-[#e5e6db] dark:border-[#3a3d24] overflow-hidden">
+<!-- Status Icon Area -->
+<div class="flex justify-center pt-10 pb-4">
+<div class="relative flex items-center justify-center size-20 rounded-full bg-red-50 dark:bg-red-900/20">
+<span class="material-symbols-outlined text-5xl text-red-500 dark:text-red-400">gpp_bad</span>
+<div class="absolute -bottom-1 -right-1 size-8 bg-primary rounded-full flex items-center justify-center border-4 border-white dark:border-[#1a1c0d]">
+<span class="material-symbols-outlined text-lg text-[#181811]">priority_high</span>
+</div>
+</div>
+</div>
+<!-- Main Content -->
+<div class="px-8 pb-4 text-center">
+<h1 class="text-[#181811] dark:text-white text-2xl sm:text-[32px] font-bold leading-tight mb-4">Verificación no exitosa</h1>
+<p class="text-[#5e6045] dark:text-[#a1a388] text-base font-normal leading-relaxed">
+                        No pudimos validar tu identidad. Para cumplir con las regulaciones y mantener la plataforma segura, necesitamos que realices el proceso nuevamente.
+                    </p>
+</div>
+<!-- Tips / Checklist Section -->
+<div class="px-6 py-4 sm:px-12">
+<div class="bg-background-light dark:bg-background-dark rounded-lg p-6 border border-[#e5e6db] dark:border-[#3a3d24]">
+<h3 class="text-[#181811] dark:text-white text-sm font-bold uppercase tracking-wider mb-3">Consejos para el éxito</h3>
+<div class="flex flex-col gap-3">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary dark:text-primary mt-0.5">check_circle</span>
+<p class="text-[#181811] dark:text-[#e0e2cc] text-sm sm:text-base font-normal leading-normal">
+                                    Asegúrate de que la foto no esté borrosa
+                                </p>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary dark:text-primary mt-0.5">check_circle</span>
+<p class="text-[#181811] dark:text-[#e0e2cc] text-sm sm:text-base font-normal leading-normal">
+                                    Usa un documento de identidad vigente
+                                </p>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary dark:text-primary mt-0.5">check_circle</span>
+<p class="text-[#181811] dark:text-[#e0e2cc] text-sm sm:text-base font-normal leading-normal">
+                                    Evita reflejos de luz en el documento
+                                </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="px-8 pt-4 pb-10 flex flex-col gap-4 items-center">
+<button class="w-full sm:w-auto min-w-[200px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary hover:bg-[#d4e305] transition-colors text-[#181811] text-base font-bold leading-normal tracking-[0.015em] flex gap-2">
+<span class="material-symbols-outlined">restart_alt</span>
+<span class="truncate">Reintentar Verificación</span>
+</button>
+<a class="text-[#5e6045] dark:text-[#a1a388] hover:text-[#181811] dark:hover:text-primary text-sm font-medium transition-colors flex items-center gap-1 group" href="#">
+<span>¿Problemas persistentes? Contactar soporte</span>
+<span class="material-symbols-outlined text-base group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Footer Links -->
+<div class="mt-8 flex gap-6 text-sm text-[#898c5f] dark:text-[#6b6e50]">
+<a class="hover:underline hover:text-[#181811] dark:hover:text-[#a1a388]" href="#">Términos de servicio</a>
+<a class="hover:underline hover:text-[#181811] dark:hover:text-[#a1a388]" href="#">Política de privacidad</a>
+</div>
+</div>
+</div>
+</body></html>

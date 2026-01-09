@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Notificación: Perfil Inversor Exitoso</title>
+<!-- Google Fonts: Cairo (requested) and Inter (theme default) -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&amp;family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS with Theme Configuration -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#e3f20d",
+                        "background-light": "#f8f8f5",
+                        "background-dark": "#212210",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "cairo": ["Cairo", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom styles to ensure Cairo is used for headings as requested */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Cairo', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex flex-col font-display text-[#181811] dark:text-white overflow-x-hidden transition-colors duration-200">
+<!-- Layout Container -->
+<div class="layout-container flex h-full grow flex-col items-center justify-between min-h-screen">
+<!-- Header: Logo Only -->
+<header class="w-full flex justify-center py-8 px-4">
+<div class="w-48 h-12 flex items-center justify-center">
+<!-- Using placeholder since actual file might not load in this preview, but keeping the name as requested -->
+<!-- Ideally: <img src="Wattismoney_Logo.png" ...> -->
+<div class="w-full h-full bg-contain bg-center bg-no-repeat" data-alt="Wattismoney corporate logo in black text" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC9Gm1_ss9sSINotCzh7kiudfYdN9UQcTA8G0159imwLbrckIrqQEnpkl2A4i34eLdIvOMDl7mIvUlrEOZ4Kev1J9s0t37HUctjUSe628PdnUSrpDH6jgRAjYieUpDqsnPH9S89mlgjOdWafKp8-adbkFaSu5W0_Ae8ayBhr8zFlEKQw0vQ8GyATWAyOabNn0maICCii-0EEEzk-gRutgKqnWC-Q3w92dZLopKgZ4BBI3N81byDpWbL2yWvhuhgBKDpL9LRbCcU-1E'), url('https://placeholder.pics/svg/200x50/FFFFFF/000000/Wattismoney');">
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col items-center justify-center w-full px-4 sm:px-6">
+<div class="layout-content-container flex flex-col max-w-[600px] w-full">
+<!-- Success Notification Card -->
+<div class="flex flex-col items-center gap-8 bg-white dark:bg-[#2a2b16] p-8 sm:p-12 rounded-2xl shadow-sm border border-black/5 dark:border-white/10">
+<!-- Success Visual/Icon -->
+<div class="relative flex items-center justify-center w-24 h-24 rounded-full bg-primary/20 text-primary-dark mb-2">
+<span class="material-symbols-outlined text-6xl text-[#b8c400] dark:text-primary">check_circle</span>
+<!-- Decorative elements behind -->
+<div class="absolute -z-10 w-full h-full rounded-full bg-primary blur-xl opacity-30 animate-pulse"></div>
+</div>
+<!-- Text Content -->
+<div class="flex flex-col items-center gap-4 text-center">
+<h1 class="text-3xl sm:text-4xl font-bold leading-tight tracking-tight text-[#181811] dark:text-white">
+                            ¡Felicidades!<br/>Tu perfil de inversor está listo.
+                        </h1>
+<p class="text-[#555] dark:text-gray-300 text-base sm:text-lg font-normal leading-relaxed max-w-[480px]">
+                            Hemos analizado exitosamente tu perfil de riesgo. Ya puedes acceder a proyectos de energía sostenible adaptados específicamente a tus objetivos financieros.
+                        </p>
+</div>
+<!-- Actions -->
+<div class="flex flex-col w-full max-w-[400px] gap-4 mt-2">
+<!-- Primary CTA -->
+<button class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-6 bg-primary hover:bg-[#d4e20c] transition-colors text-[#181811] text-base font-bold leading-normal tracking-[0.015em] shadow-sm">
+<span class="material-symbols-outlined mr-2 text-xl">rocket_launch</span>
+<span class="truncate">Ver Oportunidades Personalizadas</span>
+</button>
+<!-- Secondary Link -->
+<a class="flex w-full cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-transparent text-[#666] dark:text-[#aaa] hover:text-[#181811] dark:hover:text-white text-sm font-semibold transition-colors" href="#">
+<span>Volver al inicio</span>
+</a>
+</div>
+</div>
+</div>
+</main>
+<!-- Simple Footer -->
+<footer class="w-full max-w-[960px] mx-auto px-5 py-8 text-center mt-auto">
+<div class="flex flex-col gap-6">
+<div class="flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
+<a class="text-[#888a60] dark:text-[#b0b380] text-sm font-medium hover:underline" href="#">Política de Privacidad</a>
+<a class="text-[#888a60] dark:text-[#b0b380] text-sm font-medium hover:underline" href="#">Términos y Condiciones</a>
+</div>
+<p class="text-[#888a60] dark:text-[#6d6f4d] text-xs font-normal">
+                    © 2023 Wattismoney. Todos los derechos reservados.
+                </p>
+</div>
+</footer>
+</div>
+</body></html>

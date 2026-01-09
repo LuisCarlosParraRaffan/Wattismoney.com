@@ -5,7 +5,7 @@ import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import {
-    sendKycApprovedEmail,
+    sendKycSubmittedEmail,
     sendProfileCompleteEmail
 } from '@/lib/email';
 
@@ -102,18 +102,18 @@ export async function submitKycDocument(
             hasEmail: !!user?.email
         });
 
-        // Enviar email de confirmación de KYC aprobado (no bloqueante)
-        // Con auto-aprobación en MVP, enviamos directamente el email de éxito
+        // Enviar email de confirmación de documentos recibidos
+        // El usuario recibirá un email indicando que sus documentos están en revisión
         if (user?.email) {
             try {
-                // Email de KYC Aprobado que incluye CTA para completar perfil de inversor
-                const emailResult = await sendKycApprovedEmail(
+                // Email de KYC en revisión (documentos recibidos)
+                const emailResult = await sendKycSubmittedEmail(
                     user.email,
                     user.firstName || 'Usuario'
                 );
-                console.log('KYC Approved email result:', emailResult);
+                console.log('KYC Submitted email result:', emailResult);
             } catch (emailError) {
-                console.error('Error enviando email KYC approved (no crítico):', emailError);
+                console.error('Error enviando email KYC submitted (no crítico):', emailError);
             }
         } else {
             console.warn('KYC Submit - No user email found, skipping email');

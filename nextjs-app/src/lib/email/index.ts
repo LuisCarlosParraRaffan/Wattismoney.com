@@ -4,8 +4,16 @@ import { Resend } from 'resend';
 let resend: Resend | null = null;
 
 function getResendClient(): Resend | null {
+    const hasApiKey = !!process.env.RESEND_API_KEY;
+    console.log('[Email Service] getResendClient called:', {
+        hasApiKey,
+        apiKeyLength: process.env.RESEND_API_KEY?.length || 0,
+        apiKeyPrefix: process.env.RESEND_API_KEY?.substring(0, 6) || 'none'
+    });
+
     if (!resend && process.env.RESEND_API_KEY) {
         resend = new Resend(process.env.RESEND_API_KEY);
+        console.log('[Email Service] Resend client initialized');
     }
     return resend;
 }
