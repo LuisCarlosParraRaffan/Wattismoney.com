@@ -119,22 +119,9 @@ export async function submitKycDocument(
             console.warn('KYC Submit - No user email found, skipping email');
         }
 
-        // AUTO-APROBACIÓN PARA MVP: Aprobar automáticamente todos los KYC
-        // TODO: Implementar revisión manual cuando se tenga más volumen
-        await prisma.kycDocument.update({
-            where: { id: document.id },
-            data: {
-                status: 'APPROVED',
-                reviewedAt: new Date(),
-                reviewedBy: 'AUTO_APPROVED_MVP',
-            },
-        });
-
-        // Actualizar estado del usuario a ACTIVE
-        await prisma.user.update({
-            where: { id: session.user.id },
-            data: { status: 'ACTIVE' },
-        });
+        // KYC document stays as SUBMITTED
+        // The cron job at /api/cron/process-kyc will auto-approve after 5 minutes
+        // and send the approval email at that time
 
         revalidatePath('/kyc-upload');
         revalidatePath('/dashboard');
