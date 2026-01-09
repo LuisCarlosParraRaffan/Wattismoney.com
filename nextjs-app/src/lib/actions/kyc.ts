@@ -96,15 +96,27 @@ export async function submitKycDocument(
             select: { email: true, firstName: true },
         });
 
+        console.log('KYC Submit - User data for email:', {
+            email: user?.email,
+            firstName: user?.firstName,
+            hasEmail: !!user?.email
+        });
+
         // Enviar email de confirmación de KYC aprobado (no bloqueante)
         // Con auto-aprobación en MVP, enviamos directamente el email de éxito
-        if (user?.email && user?.firstName) {
+        if (user?.email) {
             try {
                 // Email de KYC Aprobado que incluye CTA para completar perfil de inversor
-                await sendKycApprovedEmail(user.email, user.firstName);
+                const emailResult = await sendKycApprovedEmail(
+                    user.email,
+                    user.firstName || 'Usuario'
+                );
+                console.log('KYC Approved email result:', emailResult);
             } catch (emailError) {
                 console.error('Error enviando email KYC approved (no crítico):', emailError);
             }
+        } else {
+            console.warn('KYC Submit - No user email found, skipping email');
         }
 
         // AUTO-APROBACIÓN PARA MVP: Aprobar automáticamente todos los KYC
