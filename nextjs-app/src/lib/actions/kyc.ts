@@ -4,15 +4,18 @@ import { z } from 'zod';
 import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
-import { sendKycSubmittedEmail, sendProfileInvitationEmail, sendProfileCompleteEmail } from '@/lib/email';
+import {
+    sendKycApprovedEmail,
+    sendProfileCompleteEmail
+} from '@/lib/email';
 
 // Schema de validación para documentos KYC
 const KycDocumentSchema = z.object({
     documentType: z.enum(['DNI', 'NIE', 'PASSPORT', 'DRIVERS_LICENSE']),
-    documentNumber: z.string().min(5, 'Número de documento inválido').optional(),
-    frontImageUrl: z.string().url('URL inválida').optional(),
-    backImageUrl: z.string().url('URL inválida').optional(),
-    proofOfResidenceUrl: z.string().url('URL inválida').optional(),
+    documentNumber: z.string().min(5, 'Número de documento inválido').optional().nullable(),
+    frontImageUrl: z.string().url('URL inválida').optional().nullable(),
+    backImageUrl: z.string().url('URL inválida').optional().nullable(),
+    proofOfResidenceUrl: z.string().url('URL inválida').optional().nullable(),
 });
 
 export type KycState = {
@@ -93,12 +96,14 @@ export async function submitKycDocument(
             select: { email: true, firstName: true },
         });
 
-        // Enviar email de confirmación de documentos recibidos (no bloqueante)
+        // Enviar email de confirmación de KYC aprobado (no bloqueante)
+        // Con auto-aprobación en MVP, enviamos directamente el email de éxito
         if (user?.email && user?.firstName) {
             try {
-                await sendKycSubmittedEmail(user.email, user.firstName);
+                // Email de KYC Aprobado que incluye CTA para completar perfil de inversor
+                await sendKycApprovedEmail(user.email, user.firstName);
             } catch (emailError) {
-                console.error('Error enviando email KYC submitted (no crítico):', emailError);
+                console.error('Error enviando email KYC approved (no crítico):', emailError);
             }
         }
 
@@ -113,21 +118,11 @@ export async function submitKycDocument(
             },
         });
 
-        // Actualizar estado del usuario a PENDING_INVESTOR_PROFILE
-        // (necesitamos añadir este estado al enum o usar ACTIVE temporalmente)
+        // Actualizar estado del usuario a ACTIVE
         await prisma.user.update({
             where: { id: session.user.id },
-            data: { status: 'ACTIVE' }, // Usuario activo, pero middleware verificará perfil de inversor
+            data: { status: 'ACTIVE' },
         });
-
-        // Enviar email de invitación para completar perfil de inversor (no bloqueante)
-        if (user?.email && user?.firstName) {
-            try {
-                await sendProfileInvitationEmail(user.email, user.firstName);
-            } catch (emailError) {
-                console.error('Error enviando email profile invitation (no crítico):', emailError);
-            }
-        }
 
         revalidatePath('/kyc-upload');
         revalidatePath('/dashboard');

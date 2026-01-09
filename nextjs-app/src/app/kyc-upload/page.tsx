@@ -86,12 +86,26 @@ const KYCUpload: React.FC = () => {
             formData.set('backImageUrl', backUrl);
             formData.set('proofOfResidenceUrl', residenceUrl);
 
+            console.log('Submitting KYC with data:', {
+                documentType: docType,
+                frontImageUrl: frontUrl,
+                backImageUrl: backUrl,
+                proofOfResidenceUrl: residenceUrl
+            });
+
             const result = await submitKycDocument({}, formData);
+            console.log('KYC submission result:', result);
 
             if (result.success) {
                 router.push('/kyc-success');
             } else if (result.errors?._form) {
                 setError(result.errors._form[0]);
+            } else if (result.errors) {
+                // Show any field-specific errors
+                const errorMessages = Object.entries(result.errors)
+                    .map(([field, msgs]) => `${field}: ${(msgs as string[]).join(', ')}`)
+                    .join('; ');
+                setError(errorMessages || 'Error de validación');
             } else {
                 setError('Error al enviar la documentación');
             }
