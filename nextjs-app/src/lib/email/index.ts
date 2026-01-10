@@ -378,7 +378,7 @@ export async function sendKycApprovedEmail(
         await client.emails.send({
             from: FROM_EMAIL,
             to,
-            subject: '¡KYC Aprobado! Ya puedes invertir 🎉',
+            subject: 'Tu verificación ha sido completada - Wattismoney',
             html: wrapEmailContent(content),
         });
         return { success: true };
@@ -559,7 +559,7 @@ export async function sendProfileInvitationEmail(
         await client.emails.send({
             from: FROM_EMAIL,
             to,
-            subject: '¡KYC Aprobado! Completa tu perfil de inversor 🎯',
+            subject: 'Tu verificación ha sido completada - Wattismoney',
             html: wrapEmailContent(content),
         });
         return { success: true };
