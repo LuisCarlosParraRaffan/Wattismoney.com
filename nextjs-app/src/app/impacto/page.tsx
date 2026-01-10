@@ -56,7 +56,7 @@ const Impacto: React.FC = () => {
                                         <p className="text-sm font-medium text-gray-500">Financiación Sostenible</p>
                                     </div>
                                     <div>
-                                        <p className="text-3xl font-black text-text-main">+25k</p>
+                                        <p className="text-3xl font-black text-text-main">+250</p>
                                         <p className="text-sm font-medium text-gray-500">Hogares Equivalentes</p>
                                     </div>
                                 </div>
@@ -93,7 +93,7 @@ const Impacto: React.FC = () => {
                                     </div>
                                     <h3 className="text-xl font-bold text-text-main mb-3">Impacto Ambiental</h3>
                                     <p className="text-gray-600 leading-relaxed">
-                                        Reducimos miles de toneladas de CO2 al año facilitando la adopción de energías renovables en industrias de alto consumo.
+                                        Reducimos toneladas de CO2 al año facilitando la adopción de energías renovables en industrias de alto consumo.
                                     </p>
                                 </div>
                                 <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-8 hover:shadow-xl hover:border-primary transition-all group">

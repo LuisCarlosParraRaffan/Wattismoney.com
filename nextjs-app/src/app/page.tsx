@@ -53,7 +53,7 @@ const Landing: React.FC = () => {
           <div className="flex items-center gap-3 pt-6">
             <div className="flex items-center gap-2">
               <InversoresGroup className="h-12 w-auto" />
-              <div className="w-8 h-8 rounded-full border-2 border-white bg-w-accent flex items-center justify-center text-[10px] font-bold ml-[-12px] z-10 relative">+1k</div>
+              <div className="w-8 h-8 rounded-full border-2 border-white bg-w-accent flex items-center justify-center text-[10px] font-bold ml-[-12px] z-10 relative">+50</div>
             </div>
             <span className="text-sm text-gray-500 font-medium">Inversores confían en nosotros</span>
           </div>
@@ -107,7 +107,7 @@ const Landing: React.FC = () => {
                 </svg>
               </div>
             </div>
-            <div className="text-5xl font-extrabold mb-1">1k+</div>
+            <div className="text-5xl font-extrabold mb-1">150+</div>
             <div className="text-sm font-medium flex items-center gap-2">
               <div className="w-12 h-12 bg-yellow-100 rounded-full flex-shrink-0 flex items-center justify-center text-gray-800">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path></svg>
@@ -126,7 +126,7 @@ const Landing: React.FC = () => {
                 </svg>
               </div>
             </div>
-            <div className="text-5xl font-extrabold mb-1">10000<span className="text-base font-normal text-gray-500">MWh</span></div>
+            <div className="text-5xl font-extrabold mb-1">500<span className="text-base font-normal text-gray-500">MWh</span></div>
             <div className="text-sm font-medium flex items-center gap-2">
               <div className="w-12 h-12 bg-yellow-100 rounded-full flex-shrink-0 flex items-center justify-center text-gray-800">
                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path clipRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" fillRule="evenodd"></path></svg>
@@ -146,9 +146,9 @@ const Landing: React.FC = () => {
                 </svg>
               </div>
             </div>
-            <div className="text-5xl font-extrabold mb-1">1,200 <span className="text-base font-normal text-gray-500">Ton</span></div>
+            <div className="text-5xl font-extrabold mb-1">85 <span className="text-base font-normal text-gray-500">Ton</span></div>
             <div className="text-sm text-gray-500 font-medium mt-2">
-              Equivalente a 40k árboles
+              Equivalente a 3,500 árboles
             </div>
           </div>
         </div>
@@ -237,7 +237,7 @@ const Landing: React.FC = () => {
               ¿Listo para invertir en un mundo mejor?
             </h2>
             <p className="text-gray-400 mb-8 text-lg max-w-xl mx-auto md:mx-0">
-              Regístrate en menos de 5 minutos y únete a los miles de inversores que ya están cambiando el modelo energético.
+              Regístrate en menos de 5 minutos y únete a los inversores que ya están cambiando el modelo energético.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
               <Link href="/signup" className="bg-w-accent text-black px-8 py-3 rounded-full font-bold hover:bg-yellow-300 transition-colors shadow-lg cursor-pointer hover:opacity-90">
@@ -262,7 +262,7 @@ const Landing: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-gray-400 text-xs uppercase tracking-wide">Tu Balance Total</p>
-                  <p className="text-white text-2xl font-bold font-mono text-4xl font-sans">$ 12,490.00</p>
+                  <p className="text-white text-2xl font-bold font-mono text-4xl font-sans">$ 2,450.00</p>
                 </div>
               </div>
               {/* List Items */}
