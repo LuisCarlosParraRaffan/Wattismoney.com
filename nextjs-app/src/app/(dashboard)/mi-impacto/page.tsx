@@ -190,7 +190,7 @@ const UserImpact: React.FC = () => {
                                             </div>
                                             <div className="text-right">
                                                 <p className="text-base font-black text-text-main">45%</p>
-                                                <p className="text-xs text-slate-500 font-medium">€4,500</p>
+                                                <p className="text-xs text-slate-500 font-medium">$4,500</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors bg-white">
@@ -200,7 +200,7 @@ const UserImpact: React.FC = () => {
                                             </div>
                                             <div className="text-right">
                                                 <p className="text-base font-black text-text-main">30%</p>
-                                                <p className="text-xs text-slate-500 font-medium">€3,000</p>
+                                                <p className="text-xs text-slate-500 font-medium">$3,000</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors bg-white">
@@ -210,7 +210,7 @@ const UserImpact: React.FC = () => {
                                             </div>
                                             <div className="text-right">
                                                 <p className="text-base font-black text-text-main">15%</p>
-                                                <p className="text-xs text-slate-500 font-medium">€1,500</p>
+                                                <p className="text-xs text-slate-500 font-medium">$1,500</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors bg-white">
@@ -220,7 +220,7 @@ const UserImpact: React.FC = () => {
                                             </div>
                                             <div className="text-right">
                                                 <p className="text-base font-black text-text-main">10%</p>
-                                                <p className="text-xs text-slate-500 font-medium">€1,000</p>
+                                                <p className="text-xs text-slate-500 font-medium">$1,000</p>
                                             </div>
                                         </div>
                                     </div>

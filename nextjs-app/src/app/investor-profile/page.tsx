@@ -34,7 +34,7 @@ export default function InvestorProfileQuiz() {
         },
         {
             question: "¿Cuánto planeas invertir inicialmente?",
-            options: ["Menos de €1,000", "€1,000 - €5,000", "€5,000 - €20,000", "Más de €20,000"]
+            options: ["Menos de $1,000", "$1,000 - $5,000", "$5,000 - $20,000", "Más de $20,000"]
         }
     ];
 

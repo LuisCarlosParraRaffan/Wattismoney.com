@@ -112,12 +112,12 @@ const Settings: React.FC = () => {
                                     <div className="space-y-3">
                                         <div className="flex justify-between">
                                             <label className="text-sm font-semibold text-slate-700">Límite de Inversión Mensual</label>
-                                            <span className="text-sm font-bold text-primary">2.500 €</span>
+                                            <span className="text-sm font-bold text-primary">$2,500</span>
                                         </div>
                                         <input className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary" max={10000} min={100} type="range" defaultValue={2500} />
                                         <div className="flex justify-between text-xs text-slate-400">
-                                            <span>100 €</span>
-                                            <span>10.000 €</span>
+                                            <span>$100</span>
+                                            <span>$10,000</span>
                                         </div>
                                     </div>
                                     {/* Project Types */}
@@ -205,8 +205,8 @@ const Settings: React.FC = () => {
                                     <div className="space-y-1">
                                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Moneda</label>
                                         <select className="block w-full h-11 pl-3 pr-10 py-2 text-base border-gray-200 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-lg bg-gray-50 text-slate-900">
-                                            <option>EUR (€)</option>
                                             <option>USD ($)</option>
+                                            <option>EUR (€)</option>
                                             <option>GBP (£)</option>
                                         </select>
                                     </div>

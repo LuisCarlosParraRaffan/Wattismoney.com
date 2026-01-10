@@ -189,7 +189,7 @@ const Landing: React.FC = () => {
               <div>
                 <h3 className="text-xl font-bold mb-2">Inversión Directa en Contratos Limpios</h3>
                 <p className="text-gray-500 text-sm leading-relaxed">
-                  Olvídate de las barreras de entrada. Participa en proyectos de gran escala desde montos tan pequeños como 50€. Democratizamos el acceso a rentabilidades.
+                  Olvídate de las barreras de entrada. Participa en proyectos de gran escala desde montos tan pequeños como $50. Democratizamos el acceso a rentabilidades.
                 </p>
               </div>
             </div>
@@ -262,7 +262,7 @@ const Landing: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-gray-400 text-xs uppercase tracking-wide">Tu Balance Total</p>
-                  <p className="text-white text-2xl font-bold font-mono text-4xl font-sans">€ 12,490.00</p>
+                  <p className="text-white text-2xl font-bold font-mono text-4xl font-sans">$ 12,490.00</p>
                 </div>
               </div>
               {/* List Items */}

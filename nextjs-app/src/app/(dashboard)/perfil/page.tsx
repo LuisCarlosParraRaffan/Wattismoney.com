@@ -141,7 +141,7 @@ const Profile: React.FC = () => {
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col gap-1 hover:border-primary transition-colors cursor-default">
                                     <span className="text-slate-500 text-sm font-medium">Inversión Total</span>
-                                    <span className="text-2xl font-bold text-text-main tracking-tight">€15,200</span>
+                                    <span className="text-2xl font-bold text-text-main tracking-tight">$15,200</span>
                                     <span className="text-xs text-green-600 flex items-center gap-1 font-bold mt-1">
                                         <span className="material-symbols-outlined text-[14px]">trending_up</span> +12% este mes
                                     </span>
