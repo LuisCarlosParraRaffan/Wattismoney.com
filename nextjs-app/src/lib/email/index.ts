@@ -151,10 +151,10 @@ export async function sendWelcomeEmail(
                     Para comenzar a invertir en proyectos renovables, necesitamos verificar tu identidad.
                 </p>
                 
-                ${getPrimaryButton('Iniciar proceso de KYC', `${BASE_URL}/kyc-upload`)}
+                ${getPrimaryButton('Iniciar sesión', `${BASE_URL}/login`)}
                 
-                <a href="${BASE_URL}/dashboard" style="color: #888888; font-size: 13px; text-decoration: underline;">
-                    Hacer esto más tarde
+                <a href="${BASE_URL}" style="color: #888888; font-size: 13px; text-decoration: underline;">
+                    Ver más información
                 </a>
             </td>
         </tr>
