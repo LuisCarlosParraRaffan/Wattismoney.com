@@ -17,6 +17,10 @@ const protectedRoutes = [
     "/ayuda",
     "/clasificacion",
     "/contrato/", // Added trailing slash to prevent matching /contratos
+    "/investor-quiz",
+    "/investor-quiz-results",
+    "/kyc-success",
+    "/kyc-upload",
 ];
 
 // Rutas públicas de autenticación (redirigir si ya está logueado)

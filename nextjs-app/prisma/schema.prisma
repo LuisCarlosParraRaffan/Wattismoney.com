@@ -137,8 +137,15 @@ model InvestorProfile {
   riskTolerance     String?  // "very_conservative", "conservative", "moderate", "aggressive"
   initialInvestment String?  // "less_1000", "1000_5000", "5000_20000", "more_20000"
   
-  // Perfil calculado
+  // Perfil calculado (legacy)
   profileType       ProfileType @default(MODERATE)
+  
+  // Perfil determinado por AI
+  aiRiskProfile     String?   // "VISIONARIO" | "ACELERADOR" | "ESTABILIZADOR"
+  aiConfidence      Float?    // 0.0 - 1.0
+  aiReasons         String[]  // Array de razones
+  aiRecommendations String[]  // Recomendaciones de inversión
+  quizCompletedAt   DateTime?
   
   // Límites de inversión
   monthlyLimit      Decimal?    @db.Decimal(12, 2)
