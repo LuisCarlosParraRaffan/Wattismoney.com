@@ -149,20 +149,20 @@ export default function InvestorQuizResults() {
 
                         {/* CTA Buttons */}
                         <div className="flex flex-col gap-4 pt-4">
-                            <Link
-                                href="/mercado-primario"
-                                className={`w-full py-4 ${config.gradient} text-white font-bold rounded-xl transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2`}
+                            <button
+                                onClick={() => router.push('/mercado-primario')}
+                                className={`w-full py-4 ${config.gradient} text-white font-bold rounded-xl transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer`}
                             >
                                 <span className="material-symbols-outlined">bolt</span>
                                 Explorar Oportunidades Personalizadas
-                            </Link>
-                            <Link
-                                href="/dashboard"
-                                className="w-full py-4 bg-white border-2 border-gray-200 hover:border-gray-300 text-black font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+                            </button>
+                            <button
+                                onClick={() => router.push('/dashboard')}
+                                className="w-full py-4 bg-white border-2 border-gray-200 hover:border-gray-300 text-black font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
                             >
                                 <span className="material-symbols-outlined">dashboard</span>
                                 Ir al Dashboard
-                            </Link>
+                            </button>
                         </div>
 
                         {/* Share Section */}
