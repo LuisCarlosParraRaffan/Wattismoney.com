@@ -32,6 +32,12 @@ export async function GET(
                         },
                     },
                     orderBy: { createdAt: 'desc' },
+                    take: 10, // Limit to most recent 10
+                },
+                _count: {
+                    select: {
+                        investments: true,
+                    },
                 },
             },
         });
