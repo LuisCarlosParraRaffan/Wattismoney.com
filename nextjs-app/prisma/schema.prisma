@@ -48,6 +48,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   kycDocuments  KycDocument[]
+  investments   Investment[]
   
   // Índices para búsquedas frecuentes
   @@index([email])
@@ -203,42 +204,123 @@ enum ProfileType {
 }
 
 // ============================================
-// MODELOS FUTUROS (Placeholders para expansión)
-// Descomentar cuando se necesiten
+// CONTRATOS / OPORTUNIDADES DE INVERSIÓN
 // ============================================
 
-// model Project {
-//   id              String   @id @default(cuid())
-//   name            String
-//   description     String   @db.Text
-//   location        String
-//   country         String
-//   projectType     String   // "solar", "wind", "hydro"
-//   capacityMW      Decimal  @db.Decimal(10, 2)
-//   tirEstimated    Decimal  @db.Decimal(5, 2)
-//   termYears       Int
-//   capitalRequired Decimal  @db.Decimal(15, 2)
-//   capitalRaised   Decimal  @db.Decimal(15, 2) @default(0)
-//   status          String   // "funding", "active", "completed"
-//   createdAt       DateTime @default(now())
-//   updatedAt       DateTime @updatedAt
-// }
+model Contract {
+  id              String          @id @default(cuid())
+  
+  // Información básica
+  name            String          // Nombre del contrato
+  description     String?         @db.Text
+  imageUrl        String?         // Fotografía promocional
+  
+  // Rentabilidad
+  annualReturn    Decimal         @db.Decimal(5, 2)  // Rentabilidad anual (%)
+  
+  // Límites de inversión
+  minInvestment   Decimal         @db.Decimal(12, 2) // Monto mínimo
+  maxInvestment   Decimal         @db.Decimal(12, 2) // Monto máximo
+  totalCapacity   Decimal         @db.Decimal(15, 2) // Capacidad total del contrato
+  currentRaised   Decimal         @db.Decimal(15, 2) @default(0) // Monto recaudado
+  
+  // Partes del contrato
+  generator       String          // Generador que vende la energía
+  generatorLocation String?       // Ubicación del generador
+  buyer           String          // Empresa que compra la energía
+  buyerIndustry   String          // Industria del comprador
+  
+  // Información energética
+  energyType      EnergyType      @default(SOLAR)
+  energyAmount    Decimal         @db.Decimal(12, 2) // Cantidad de energía (MWh)
+  co2Emissions    Decimal         @db.Decimal(10, 2) // Toneladas de CO2 evitadas
+  
+  // Términos del contrato
+  termMonths      Int             // Plazo en meses
+  startDate       DateTime?       // Fecha de inicio
+  endDate         DateTime?       // Fecha de fin
+  
+  // Estado
+  status          ContractStatus  @default(DRAFT)
+  
+  // Metadata
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  createdBy       String?         // ID del admin que creó
+  
+  // Relaciones
+  documents       ContractDocument[]
+  investments     Investment[]
+  
+  @@index([status])
+  @@index([energyType])
+}
 
-// model Investment {
-//   id          String   @id @default(cuid())
-//   userId      String
-//   projectId   String
-//   amount      Decimal  @db.Decimal(15, 2)
-//   status      String   // "pending", "confirmed", "cancelled"
-//   createdAt   DateTime @default(now())
-// }
+model ContractDocument {
+  id          String   @id @default(cuid())
+  contractId  String
+  
+  name        String   // Nombre del documento
+  type        String   // Tipo: "contract", "certificate", "technical", "other"
+  url         String   // URL del archivo
+  size        Int?     // Tamaño en bytes
+  
+  uploadedAt  DateTime @default(now())
+  
+  contract    Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  
+  @@index([contractId])
+}
 
-// model Transaction {
-//   id          String   @id @default(cuid())
-//   userId      String
-//   type        String   // "deposit", "withdrawal", "dividend", "investment"
-//   amount      Decimal  @db.Decimal(15, 2)
-//   status      String
-//   reference   String?
-//   createdAt   DateTime @default(now())
-// }
+model Investment {
+  id          String          @id @default(cuid())
+  userId      String
+  contractId  String
+  
+  amount      Decimal         @db.Decimal(15, 2)
+  status      InvestmentStatus @default(PENDING)
+  
+  // Datos calculados
+  expectedReturn Decimal?     @db.Decimal(15, 2)
+  
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  confirmedAt DateTime?
+  
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contract    Contract        @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([contractId])
+  @@index([status])
+}
+
+// ============================================
+// ENUMS ADICIONALES
+// ============================================
+
+enum ContractStatus {
+  DRAFT       // Borrador, no visible para usuarios
+  ACTIVE      // Activo, aceptando inversiones
+  FUNDED      // Completamente financiado
+  IN_PROGRESS // En ejecución
+  COMPLETED   // Contrato finalizado
+  CANCELLED   // Cancelado
+}
+
+enum EnergyType {
+  SOLAR       // Energía solar
+  WIND        // Energía eólica
+  HYDRO       // Hidroeléctrica
+  BIOMASS     // Biomasa
+  GEOTHERMAL  // Geotérmica
+  HYBRID      // Híbrido
+}
+
+enum InvestmentStatus {
+  PENDING     // Pendiente de confirmación
+  CONFIRMED   // Confirmada
+  CANCELLED   // Cancelada
+  REFUNDED    // Reembolsada
+}
+
