@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 
 interface ContractFormData {
@@ -21,6 +21,7 @@ interface ContractFormData {
     termValue: string;
     termUnit: 'years' | 'months';
     co2Emissions: string;
+    status: string;
 }
 
 interface UploadedDocument {
@@ -30,21 +31,15 @@ interface UploadedDocument {
     uploadedAt: string;
 }
 
-interface Props {
-    contractId?: string;
-}
-
-export default function ContractFormPage({ contractId }: Props) {
+export default function EditContractPage() {
     const router = useRouter();
-    const isEditing = !!contractId;
-    const [isLoading, setIsLoading] = useState(isEditing);
+    const params = useParams();
+    const contractId = params.id as string;
+
+    const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDocument[]>([
-        // Sample documents for UI demonstration
-        { id: '1', name: 'PPA_Contrato_Marco.pdf', size: '2.4 MB', uploadedAt: 'hace 2 min' },
-        { id: '2', name: 'Auditoría_Ambiental_2024.pdf', size: '1.8 MB', uploadedAt: 'hace 5 min' },
-    ]);
+    const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDocument[]>([]);
 
     const [formData, setFormData] = useState<ContractFormData>({
         name: '',
@@ -63,13 +58,11 @@ export default function ContractFormPage({ contractId }: Props) {
         termValue: '',
         termUnit: 'years',
         co2Emissions: '',
+        status: 'DRAFT',
     });
 
-    // Load existing contract data if editing
     useEffect(() => {
-        if (contractId) {
-            fetchContract();
-        }
+        fetchContract();
     }, [contractId]);
 
     const fetchContract = async () => {
@@ -78,7 +71,6 @@ export default function ContractFormPage({ contractId }: Props) {
             if (!res.ok) throw new Error('Error al cargar el contrato');
             const data = await res.json();
 
-            // Convert API data to form data
             const termMonths = data.contract.termMonths || 12;
             const isYears = termMonths >= 12 && termMonths % 12 === 0;
 
@@ -99,9 +91,9 @@ export default function ContractFormPage({ contractId }: Props) {
                 termValue: isYears ? (termMonths / 12).toString() : termMonths.toString(),
                 termUnit: isYears ? 'years' : 'months',
                 co2Emissions: data.contract.co2Emissions?.toString() || '',
+                status: data.contract.status || 'DRAFT',
             });
 
-            // Load documents if available
             if (data.contract.documents?.length) {
                 setUploadedDocuments(data.contract.documents.map((doc: any) => ({
                     id: doc.id,
@@ -132,7 +124,7 @@ export default function ContractFormPage({ contractId }: Props) {
         return formData.termUnit === 'years' ? value * 12 : value;
     };
 
-    const buildContractPayload = (status: 'DRAFT' | 'ACTIVE') => ({
+    const buildContractPayload = (status: string) => ({
         name: formData.name,
         description: formData.description,
         imageUrl: formData.imageUrl || null,
@@ -168,11 +160,8 @@ export default function ContractFormPage({ contractId }: Props) {
 
         try {
             const payload = buildContractPayload('DRAFT');
-            const url = isEditing ? `/api/admin/contracts/${contractId}` : '/api/admin/contracts';
-            const method = isEditing ? 'PATCH' : 'POST';
-
-            const res = await fetch(url, {
-                method,
+            const res = await fetch(`/api/admin/contracts/${contractId}`, {
+                method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
@@ -202,11 +191,8 @@ export default function ContractFormPage({ contractId }: Props) {
 
         try {
             const payload = buildContractPayload('ACTIVE');
-            const url = isEditing ? `/api/admin/contracts/${contractId}` : '/api/admin/contracts';
-            const method = isEditing ? 'PATCH' : 'POST';
-
-            const res = await fetch(url, {
-                method,
+            const res = await fetch(`/api/admin/contracts/${contractId}`, {
+                method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
@@ -228,6 +214,17 @@ export default function ContractFormPage({ contractId }: Props) {
         setUploadedDocuments(prev => prev.filter(d => d.id !== docId));
     };
 
+    const getStatusLabel = (status: string) => {
+        const labels: Record<string, { text: string; color: string }> = {
+            DRAFT: { text: 'Borrador', color: 'bg-gray-100 text-gray-800' },
+            ACTIVE: { text: 'Activo', color: 'bg-blue-100 text-blue-800' },
+            FUNDED: { text: 'Financiado', color: 'bg-green-100 text-green-800' },
+            COMPLETED: { text: 'Completado', color: 'bg-green-100 text-green-800' },
+            CANCELLED: { text: 'Cancelado', color: 'bg-red-100 text-red-800' },
+        };
+        return labels[status] || { text: status, color: 'bg-gray-100 text-gray-800' };
+    };
+
     if (isLoading) {
         return (
             <div className="flex-1 flex items-center justify-center">
@@ -235,6 +232,8 @@ export default function ContractFormPage({ contractId }: Props) {
             </div>
         );
     }
+
+    const statusInfo = getStatusLabel(formData.status);
 
     return (
         <>
@@ -245,12 +244,15 @@ export default function ContractFormPage({ contractId }: Props) {
                         <div className="flex items-center gap-2 mb-2 text-sm text-gray-500">
                             <Link href="/admin/contracts" className="hover:underline">Contratos</Link>
                             <span className="material-symbols-outlined text-sm">chevron_right</span>
-                            <span className="font-bold text-black">{isEditing ? 'Editar Contrato' : 'Nuevo Contrato'}</span>
+                            <span className="font-bold text-black">Editar Contrato</span>
                         </div>
-                        <h1 className="text-3xl font-extrabold text-black leading-tight">
-                            Admin: {isEditing ? 'Editar' : 'Nuevo'} Contrato
-                        </h1>
-                        <p className="text-gray-500 mt-1">Panel de administración para la creación y edición de contratos de energía.</p>
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-3xl font-extrabold text-black leading-tight">Editar Contrato</h1>
+                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusInfo.color}`}>
+                                {statusInfo.text}
+                            </span>
+                        </div>
+                        <p className="text-gray-500 mt-1">Panel de administración para la edición de contratos de energía.</p>
                     </div>
                     <div className="flex gap-3">
                         <button
@@ -317,8 +319,6 @@ export default function ContractFormPage({ contractId }: Props) {
                                         accept=".jpg,.jpeg,.png"
                                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                         onChange={(e) => {
-                                            // For now, just show a placeholder
-                                            // In production, this would upload to cloud storage
                                             if (e.target.files?.[0]) {
                                                 const url = URL.createObjectURL(e.target.files[0]);
                                                 setFormData(prev => ({ ...prev, imageUrl: url }));
@@ -339,7 +339,6 @@ export default function ContractFormPage({ contractId }: Props) {
                             <h2 className="text-xl font-bold text-black">Detalles y Finanzas</h2>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                            {/* Nombre del Contrato - Full width */}
                             <div className="col-span-1 md:col-span-2 space-y-2">
                                 <label className="text-sm font-bold text-gray-700">Nombre del Contrato *</label>
                                 <input
@@ -351,7 +350,6 @@ export default function ContractFormPage({ contractId }: Props) {
                                 />
                             </div>
 
-                            {/* Tipo de energía */}
                             <div className="space-y-2">
                                 <label className="text-sm font-bold text-gray-700">Tipo de energía *</label>
                                 <select
@@ -371,7 +369,6 @@ export default function ContractFormPage({ contractId }: Props) {
                                 </select>
                             </div>
 
-                            {/* Rentabilidad anual */}
                             <div className="space-y-2">
                                 <label className="text-sm font-bold text-gray-700">Rentabilidad anual (%) *</label>
                                 <div className="relative">
@@ -388,7 +385,6 @@ export default function ContractFormPage({ contractId }: Props) {
                                 </div>
                             </div>
 
-                            {/* Meta financiación */}
                             <div className="space-y-2">
                                 <label className="text-sm font-bold text-gray-700">Meta financiación ($) *</label>
                                 <div className="relative">
@@ -404,7 +400,6 @@ export default function ContractFormPage({ contractId }: Props) {
                                 </div>
                             </div>
 
-                            {/* Inversión mínima y máxima */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-bold text-gray-700">Inversión mínima ($)</label>
@@ -447,7 +442,6 @@ export default function ContractFormPage({ contractId }: Props) {
                             <h2 className="text-xl font-bold text-black">Especificaciones</h2>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                            {/* Generador energético */}
                             <div className="space-y-2">
                                 <label className="text-sm font-bold text-gray-700">Generador energético *</label>
                                 <input
@@ -459,7 +453,6 @@ export default function ContractFormPage({ contractId }: Props) {
                                 />
                             </div>
 
-                            {/* Empresa compradora */}
                             <div className="space-y-2">
                                 <label className="text-sm font-bold text-gray-700">Empresa compradora *</label>
                                 <input
@@ -471,7 +464,6 @@ export default function ContractFormPage({ contractId }: Props) {
                                 />
                             </div>
 
-                            {/* Industria del comprador */}
                             <div className="space-y-2">
                                 <label className="text-sm font-bold text-gray-700">Industria del comprador</label>
                                 <select
@@ -492,7 +484,6 @@ export default function ContractFormPage({ contractId }: Props) {
                                 </select>
                             </div>
 
-                            {/* Volumen energía */}
                             <div className="space-y-2">
                                 <label className="text-sm font-bold text-gray-700">Volumen energía (MWh)</label>
                                 <input
@@ -505,7 +496,6 @@ export default function ContractFormPage({ contractId }: Props) {
                                 />
                             </div>
 
-                            {/* Plazo */}
                             <div className="space-y-2">
                                 <label className="text-sm font-bold text-gray-700">Plazo *</label>
                                 <div className="flex gap-2">
@@ -529,7 +519,6 @@ export default function ContractFormPage({ contractId }: Props) {
                                 </div>
                             </div>
 
-                            {/* CO2 evitado */}
                             <div className="space-y-2">
                                 <label className="text-sm font-bold text-gray-700">CO2 evitado (toneladas)</label>
                                 <div className="relative">
@@ -556,7 +545,6 @@ export default function ContractFormPage({ contractId }: Props) {
                             <h2 className="text-xl font-bold text-black">Documentos</h2>
                         </div>
                         <div className="space-y-4">
-                            {/* Upload area */}
                             <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 flex flex-col items-center justify-center bg-gray-50 hover:bg-white hover:border-primary transition-all cursor-pointer">
                                 <span className="material-symbols-outlined text-4xl text-gray-400 mb-2">picture_as_pdf</span>
                                 <p className="text-sm font-bold text-black">Carga múltiple de PDFs</p>
@@ -569,7 +557,6 @@ export default function ContractFormPage({ contractId }: Props) {
                                 </button>
                             </div>
 
-                            {/* Uploaded documents list */}
                             {uploadedDocuments.length > 0 && (
                                 <div className="rounded-xl border border-gray-100 overflow-hidden">
                                     {uploadedDocuments.map((doc, index) => (
