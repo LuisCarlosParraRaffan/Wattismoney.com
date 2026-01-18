@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Admin: Gestión de KYC - Wattismoney</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#EEFF00", // Vibrant Yellow from prompt
+                        "primary-hover": "#D4E600",
+                        "background-light": "#F3F4F6", // Light gray background
+                        "background-dark": "#111827", // Dark background
+                        "surface-light": "#FFFFFF",
+                        "surface-dark": "#1F2937",
+                        "text-light": "#1F2937",
+                        "text-dark": "#F9FAFB",
+                    },
+                    fontFamily: {
+                        display: ["Cairo", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                    },
+                },
+            },
+        };
+    </script>
+<style>::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #4b5563; 
+        }
+        .glass-panel {
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark transition-colors duration-200">
+<div class="flex h-screen overflow-hidden">
+<aside class="hidden md:flex flex-col w-64 bg-surface-light dark:bg-surface-dark border-r border-gray-200 dark:border-gray-700 transition-colors duration-200">
+<div class="flex items-center justify-center h-20 border-b border-gray-200 dark:border-gray-700 bg-primary">
+<div class="flex items-center gap-2 font-bold text-2xl text-black">
+<span class="material-icons-outlined">bolt</span>
+                    WATTISMONEY
+                 </div>
+</div>
+<nav class="flex-1 overflow-y-auto py-4">
+<ul class="space-y-1 px-2">
+<li>
+<a class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors" href="#">
+<span class="material-icons-outlined mr-3">dashboard</span>
+                            Dashboard
+                        </a>
+</li>
+<li>
+<a class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors" href="#">
+<span class="material-icons-outlined mr-3">people</span>
+                            Usuarios
+                        </a>
+</li>
+<li>
+<a class="flex items-center px-4 py-3 bg-primary/20 text-black dark:text-primary font-bold rounded-md transition-colors" href="#">
+<span class="material-icons-outlined mr-3 text-black dark:text-primary">verified_user</span>
+                            Gestión KYC
+                        </a>
+</li>
+<li>
+<a class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors" href="#">
+<span class="material-icons-outlined mr-3">payments</span>
+                            Transacciones
+                        </a>
+</li>
+<li>
+<a class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors" href="#">
+<span class="material-icons-outlined mr-3">settings</span>
+                            Configuración
+                        </a>
+</li>
+</ul>
+</nav>
+<div class="p-4 border-t border-gray-200 dark:border-gray-700">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
+<span class="material-icons-outlined text-gray-600 dark:text-gray-300">person</span>
+</div>
+<div>
+<p class="text-sm font-medium">Admin User</p>
+<p class="text-xs text-gray-500 dark:text-gray-400">admin@wattismoney.com</p>
+</div>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col overflow-hidden relative">
+<header class="h-20 flex items-center justify-between px-6 bg-surface-light dark:bg-surface-dark border-b border-gray-200 dark:border-gray-700 transition-colors duration-200 z-10">
+<h1 class="text-2xl font-bold flex items-center gap-2">
+<span class="material-icons-outlined text-yellow-500">verified</span>
+                    Gestión de KYC de Usuarios
+                </h1>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
+<span class="material-icons-outlined">dark_mode</span>
+</button>
+<button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 relative">
+<span class="material-icons-outlined">notifications</span>
+<span class="absolute top-2 right-2 h-2 w-2 rounded-full bg-red-500"></span>
+</button>
+</div>
+</header>
+<div class="flex-1 overflow-auto p-6">
+<div class="mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
+<div class="relative w-full sm:w-96">
+<span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+<span class="material-icons-outlined">search</span>
+</span>
+<input class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="Buscar por nombre, email o DNI..." type="text"/>
+</div>
+<div class="flex gap-2">
+<button class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium transition-colors flex items-center gap-2">
+<span class="material-icons-outlined text-lg">filter_list</span>
+                            Filtrar: Pendientes
+                        </button>
+<button class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium transition-colors flex items-center gap-2">
+<span class="material-icons-outlined text-lg">sort</span>
+                            Ordenar: Fecha
+                        </button>
+</div>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold">
+<th class="px-6 py-4">Usuario</th>
+<th class="px-6 py-4">Tipo Documento</th>
+<th class="px-6 py-4">Doc. Frontal</th>
+<th class="px-6 py-4">Doc. Trasero</th>
+<th class="px-6 py-4">Selfie</th>
+<th class="px-6 py-4">Residencia</th>
+<th class="px-6 py-4">Fecha Envío</th>
+<th class="px-6 py-4 text-center">Acciones</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold">
+                                                CM
+                                            </div>
+<div>
+<div class="font-medium text-gray-900 dark:text-white">Carlos Martínez</div>
+<div class="text-sm text-gray-500 dark:text-gray-400">carlos.mtz@example.com</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                            DNI / NIE
+                                        </span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="group relative h-12 w-20 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden cursor-pointer border border-gray-300 dark:border-gray-600">
+<img alt="Front ID" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJUxBeRbFMTVT6VudpxJKnVswSwKKd2oOc7UEzp3m92nS34U3nXNGDBXyLyzX6ExsQEGcpOFPCAJdzLtkDSUPWnJXSD-jCgU4E53p8pTH2BjxM19cA4uk-rfMXx4QLo-1lFV9Uw4ORgueJD70DCjfpnc5bchd7Ufm3RthQP8eLDNDfNBeIsAc1GNMSTZJVHw9NCDPtPc1VA7e2MuEL5YkvkxraIKYMIPMHaIc8Q622Jd-q_fXjpk0YXZS_7g9Unv16g95inx9SW8Q"/>
+<div class="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all">
+<span class="material-icons-outlined text-white text-lg">visibility</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="group relative h-12 w-20 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden cursor-pointer border border-gray-300 dark:border-gray-600">
+<img alt="Back ID" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBT9YwmMQRFQ4YX9HuGUTdPbIyfguBSsPUJMC2XQII6KNlNvxFZR_qBJJsepSXSWmBzB1rQm1ov2Ozzk9X_LY4sbABB1ISQG8zrghLObPyKvR7EeUcnGQloX_WvFDqICHZh2kwOppxBpUub7y6wzA2qSxWcb_9n8uS2ul6KT-XOxsrdpDok64nRNihScchOf2lqmfvP1dX54qIbzg4uwm2abxB_opAIawN4E-rRbik6nwJILJqtdITpRMpGTfDUaMlzBLOaLU7htAU"/>
+<div class="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all">
+<span class="material-icons-outlined text-white text-lg">visibility</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="group relative h-12 w-12 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden cursor-pointer border border-gray-300 dark:border-gray-600">
+<img alt="Selfie" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCIjibRCQN5j9jXv_AgQeREYhRSyAynuCNomXlTIxGQhaWUttKlXsyhU_uYgb6oKDCFcv0FvSsdWdOkRMImlouPcgPaDhFLo7qt0j-EgWMzenJ29BQy1OMNUe2Wvy_CguXSR0HpDschH7dtS6phYISaajf6G3oixyrgrjo9ILM8_21MnQ1Kq8rVrhUsm6knwnzgdlPh7nCK2tn--Uu0e_D3EHlIC1KQd6OlFo80Fi5OSm549o1eJPftQnhJCHWV7ZnOS7GqOGryFs0"/>
+<div class="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all">
+<span class="material-icons-outlined text-white text-lg">face</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<a class="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline" href="#">
+<span class="material-icons-outlined text-lg">picture_as_pdf</span>
+<span class="text-sm">Ver PDF</span>
+</a>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        15 Oct 2023 <br/>
+<span class="text-xs">10:42 AM</span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-center">
+<div class="flex items-center justify-center gap-2">
+<button class="bg-primary hover:bg-primary-hover text-black font-semibold px-3 py-1.5 rounded-md shadow-sm transition-colors flex items-center gap-1">
+<span class="material-icons-outlined text-sm">check</span>
+                                                Aprobar
+                                            </button>
+<button class="bg-white dark:bg-gray-800 border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 font-medium px-3 py-1.5 rounded-md transition-colors flex items-center gap-1">
+<span class="material-icons-outlined text-sm">close</span>
+                                                Rechazar
+                                            </button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold">
+                                                LS
+                                            </div>
+<div>
+<div class="font-medium text-gray-900 dark:text-white">Laura Sánchez</div>
+<div class="text-sm text-gray-500 dark:text-gray-400">laura.sanchez@example.com</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
+                                            Pasaporte
+                                        </span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="group relative h-12 w-20 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden cursor-pointer border border-gray-300 dark:border-gray-600">
+<img alt="Front ID" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCq5Kz3zYSnSrv3OC0-u8EgU5S5QFanIKWrslaRTCMLru-EgKGOjkQdxM-kCpfSyKb-cOjjScvDJ_gPiOeaUkh_MxZjBqGNN-6D6LOyHvuh9KEbu9hD0YEmiHR4rCdMuSGfMhmE7jmSpxiA9rZd9Cceo16pTURORf907kAr3GBzkUHFc8RzANuQhh3PTyGYFWBsp4f2PbpivGAjmoF4-fDXcW4Svpiul7DF-7A5y2Wt_pMe4rvUhxzg0unGH_fKqE4ztwXQAigL-0U"/>
+<div class="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all">
+<span class="material-icons-outlined text-white text-lg">visibility</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="text-xs text-gray-400 italic">N/A (Pasaporte)</span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="group relative h-12 w-12 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden cursor-pointer border border-gray-300 dark:border-gray-600">
+<img alt="Selfie" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuADU31x5tBEzdFXKL1xcN4tfrXdDiWYQ9ACYcLdrNoxzpFkwzuxW1e2kFxrSry5hp3EWtc2wEeURCZEO8g7aIviBHuPh91YwLTHpELIbDKqKKg1KLMMsWp7cTkattvNvD87aOOhbfo75VKha5_q8bjZCsj2wEotlG-hKzDQLH6UkoBJiRlC4i1Fi4IY4hqifiaThzqT1WVYoxVa6jPiTgmTO6ZK5ZX75Rm7pgo3Hd_6yu-4iaSQXlYISQDanF_Oef8Z7FAK65gNzUM"/>
+<div class="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all">
+<span class="material-icons-outlined text-white text-lg">face</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<a class="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline" href="#">
+<span class="material-icons-outlined text-lg">image</span>
+<span class="text-sm">Ver Imagen</span>
+</a>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        15 Oct 2023 <br/>
+<span class="text-xs">09:15 AM</span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-center">
+<div class="flex items-center justify-center gap-2">
+<button class="bg-primary hover:bg-primary-hover text-black font-semibold px-3 py-1.5 rounded-md shadow-sm transition-colors flex items-center gap-1">
+<span class="material-icons-outlined text-sm">check</span>
+                                                Aprobar
+                                            </button>
+<button class="bg-white dark:bg-gray-800 border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 font-medium px-3 py-1.5 rounded-md transition-colors flex items-center gap-1">
+<span class="material-icons-outlined text-sm">close</span>
+                                                Rechazar
+                                            </button>
+</div>
+</td>
+</tr>
+<tr class="bg-red-50 dark:bg-red-900/10 transition-colors border-l-4 border-l-red-500">
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold">
+                                                JP
+                                            </div>
+<div>
+<div class="font-medium text-gray-900 dark:text-white">Juan Pérez</div>
+<div class="text-sm text-gray-500 dark:text-gray-400">juan.perez@example.com</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                            DNI / NIE
+                                        </span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="group relative h-12 w-20 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden cursor-pointer border border-red-300 dark:border-red-500 ring-2 ring-red-400/50">
+<img alt="Front ID" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAH2LwCUgPjVpWkpKZlP9bVECRWer8VaHkApbZUNHa8EmVkhl1A3tS-4HsFIzGb9gxUcPETwGkqbAak6DjrADiAZA_1OWFUIy8742AvE6ZmgAjgEj6r3Kmil60C528jmxo4_ujBJ0pFYwUbpIgzUwzHIK_AgyDLgBS2JHDhfnPIvb-fE1W6EYqgKo9jvXRr2YWsxTyqx36twP_8NYh17fCjzGMD4tOcID9oHX4Zo1appxGO1lzNPoEVyPmZ1XYUEm6jmkuyiK6ntdM"/>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="group relative h-12 w-20 bg-gray-200 dark:bg-gray-700 rounded overflow-hidden cursor-pointer border border-gray-300 dark:border-gray-600">
+<img alt="Back ID" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0iT2LCKQzbL2rn_aaUHbsT0-kfhiVKnfBzcIAB5ORNIb9xwC0s8n3NmXoTkEJ7seeLyvDRhDWEW3r3sRM1eN6D6wtbPysnaohpMeCjse2hKi9hFKMnt5CsSuJuMEI9CpdRmtRHQZcWKKGtA4cVeQzJuuUQQ16g6xqmkoJuSfDI3jvCiYebKvNJ8cmmv044jl9iFWyTDFfFizis7XaBDMHi3-37Lf29hh1q134LcJKS0RUeg6ejEXTT_gj4wsTOxBXrXQpEm7OGes"/>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="group relative h-12 w-12 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden cursor-pointer border border-gray-300 dark:border-gray-600">
+<img alt="Selfie" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDF4jGHQaTxbCrgwAoLL_u77zQReNOtjqsg2JShh2HZgEIfEgoiysTDT0FFdhytcS0gP1J6wfOMt0Am1PFU64TFW3m9sgc9gFerdw13rY6cx4Uf7Saq59YWlh8J7iJW10sxSXXOIWXLV_cJnIUQPsMwk8snJexv4l0tzLuMhLA7dnB02pRX00z6t-_FFXgGmaE1JTyozl3ygWDfgswG7DMb0zTiLrRRr3JX_JcxG5rQ0P07530A-vo0t0ualhdlD9_4yO6rDZs46PE"/>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<a class="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline" href="#">
+<span class="material-icons-outlined text-lg">picture_as_pdf</span>
+<span class="text-sm">Ver PDF</span>
+</a>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        14 Oct 2023 <br/>
+<span class="text-xs">16:20 PM</span>
+</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-center gap-2 opacity-50">
+<button class="bg-gray-200 text-gray-400 font-semibold px-3 py-1.5 rounded-md flex items-center gap-1 cursor-not-allowed" disabled="">
+                                                    Aprobar
+                                                </button>
+<button class="bg-red-600 text-white font-medium px-3 py-1.5 rounded-md flex items-center gap-1 shadow-md">
+                                                    Rechazar
+                                                </button>
+</div>
+<div class="mt-2 animate-pulse-once">
+<label class="block text-xs font-semibold text-red-700 dark:text-red-300 mb-1">Razón del rechazo:</label>
+<div class="flex gap-2">
+<select class="w-full text-xs rounded border-red-300 dark:border-red-800 bg-white dark:bg-gray-800 focus:border-red-500 focus:ring-red-500">
+<option>Imagen borrosa</option>
+<option>Documento vencido</option>
+<option>Datos no coinciden</option>
+<option>Otro</option>
+</select>
+<button class="bg-red-600 hover:bg-red-700 text-white p-1 rounded">
+<span class="material-icons-outlined text-sm">send</span>
+</button>
+</div>
+</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="bg-white dark:bg-gray-800 px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+<div class="text-sm text-gray-500 dark:text-gray-400">
+                            Mostrando <span class="font-medium text-gray-900 dark:text-white">1</span> a <span class="font-medium text-gray-900 dark:text-white">3</span> de <span class="font-medium text-gray-900 dark:text-white">12</span> solicitudes
+                        </div>
+<div class="flex gap-1">
+<button class="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50">
+                                «
+                            </button>
+<button class="px-3 py-1 border border-primary bg-primary text-black font-bold rounded">
+                                1
+                            </button>
+<button class="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                2
+                            </button>
+<button class="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                »
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+        const themeToggleBtn = document.querySelector('button span.material-icons-outlined:contains("dark_mode")')?.parentNode || document.querySelectorAll('button')[1];
+        themeToggleBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            const icon = themeToggleBtn.querySelector('.material-icons-outlined');
+            if (document.documentElement.classList.contains('dark')) {
+                icon.textContent = 'light_mode';
+            } else {
+                icon.textContent = 'dark_mode';
+            }
+        });
+    </script>
+
+</body></html>

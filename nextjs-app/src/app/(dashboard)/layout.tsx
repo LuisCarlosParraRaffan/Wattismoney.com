@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { WattismoneyLogo } from '@/components/Icons';
 import { useOnboardingCheck } from '@/hooks/useOnboardingCheck';
 
@@ -13,8 +14,14 @@ export default function DashboardLayout({
 }) {
     const router = useRouter();
     const pathname = usePathname();
+    const { data: session } = useSession();
     const { isLoading, hasKyc, hasInvestorProfile } = useOnboardingCheck();
     const [isOpportunitiesOpen, setIsOpportunitiesOpen] = useState(false);
+    const [isAdminOpen, setIsAdminOpen] = useState(false);
+
+    // Check if user is admin
+    const isAdmin = session?.user?.role === 'ADMIN' || session?.user?.role === 'SUPER_ADMIN';
+    const isAdminRoute = pathname.startsWith('/admin');
 
     // Show loading while checking onboarding status
     if (isLoading) {
@@ -128,6 +135,43 @@ export default function DashboardLayout({
                             <span className={`material-symbols-outlined text-[22px] ${getIconClass('/ayuda')}`}>help</span>
                             <span className="text-sm">Ayuda</span>
                         </Link>
+
+                        {/* Admin Section - Only visible for ADMIN/SUPER_ADMIN */}
+                        {isAdmin && (
+                            <>
+                                <div className="pt-4 mt-4 border-t border-gray-100">
+                                    <span className="px-3 text-xs font-bold text-primary uppercase tracking-wider">Administración</span>
+                                </div>
+
+                                <button
+                                    onClick={() => setIsAdminOpen(!isAdminOpen)}
+                                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors group ${isAdminRoute ? 'bg-primary/10 text-black' : 'text-slate-500 hover:bg-gray-50 hover:text-black'}`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <span className={`material-symbols-outlined text-[22px] ${isAdminRoute ? 'text-primary' : 'group-hover:text-black'}`}>admin_panel_settings</span>
+                                        <span className={`text-sm ${isAdminRoute ? 'font-bold' : 'font-medium'}`}>Panel Admin</span>
+                                    </div>
+                                    <span className={`material-symbols-outlined text-[20px] transition-transform duration-200 ${isAdminOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                                </button>
+
+                                <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isAdminOpen || isAdminRoute ? 'max-h-60 opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
+                                    <div className="pl-10 pr-2 flex flex-col gap-1">
+                                        <Link href="/admin" className={`block px-3 py-2 rounded-lg text-xs transition-colors ${pathname === '/admin' ? 'text-black font-bold bg-primary/20' : 'text-slate-500 hover:text-black hover:bg-gray-50'}`}>
+                                            Dashboard
+                                        </Link>
+                                        <Link href="/admin/contracts" className={`block px-3 py-2 rounded-lg text-xs transition-colors ${pathname.includes('/admin/contracts') ? 'text-black font-bold bg-primary/20' : 'text-slate-500 hover:text-black hover:bg-gray-50'}`}>
+                                            Contratos
+                                        </Link>
+                                        <Link href="/admin/users" className={`block px-3 py-2 rounded-lg text-xs transition-colors ${pathname.includes('/admin/users') ? 'text-black font-bold bg-primary/20' : 'text-slate-500 hover:text-black hover:bg-gray-50'}`}>
+                                            Usuarios
+                                        </Link>
+                                        <Link href="/admin/kyc" className={`block px-3 py-2 rounded-lg text-xs transition-colors ${pathname.includes('/admin/kyc') ? 'text-black font-bold bg-primary/20' : 'text-slate-500 hover:text-black hover:bg-gray-50'}`}>
+                                            Gestión KYC
+                                        </Link>
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </nav>
 
                     {/* User Profile */}

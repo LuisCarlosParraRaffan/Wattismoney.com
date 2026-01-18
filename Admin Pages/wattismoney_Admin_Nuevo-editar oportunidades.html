@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Admin: Nuevo/Editar Contrato de Energía | Wattismoney</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#e3f20d", // Vibrante yellow
+                        "primary-hover": "#d1df0c",
+                        "background-light": "#ffffff", // Pure white background as requested
+                        "background-dark": "#1a1a1a",
+                        "text-main": "#000000", // Black text
+                        "text-secondary": "#4a4a4a",
+                        "border-light": "#e5e7eb",
+                    },
+                    fontFamily: {
+                        "sans": ["Cairo", "sans-serif"], // Changed to Cairo
+                        "display": ["Cairo", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.375rem",
+                        "lg": "0.5rem",
+                        "xl": "1rem", // Softer corners
+                        "2xl": "1.5rem",
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #e5e7eb;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d1d5db;
+        }
+    </style>
+</head>
+<body class="bg-background-light text-text-main min-h-screen">
+<header class="sticky top-0 z-50 bg-white border-b border-border-light px-6 py-4">
+<div class="max-w-[1200px] mx-auto flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="size-9 text-primary">
+<svg fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z"></path>
+</svg>
+</div>
+<h2 class="text-xl font-bold tracking-tight">Wattismoney</h2>
+</div>
+<div class="flex flex-1 justify-end gap-6 items-center">
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-sm font-semibold text-text-secondary hover:text-black transition-colors" href="#">Dashboard</a>
+<a class="text-sm font-bold border-b-2 border-primary pb-0.5 text-black" href="#">Contratos</a>
+<a class="text-sm font-semibold text-text-secondary hover:text-black transition-colors" href="#">Usuarios</a>
+<a class="text-sm font-semibold text-text-secondary hover:text-black transition-colors" href="#">Reportes</a>
+</nav>
+<div class="flex gap-3">
+<button class="flex items-center justify-center rounded-full h-10 w-10 hover:bg-gray-100 transition-colors">
+<span class="material-symbols-outlined text-gray-600">notifications</span>
+</button>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border border-gray-200" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBceOV2cCWYlECvUr7teVDA69LpiBkJWt6dFSDZWCrJCtAIanT1ituhpUR_D9gAlagul5iVwSI8bMvl5Ot_Os_YPNdyFc5vtalWupWFRWDNOJ_oYM9YgGZEnEO9s0ymLZNwhuuu7_iMQm_2GzKpvRruV6E10SdVC1Qta19cvtd4JQRBb4evdgtbzGPKrroGkK7tnPbrKNzx5yyKWi5bbTmox5kSFVSagnMEBMyxFtqUKWSexSvifpfTgnJAAgJSEw29z3zJD4e4YH0");'></div>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-[1000px] mx-auto px-6 py-10">
+<div class="flex flex-wrap justify-between items-start gap-4 mb-10">
+<div>
+<div class="flex items-center gap-2 mb-2 text-sm text-text-secondary">
+<a class="hover:underline" href="#">Contratos</a>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+<span class="font-bold text-black">Nuevo Contrato</span>
+</div>
+<h1 class="text-4xl font-black text-black leading-tight">Admin: Nuevo/Editar Contrato</h1>
+<p class="text-text-secondary mt-2 text-lg">Panel de administración para la creación y edición de contratos de energía.</p>
+</div>
+<div class="flex gap-3 mt-4 md:mt-0">
+<button class="flex items-center justify-center rounded-xl h-12 px-6 bg-white border-2 border-primary text-black text-sm font-bold shadow-sm hover:bg-gray-50 transition-colors">
+                Guardar Borrador
+            </button>
+<button class="flex items-center justify-center rounded-xl h-12 px-8 bg-primary text-black text-sm font-bold shadow-md hover:bg-primary-hover transition-all">
+                Publicar Contrato
+            </button>
+</div>
+</div>
+<form class="space-y-8">
+<section class="bg-white rounded-2xl shadow-soft border border-gray-100 p-8">
+<div class="flex items-center gap-3 mb-6">
+<div class="p-2 bg-primary/20 rounded-lg">
+<span class="material-symbols-outlined text-black">image</span>
+</div>
+<h2 class="text-xl font-bold text-black">Imagen Promocional</h2>
+</div>
+<div class="w-full">
+<div class="relative group cursor-pointer w-full aspect-[21/9] rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-primary/5 hover:border-primary transition-all flex flex-col items-center justify-center overflow-hidden">
+<div class="flex flex-col items-center p-6 text-center">
+<span class="material-symbols-outlined text-5xl text-gray-400 group-hover:text-primary mb-3 transition-colors">cloud_upload</span>
+<p class="text-lg font-bold text-gray-700">Arrastra tu imagen aquí o haz clic para subir</p>
+<p class="text-sm text-gray-500 mt-1">Soporta JPG y PNG de alta resolución</p>
+</div>
+<input accept=".jpg, .jpeg, .png" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" type="file"/>
+</div>
+</div>
+</section>
+<section class="bg-white rounded-2xl shadow-soft border border-gray-100 p-8">
+<div class="flex items-center gap-3 mb-6">
+<div class="p-2 bg-primary/20 rounded-lg">
+<span class="material-symbols-outlined text-black">payments</span>
+</div>
+<h2 class="text-xl font-bold text-black">Detalles y Finanzas</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+<div class="col-span-1 md:col-span-2 space-y-2">
+<label class="text-sm font-bold text-gray-700">Nombre del Contrato</label>
+<input class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all placeholder:text-gray-400" placeholder="Ej: Parque Solar Almería III" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-bold text-gray-700">Tipo de energía</label>
+<select class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all">
+<option disabled="" selected="" value="">Seleccionar tipo</option>
+<option>Energía Solar Fotovoltaica</option>
+<option>Energía Eólica Onshore</option>
+<option>Energía Eólica Offshore</option>
+<option>Biomasa</option>
+<option>Hidroeléctrica</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-bold text-gray-700">Rentabilidad anual (%)</label>
+<div class="relative">
+<input class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 pl-4 pr-10 transition-all font-medium" placeholder="0.00" step="0.1" type="number"/>
+<span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">%</span>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-bold text-gray-700">Meta financiación ($)</label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
+<input class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 pl-8 pr-4 transition-all font-medium" placeholder="0.00" type="number"/>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-2">
+<label class="text-sm font-bold text-gray-700">Inversión mínima ($)</label>
+<div class="relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-bold">$</span>
+<input class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 pl-6 pr-3 transition-all font-medium text-sm" placeholder="Min" type="number"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-bold text-gray-700">Inversión máxima ($)</label>
+<div class="relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-bold">$</span>
+<input class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 pl-6 pr-3 transition-all font-medium text-sm" placeholder="Max" type="number"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="bg-white rounded-2xl shadow-soft border border-gray-100 p-8">
+<div class="flex items-center gap-3 mb-6">
+<div class="p-2 bg-primary/20 rounded-lg">
+<span class="material-symbols-outlined text-black">tune</span>
+</div>
+<h2 class="text-xl font-bold text-black">Especificaciones</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+<div class="space-y-2">
+<label class="text-sm font-bold text-gray-700">Generador energético</label>
+<input class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all" placeholder="Nombre de la empresa generadora" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-bold text-gray-700">Empresa compradora</label>
+<input class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all" placeholder="Nombre del off-taker" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-bold text-gray-700">Industria del comprador</label>
+<select class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all">
+<option disabled="" selected="" value="">Seleccionar industria</option>
+<option>Tecnología</option>
+<option>Manufactura</option>
+<option>Transporte</option>
+<option>Retail</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-bold text-gray-700">Volumen energía (MWh)</label>
+<input class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all" placeholder="0" type="number"/>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-bold text-gray-700">Plazo</label>
+<div class="flex gap-2">
+<input class="flex-1 rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all" placeholder="Duración" type="number"/>
+<select class="w-32 rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all">
+<option>Años</option>
+<option>Meses</option>
+</select>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-bold text-gray-700">CO2 evitado (toneladas)</label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-outlined text-[20px]">co2</span>
+<input class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 pl-10 px-4 transition-all" placeholder="0" type="number"/>
+</div>
+</div>
+</div>
+</section>
+<section class="bg-white rounded-2xl shadow-soft border border-gray-100 p-8">
+<div class="flex items-center gap-3 mb-6">
+<div class="p-2 bg-primary/20 rounded-lg">
+<span class="material-symbols-outlined text-black">description</span>
+</div>
+<h2 class="text-xl font-bold text-black">Documentos</h2>
+</div>
+<div class="space-y-4">
+<div class="border-2 border-dashed border-gray-200 rounded-xl p-8 flex flex-col items-center justify-center bg-gray-50 hover:bg-white hover:border-primary transition-all cursor-pointer">
+<span class="material-symbols-outlined text-4xl text-gray-400 mb-2">picture_as_pdf</span>
+<p class="text-sm font-bold text-black">Carga múltiple de PDFs</p>
+<p class="text-xs text-gray-500 mb-4">Verificaciones legales, contratos, auditorías</p>
+<button class="px-5 py-2 bg-black text-white text-xs font-bold rounded-lg hover:bg-gray-800 transition-colors" type="button">Seleccionar Archivos</button>
+</div>
+<div class="rounded-xl border border-gray-100 overflow-hidden">
+<div class="flex items-center justify-between p-4 bg-white border-b border-gray-50 hover:bg-gray-50 transition-colors group">
+<div class="flex items-center gap-4">
+<div class="bg-red-50 p-2 rounded-lg text-red-500">
+<span class="material-symbols-outlined">picture_as_pdf</span>
+</div>
+<div>
+<p class="text-sm font-bold text-black">PPA_Contrato_Marco.pdf</p>
+<p class="text-xs text-gray-400">2.4 MB • Subido hace 2 min</p>
+</div>
+</div>
+<button class="p-2 rounded-full hover:bg-gray-200 text-gray-400 hover:text-red-500 transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+<div class="flex items-center justify-between p-4 bg-white hover:bg-gray-50 transition-colors group">
+<div class="flex items-center gap-4">
+<div class="bg-red-50 p-2 rounded-lg text-red-500">
+<span class="material-symbols-outlined">picture_as_pdf</span>
+</div>
+<div>
+<p class="text-sm font-bold text-black">Auditoría_Ambiental_2024.pdf</p>
+<p class="text-xs text-gray-400">1.8 MB • Subido hace 5 min</p>
+</div>
+</div>
+<button class="p-2 rounded-full hover:bg-gray-200 text-gray-400 hover:text-red-500 transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</form>
+</main>
+<footer class="max-w-[1000px] mx-auto px-6 py-10 text-center">
+<div class="flex justify-center items-center gap-2 mb-2">
+<span class="size-6 text-gray-300">
+<svg fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z"></path>
+</svg>
+</span>
+<p class="text-gray-400 text-sm font-semibold">Wattismoney Platform</p>
+</div>
+<p class="text-gray-400 text-xs">© 2024 Wattismoney. Todos los derechos reservados.</p>
+</footer>
+
+</body></html>

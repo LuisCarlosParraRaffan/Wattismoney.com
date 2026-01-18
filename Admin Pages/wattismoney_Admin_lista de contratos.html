@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Admin: Lista de Contratos de Inversión - Wattismoney</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#eeff00",
+              "background-light": "#ffffff",
+              "background-dark": "#111111",
+              "card-light": "#f9f9f9",
+              "card-dark": "#1a1a1a",
+            },
+            fontFamily: {
+              display: ["Cairo", "sans-serif"],
+              sans: ["Cairo", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.5rem",
+            },
+          },
+        },
+      };
+    </script>
+<style>
+        body { font-family: 'Cairo', sans-serif; }
+        .progress-bar { height: 8px; border-radius: 4px; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-black dark:text-white min-h-screen flex">
+<aside class="w-64 border-r border-gray-200 dark:border-gray-800 flex flex-col fixed h-full bg-background-light dark:bg-background-dark z-50">
+<div class="p-6">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 bg-primary rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-black font-bold">bolt</span>
+</div>
+<span class="text-xl font-bold tracking-tight">Wattismoney</span>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-2 mt-4">
+<a class="flex items-center gap-3 px-4 py-3 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-primary text-black rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">description</span>
+<span class="font-medium">Contratos</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-medium">Inversionistas</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="font-medium">Transacciones</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-medium">Configuración</span>
+</a>
+</nav>
+<div class="p-4 border-t border-gray-200 dark:border-gray-800">
+<div class="flex items-center gap-3 p-2">
+<img alt="Admin Profile" class="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOQ46gr0wbdcDj8Kza_YGQCZuCKjYS2291Eiw8AKEnd9FQffAAZbfU5sj7YYvWclPNNOQ1BXZqunVKRjfj1Cz6lFWHz4Swbtc_SNl8CnH946ew3buXl1FkNWQ2A3klQj13M7VuQmEONXYOGKQ2qNNqXymR1z7fcOshadstwo1YvgWRwZGgHa4HH1q-476hBdEZFbod6OBeBZEjtNnDuQ7MMO5Vjo4ulRNilkDK9Q8MyshFZmbznLUTI-9FgmqIs8AJiSFJEhepjRI"/>
+<div class="overflow-hidden">
+<p class="text-sm font-bold truncate">Admin Wattismoney</p>
+<p class="text-xs text-gray-500 truncate">admin@wattismoney.com</p>
+</div>
+</div>
+</div>
+</aside>
+<main class="flex-1 ml-64 p-8">
+<header class="flex justify-between items-center mb-8">
+<div>
+<h1 class="text-3xl font-extrabold tracking-tight">Lista de Contratos de Inversión</h1>
+<p class="text-gray-500 dark:text-gray-400 mt-1">Gestión integral del catálogo de energía renovable.</p>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-symbols-outlined">dark_mode</span>
+</button>
+<button class="bg-primary text-black px-6 py-2.5 rounded-lg font-bold flex items-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined">add</span>
+                    Nuevo Contrato
+                </button>
+</div>
+</header>
+<div class="flex flex-wrap items-center gap-4 mb-6 p-4 bg-card-light dark:bg-card-dark rounded-xl border border-gray-200 dark:border-gray-800">
+<div class="flex-1 min-w-[200px]">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+<input class="w-full pl-10 pr-4 py-2 rounded-lg border-gray-200 dark:border-gray-700 dark:bg-background-dark focus:ring-primary focus:border-primary" placeholder="Buscar por nombre..." type="text"/>
+</div>
+</div>
+<div class="w-48">
+<select class="w-full py-2 rounded-lg border-gray-200 dark:border-gray-700 dark:bg-background-dark focus:ring-primary">
+<option>Estado: Todos</option>
+<option>Borrador</option>
+<option>Activo</option>
+<option>Financiado</option>
+<option>Completado</option>
+</select>
+</div>
+<div class="w-48">
+<select class="w-full py-2 rounded-lg border-gray-200 dark:border-gray-700 dark:bg-background-dark focus:ring-primary">
+<option>Tipo Energía: Todas</option>
+<option>Solar</option>
+<option>Eólica</option>
+<option>Hidroeléctrica</option>
+<option>Biomasa</option>
+</select>
+</div>
+</div>
+<div class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-background-light dark:bg-background-dark">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+<th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">Imagen</th>
+<th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">Nombre</th>
+<th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">Tipo Energía</th>
+<th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">Rentabilidad</th>
+<th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500 text-right">Meta ($)</th>
+<th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">Recaudado</th>
+<th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">Estado</th>
+<th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">Creado</th>
+<th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500 text-center">Acciones</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-200 dark:divide-gray-800">
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors">
+<td class="px-6 py-4">
+<img alt="Solar Farm" class="w-12 h-12 rounded-lg object-cover shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1i1OSZ_ali3iQxMxX84EpIuT9C80Q_9uMPCyfnC1-o1z5H6k0fPFdF0bwhWWID-KeesUxxpsIa3PVur9335pw64TQIjb_OS741CaDcevWG5w-4U09SQKv3wsK0gFxc8LwSpi9W_9e9dIRj67BaRykrIW1fEucgT8sUJrKmY3K9VqS4IWk2Nrax78BigO0AGsvHXxF3kbxkF_Vgp2ncTcTAROyy2SPp40tbZ1AtVlX-MDYx7RklT4kW8X3UQXyCLiUcRVihHwXF2Y"/>
+</td>
+<td class="px-6 py-4 font-bold">Parque Solar "Amanecer I"</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+<span class="material-symbols-outlined text-[14px]">sunny</span> Solar
+                            </span>
+</td>
+<td class="px-6 py-4 text-green-600 dark:text-green-400 font-bold">12.5%</td>
+<td class="px-6 py-4 text-right font-medium">$500,000</td>
+<td class="px-6 py-4">
+<div class="flex flex-col gap-1 min-w-[120px]">
+<span class="text-xs font-bold">$375,000 (75%)</span>
+<div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
+<div class="bg-primary h-full" style="width: 75%"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">Activo</span>
+</td>
+<td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">12 Oct 2023</td>
+<td class="px-6 py-4">
+<div class="flex justify-center gap-2">
+<button class="p-1.5 rounded-lg text-gray-400 hover:text-black hover:bg-primary transition-all"><span class="material-symbols-outlined text-sm">visibility</span></button>
+<button class="p-1.5 rounded-lg text-gray-400 hover:text-black hover:bg-primary transition-all"><span class="material-symbols-outlined text-sm">edit</span></button>
+<button class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 transition-all"><span class="material-symbols-outlined text-sm">delete</span></button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors">
+<td class="px-6 py-4">
+<img alt="Wind Farm" class="w-12 h-12 rounded-lg object-cover shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPo2PEAr1Rou980OMGltaTjL3kqn4ccyxid22OpdsrDL2f0O2LiCcRJXpEIIkhQGIjsB0VxOK1w2QN503nwXB9MgnMBQk47bELsUbjWYa2B6sz71teCWo0h5nu8NNDfcKXCMqkQ-MmFLXWu09gn998KCK2GX2CP2xBxg4eUYGPTF1cdmlrY4ArhEfNEwAVjZXRF7MALObl_LOuxHIJAWyQBXPQoPl6GDhx_F5_z1xC5L_9udkdbDTxKs62C6xc97DaFl8T554uQ4U"/>
+</td>
+<td class="px-6 py-4 font-bold">Vientos del Norte Eólico</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+<span class="material-symbols-outlined text-[14px]">air</span> Eólica
+                            </span>
+</td>
+<td class="px-6 py-4 text-green-600 dark:text-green-400 font-bold">14.2%</td>
+<td class="px-6 py-4 text-right font-medium">$850,000</td>
+<td class="px-6 py-4">
+<div class="flex flex-col gap-1 min-w-[120px]">
+<span class="text-xs font-bold">$850,000 (100%)</span>
+<div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
+<div class="bg-primary h-full" style="width: 100%"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Financiado</span>
+</td>
+<td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">28 Sep 2023</td>
+<td class="px-6 py-4">
+<div class="flex justify-center gap-2">
+<button class="p-1.5 rounded-lg text-gray-400 hover:text-black hover:bg-primary transition-all"><span class="material-symbols-outlined text-sm">visibility</span></button>
+<button class="p-1.5 rounded-lg text-gray-400 hover:text-black hover:bg-primary transition-all"><span class="material-symbols-outlined text-sm">edit</span></button>
+<button class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 transition-all"><span class="material-symbols-outlined text-sm">delete</span></button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors">
+<td class="px-6 py-4">
+<img alt="Hydro Station" class="w-12 h-12 rounded-lg object-cover shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBX1a9NqFdOl4E-OOJkj15qtB-6prRwcH9WzNbCrmSNa_-4kWz-WbvL7mplg0CRptyCL9BhHYIc9Z2wk-_Ha2ypGwG0OayidHhJRr0kcbrOnitVt53Wa_4ucjgYOPKX1YSflBrGub8HJkh17Du9DeqBE9WXeSFYMBtdf63_6hJ5_mzbu-SBe1bu8NlKRTUA-tmSJRtZnZfaUo2DDw_Z62PVb3SMzYPpSH6CX4NqjB4E6ui5jVLiMMnaK9smZC29CiiCkssHnfBqCgg"/>
+</td>
+<td class="px-6 py-4 font-bold">Cascada Energía Hidro</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400">
+<span class="material-symbols-outlined text-[14px]">water_drop</span> Hidro
+                            </span>
+</td>
+<td class="px-6 py-4 text-green-600 dark:text-green-400 font-bold">10.8%</td>
+<td class="px-6 py-4 text-right font-medium">$1,200,000</td>
+<td class="px-6 py-4">
+<div class="flex flex-col gap-1 min-w-[120px]">
+<span class="text-xs font-bold">$0 (0%)</span>
+<div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
+<div class="bg-primary h-full" style="width: 0%"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400">Borrador</span>
+</td>
+<td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">05 Nov 2023</td>
+<td class="px-6 py-4">
+<div class="flex justify-center gap-2">
+<button class="p-1.5 rounded-lg text-gray-400 hover:text-black hover:bg-primary transition-all"><span class="material-symbols-outlined text-sm">visibility</span></button>
+<button class="p-1.5 rounded-lg text-gray-400 hover:text-black hover:bg-primary transition-all"><span class="material-symbols-outlined text-sm">edit</span></button>
+<button class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 transition-all"><span class="material-symbols-outlined text-sm">delete</span></button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors border-b-0">
+<td class="px-6 py-4">
+<img alt="Project Delta" class="w-12 h-12 rounded-lg object-cover shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyFwyAMi99PNjBrQyrkVI_GcrsxqTVrXbGXeipRF1HCIl7CUOH_jE0fcg-anje2TcFsHJHckR2mKR59By3v-sSJC1uHOwGBLAANwsYacFmoObA-mmlfkYPb0pAQ_hcl3yxRwaZKJFX0biQFLeyY3DkM9JLXPU_vQK6yctOzHHPEQ0HvKbm5Fxruxf4KQTcF_g5hFVeBV7mOYnpAP_1Y8z6RNa3GUNw5oQKH3PAT6psLR61LSx-BSm5Tw46nYHMOEm13_PKZxlTAcQ"/>
+</td>
+<td class="px-6 py-4 font-bold">Proyecto Delta Biomasa</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
+<span class="material-symbols-outlined text-[14px]">eco</span> Biomasa
+                            </span>
+</td>
+<td class="px-6 py-4 text-green-600 dark:text-green-400 font-bold">11.0%</td>
+<td class="px-6 py-4 text-right font-medium">$320,000</td>
+<td class="px-6 py-4">
+<div class="flex flex-col gap-1 min-w-[120px]">
+<span class="text-xs font-bold">$320,000 (100%)</span>
+<div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
+<div class="bg-primary h-full" style="width: 100%"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Completado</span>
+</td>
+<td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">14 Ago 2023</td>
+<td class="px-6 py-4">
+<div class="flex justify-center gap-2">
+<button class="p-1.5 rounded-lg text-gray-400 hover:text-black hover:bg-primary transition-all"><span class="material-symbols-outlined text-sm">visibility</span></button>
+<button class="p-1.5 rounded-lg text-gray-400 hover:text-black hover:bg-primary transition-all"><span class="material-symbols-outlined text-sm">edit</span></button>
+<button class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 transition-all"><span class="material-symbols-outlined text-sm">delete</span></button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="mt-6 flex justify-between items-center px-2">
+<span class="text-sm text-gray-500">Mostrando 4 de 24 contratos</span>
+<div class="flex gap-2">
+<button class="px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">Anterior</button>
+<button class="px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 dark:border-gray-800 bg-primary text-black transition-colors">1</button>
+<button class="px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">2</button>
+<button class="px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">3</button>
+<button class="px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">Siguiente</button>
+</div>
+</div>
+</main>
+
+</body></html>
