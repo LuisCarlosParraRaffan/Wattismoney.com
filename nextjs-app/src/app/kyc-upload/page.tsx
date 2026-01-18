@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useTransition } from 'react';
+import React, { useState, useRef, useTransition, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { WattismoneyLogo } from '@/components/Icons';
@@ -11,6 +11,32 @@ const KYCUpload: React.FC = () => {
     const [isPending, startTransition] = useTransition();
     const [docType, setDocType] = useState<'DNI' | 'NIE' | 'PASSPORT'>('DNI');
     const [error, setError] = useState<string | null>(null);
+    const [isCheckingStatus, setIsCheckingStatus] = useState(true);
+
+    // Check if user already completed KYC
+    useEffect(() => {
+        const checkStatus = async () => {
+            try {
+                const response = await fetch('/api/user/onboarding-status');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.hasKyc) {
+                        // User already has KYC, redirect
+                        if (!data.hasInvestorProfile) {
+                            router.push('/investor-profile');
+                        } else {
+                            router.push('/dashboard');
+                        }
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking status:', error);
+            }
+            setIsCheckingStatus(false);
+        };
+        checkStatus();
+    }, [router]);
 
     const frontInputRef = useRef<HTMLInputElement>(null);
     const backInputRef = useRef<HTMLInputElement>(null);
@@ -113,6 +139,18 @@ const KYCUpload: React.FC = () => {
     };
 
     const isUploading = !frontUrl || !backUrl || !residenceUrl;
+
+    // Show loading while checking status
+    if (isCheckingStatus) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-slate-50">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-gray-500">Verificando tu cuenta...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-background-light font-body text-black transition-colors duration-200 min-h-screen flex flex-col">

@@ -17,7 +17,9 @@ export async function GET() {
             where: { id: session.user.id },
             include: {
                 kycDocuments: {
-                    where: { status: 'APPROVED' },
+                    where: {
+                        status: { in: ['SUBMITTED', 'APPROVED', 'IN_REVIEW'] }
+                    },
                     take: 1,
                 },
                 investorProfile: true,

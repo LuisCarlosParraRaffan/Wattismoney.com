@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 interface OnboardingStatus {
     userStatus: string | null;
@@ -13,6 +14,7 @@ interface OnboardingStatus {
 export function useOnboardingCheck() {
     const router = useRouter();
     const pathname = usePathname();
+    const { data: session } = useSession();
     const [status, setStatus] = useState<OnboardingStatus>({
         userStatus: null,
         hasKyc: false,
@@ -23,6 +25,18 @@ export function useOnboardingCheck() {
     useEffect(() => {
         const checkOnboarding = async () => {
             try {
+                // Skip onboarding check for admin users
+                const userRole = session?.user?.role;
+                if (userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') {
+                    setStatus({
+                        userStatus: 'ACTIVE',
+                        hasKyc: true,
+                        hasInvestorProfile: true,
+                        isLoading: false,
+                    });
+                    return;
+                }
+
                 const response = await fetch('/api/user/onboarding-status');
                 if (response.ok) {
                     const data = await response.json();
@@ -34,7 +48,14 @@ export function useOnboardingCheck() {
                     });
 
                     // Redirect based on onboarding status
-                    const onboardingPaths = ['/kyc-upload', '/kyc-success', '/investor-profile', '/investor-profile-success'];
+                    const onboardingPaths = [
+                        '/kyc-upload',
+                        '/kyc-success',
+                        '/investor-profile',
+                        '/investor-profile-success',
+                        '/investor-quiz',
+                        '/investor-quiz-results'
+                    ];
                     const isOnboardingPath = onboardingPaths.some(p => pathname.startsWith(p));
 
                     if (!isOnboardingPath) {
@@ -56,7 +77,7 @@ export function useOnboardingCheck() {
         };
 
         checkOnboarding();
-    }, [pathname, router]);
+    }, [pathname, router, session?.user?.role]);
 
     return status;
 }

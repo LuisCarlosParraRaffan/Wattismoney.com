@@ -40,19 +40,26 @@ export default function InvestorQuiz() {
 
     const verifyKycAndFetchQuestions = async () => {
         try {
-            // First, verify KYC status
-            const kycResponse = await fetch('/api/user/kyc-status');
+            // First, verify onboarding status
+            const statusResponse = await fetch('/api/user/onboarding-status');
 
-            if (kycResponse.status === 401) {
+            if (statusResponse.status === 401) {
                 // Not authenticated - redirect to login
                 router.push('/login?callbackUrl=/investor-quiz');
                 return;
             }
 
-            const kycData = await kycResponse.json();
+            const statusData = await statusResponse.json();
 
-            // Check if KYC is submitted or approved (SUBMITTED also counts since it's in review)
-            if (!kycData.kycStatus || kycData.kycStatus === 'PENDING') {
+            // Check if already has investor profile
+            if (statusData.hasInvestorProfile) {
+                // Already completed quiz - redirect to dashboard
+                router.push('/dashboard');
+                return;
+            }
+
+            // Check if KYC is submitted (SUBMITTED, APPROVED, or IN_REVIEW counts)
+            if (!statusData.hasKyc) {
                 // No KYC submitted - redirect to KYC upload
                 router.push('/kyc-upload');
                 return;

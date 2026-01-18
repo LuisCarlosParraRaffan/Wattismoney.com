@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { WattismoneyLogo } from '@/components/Icons';
@@ -9,6 +9,28 @@ export default function InvestorProfileQuiz() {
     const router = useRouter();
     const [step, setStep] = useState(1);
     const [answers, setAnswers] = useState<Record<number, string>>({});
+    const [isCheckingStatus, setIsCheckingStatus] = useState(true);
+
+    // Check if user already completed investor profile
+    useEffect(() => {
+        const checkStatus = async () => {
+            try {
+                const response = await fetch('/api/user/onboarding-status');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.hasInvestorProfile) {
+                        // User already has investor profile, redirect to dashboard
+                        router.push('/dashboard');
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking status:', error);
+            }
+            setIsCheckingStatus(false);
+        };
+        checkStatus();
+    }, [router]);
 
     const handleAnswer = (answer: string) => {
         setAnswers({ ...answers, [step]: answer });
@@ -39,6 +61,18 @@ export default function InvestorProfileQuiz() {
     ];
 
     const currentQuestion = questions[step - 1];
+
+    // Show loading while checking status
+    if (isCheckingStatus) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-slate-50">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-gray-500">Verificando tu cuenta...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-background-light text-text-main font-display min-h-screen flex flex-col">
