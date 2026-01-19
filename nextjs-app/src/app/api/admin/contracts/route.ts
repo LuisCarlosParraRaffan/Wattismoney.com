@@ -1,122 +1,120 @@
-import { NextResponse } from 'next/server';
-import { checkAdminAccess } from '@/lib/requireAdmin';
-import prisma from '@/lib/prisma';
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { auth } from '@/lib/auth';
 import { ContractStatus, EnergyType } from '@/generated/prisma';
 
-// GET /api/admin/contracts - List all contracts
-export async function GET(request: Request) {
-    const { error } = await checkAdminAccess();
-    if (error) return error;
-
+export async function POST(request: NextRequest) {
     try {
-        const { searchParams } = new URL(request.url);
-        const page = parseInt(searchParams.get('page') || '1');
-        const limit = parseInt(searchParams.get('limit') || '20');
-        const status = searchParams.get('status') || '';
+        // 1. Verify Authentication & Admin Role
+        const session = await auth();
 
-        const skip = (page - 1) * limit;
-
-        const where = status ? { status: status as ContractStatus } : {};
-
-        const [contracts, total] = await Promise.all([
-            prisma.contract.findMany({
-                where,
-                skip,
-                take: limit,
-                orderBy: { createdAt: 'desc' },
-                include: {
-                    _count: {
-                        select: { investments: true, documents: true },
-                    },
-                },
-            }),
-            prisma.contract.count({ where }),
-        ]);
-
-        return NextResponse.json({
-            contracts,
-            pagination: {
-                page,
-                limit,
-                total,
-                totalPages: Math.ceil(total / limit),
-            },
-        });
-    } catch (err) {
-        console.error('Error fetching contracts:', err);
-        return NextResponse.json(
-            { error: 'Error interno del servidor' },
-            { status: 500 }
-        );
-    }
-}
-
-// POST /api/admin/contracts - Create a new contract
-export async function POST(request: Request) {
-    const { error, session } = await checkAdminAccess();
-    if (error) return error;
-
-    try {
-        const body = await request.json();
-
-        const {
-            name,
-            description,
-            imageUrl,
-            annualReturn,
-            minInvestment,
-            maxInvestment,
-            totalCapacity,
-            generator,
-            generatorLocation,
-            buyer,
-            buyerIndustry,
-            energyType,
-            energyAmount,
-            co2Emissions,
-            termMonths,
-            startDate,
-            endDate,
-            status,
-        } = body;
-
-        // Validate required fields
-        if (!name || !generator || !buyer || !buyerIndustry || !termMonths) {
-            return NextResponse.json(
-                { error: 'Campos requeridos: name, generator, buyer, buyerIndustry, termMonths' },
-                { status: 400 }
-            );
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const contract = await prisma.contract.create({
+        // Check role - assuming 'ADMIN' or 'SUPER_ADMIN' is required
+        if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN') {
+            return NextResponse.json({ error: 'Forbidden: Admin access only' }, { status: 403 });
+        }
+
+        // 2. Parse Request Body
+        const body = await request.json();
+
+        // Destructure fields based on the form
+        const {
+            name,
+            contractType,
+            contractSubtype,
+            energyType,
+            annualReturn,
+            financingGoal, // Maps to totalCapacity (target amount to raise)
+            minInvestment,
+            maxInvestment,
+
+            // Specifications
+            generatorName,
+            buyerName,
+            buyerIndustry,
+            energyVolume, // Maps to energyAmount
+            termDuration,
+            termUnit, // 'Años' or 'Meses'
+            co2Avoided, // Maps to co2Emissions
+
+            // Images & Docs
+            imageUrl,
+
+            // Status action
+            action // 'draft' or 'publish'
+        } = body;
+
+        // 3. Validation
+        if (!name || !financingGoal || !annualReturn) {
+            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+        }
+
+        // 4. Transform Data
+        // Convert term to months if needed (simplified logic)
+        const termMonths = termUnit === 'Años' ? Math.round(Number(termDuration) * 12) : Math.round(Number(termDuration));
+
+        // Map Status
+        const status: ContractStatus = action === 'publish' ? 'ACTIVE' : 'DRAFT';
+
+        // Map Energy Type string to Enum
+        // Logic to try and match the string from the dropdown to the Enum
+        let mappedEnergyType: EnergyType = 'SOLAR';
+        if (energyType.includes('Solar')) mappedEnergyType = 'SOLAR';
+        else if (energyType.includes('Eólica Onshore')) mappedEnergyType = 'WIND_ONSHORE';
+        else if (energyType.includes('Eólica Offshore')) mappedEnergyType = 'WIND_OFFSHORE';
+        else if (energyType.includes('Hidro')) mappedEnergyType = 'HYDRO';
+        else if (energyType.includes('Biomasa')) mappedEnergyType = 'BIOMASS';
+
+        // 5. Create Contract in DB
+        const newContract = await prisma.contract.create({
             data: {
                 name,
-                description,
-                imageUrl,
-                annualReturn: annualReturn || 0,
-                minInvestment: minInvestment || 0,
-                maxInvestment: maxInvestment || 0,
-                totalCapacity: totalCapacity || 0,
-                generator,
-                generatorLocation,
-                buyer,
-                buyerIndustry,
-                energyType: energyType || EnergyType.SOLAR,
-                energyAmount: energyAmount || 0,
-                co2Emissions: co2Emissions || 0,
-                termMonths,
-                startDate: startDate ? new Date(startDate) : null,
-                endDate: endDate ? new Date(endDate) : null,
-                status: status || ContractStatus.DRAFT,
-                createdBy: session?.user?.id,
-            },
+                // Financials
+                annualReturn: Number(annualReturn),
+                totalCapacity: Number(financingGoal),
+                currentRaised: 0, // Starts at 0
+                minInvestment: Number(minInvestment) || 0,
+                maxInvestment: Number(maxInvestment) || Number(financingGoal),
+
+                // Details
+                contractType,
+                contractSubtype,
+
+                // Parties
+                generator: generatorName || 'Unknown Generator', // Fallback if missing
+                buyer: buyerName || 'Unknown Buyer',
+                buyerIndustry: buyerIndustry || 'General',
+
+                // Energy Specs
+                energyType: mappedEnergyType,
+                energyAmount: Number(energyVolume) || 0,
+                co2Emissions: Number(co2Avoided) || 0,
+
+                // Terms
+                termMonths: termMonths || 0,
+
+                // Visuals
+                imageUrl: imageUrl || null,
+
+                // Meta
+                status,
+                createdBy: session.user.id
+            }
         });
 
-        return NextResponse.json({ contract }, { status: 201 });
-    } catch (err) {
-        console.error('Error creating contract:', err);
+        return NextResponse.json({
+            success: true,
+            contractId: newContract.id,
+            message: status === 'ACTIVE' ? 'Contrato publicado exitosamente' : 'Borrador guardado'
+        });
+
+    } catch (error) {
+        console.error('Error creating contract:', error);
         return NextResponse.json(
-            { error: 'Error interno del servidor' },
+            { error: 'Internal Server Error' },
             { status: 500 }
         );
     }

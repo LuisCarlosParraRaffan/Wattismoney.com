@@ -2,7 +2,7 @@
 <html class="light" lang="es"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Admin: Nuevo/Editar Contrato de Energía | Wattismoney</title>
+<title>Admin: Nuevo/Editar Contrato Detallado | Wattismoney</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
@@ -135,6 +135,25 @@
 <div class="col-span-1 md:col-span-2 space-y-2">
 <label class="text-sm font-bold text-gray-700">Nombre del Contrato</label>
 <input class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all placeholder:text-gray-400" placeholder="Ej: Parque Solar Almería III" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-bold text-gray-700">Tipo de contrato</label>
+<select class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all">
+<option disabled="" selected="" value="">Seleccionar tipo</option>
+<option>Infraestructura</option>
+<option>Liquidez en contratos</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-bold text-gray-700">Subtipo de contrato</label>
+<select class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all">
+<option disabled="" selected="" value="">Seleccionar subtipo</option>
+<option>Proyecto solar</option>
+<option>Proyecto eólico</option>
+<option>Infraestructura de carga</option>
+<option>Smart grids</option>
+<option>Liquidez en comercialización de energía</option>
+</select>
 </div>
 <div class="space-y-2">
 <label class="text-sm font-bold text-gray-700">Tipo de energía</label>
@@ -287,5 +306,4 @@
 </div>
 <p class="text-gray-400 text-xs">© 2024 Wattismoney. Todos los derechos reservados.</p>
 </footer>
-
 </body></html>

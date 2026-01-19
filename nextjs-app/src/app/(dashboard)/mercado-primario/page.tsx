@@ -1,9 +1,68 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 
-const Oportunidades: React.FC = () => {
+// Type definitions matching the API response
+type Contract = {
+    id: string;
+    name: string;
+    imageUrl: string | null;
+    generatorLocation: string | null;
+    contractSubtype: string | null;
+    energyType: string;
+    annualReturn: string; // Decimal comes as string from JSON
+    energyAmount: string; // Decimal
+    financingGoal: string; // Decimal
+    minInvestment: string; // Decimal
+    maxInvestment: string; // Decimal
+    currentRaised: string; // Decimal
+    totalCapacity: string; // Decimal
+    termMonths: number;
+    buyerIndustry: string;
+    buyer: string;
+};
+
+export default function MercadoPrimarioPage() {
+    const [contracts, setContracts] = useState<Contract[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchContracts = async () => {
+            try {
+                // Ensure we call the public API
+                const response = await fetch('/api/contracts', { cache: 'no-store' });
+                if (response.ok) {
+                    const data = await response.json();
+                    setContracts(data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch contracts:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchContracts();
+    }, []);
+
+    // Helper to format currency
+    const formatCurrency = (val: string | number) => {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            maximumFractionDigits: 0
+        }).format(Number(val));
+    };
+
+    // Helper to calculate progress
+    const calculateProgress = (raised: string | number, total: string | number) => {
+        const r = Number(raised);
+        const t = Number(total);
+        if (t === 0) return 0;
+        return Math.min(Math.round((r / t) * 100), 100);
+    };
+
     return (
         <div className="flex flex-col flex-1 h-full relative bg-white overflow-hidden">
             {/* Header */}
@@ -37,12 +96,12 @@ const Oportunidades: React.FC = () => {
             <main className="flex-1 overflow-y-auto p-6 lg:p-8 bg-gray-50/50">
                 <div className="max-w-7xl mx-auto flex flex-col gap-10 pb-12">
 
-                    {/* Hero Banner */}
+                    {/* Hero Banner (Static for now) */}
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-white p-8 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-0 translate-x-1/3 -translate-y-1/3"></div>
                         <div className="relative z-10 flex flex-col gap-3 max-w-3xl">
                             <h2 className="text-3xl font-black text-black font-display leading-tight">Tu liquidez genera energía real</h2>
-                            <p className="text-gray-600 text-base leading-relaxed max-w-2xl">
+                            <p className="text-slate-600 text-base leading-relaxed max-w-2xl">
                                 En Wattismoney, cada inversión conecta directamente una <span className="font-bold text-black">fuente de generación sostenible</span> con una <span className="font-bold text-black">industria productiva</span>. Tu capital financia contratos PPA (Power Purchase Agreements) que garantizan precios estables.
                             </p>
                         </div>
@@ -68,228 +127,119 @@ const Oportunidades: React.FC = () => {
                                 </h3>
                                 <span className="px-2.5 py-0.5 bg-primary text-black text-[10px] font-bold rounded-full uppercase tracking-wide">Nuevas Emisiones</span>
                             </div>
-                            <button className="text-sm font-bold text-gray-500 hover:text-black transition-colors flex items-center gap-1">
-                                Ver todos
-                                <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-                            </button>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-                            {/* Opportunity Card 1 */}
-                            <article className="group relative flex flex-col bg-white rounded-2xl shadow-sm hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border border-gray-200 overflow-hidden h-full">
-                                <Link href="/contrato/sol-8821" className="block relative h-52 w-full overflow-hidden cursor-pointer">
-                                    <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuCiqBdJMue9D-ai5CSYnkYLI5Quat4LvHRK8oFQwIKykRWJGD6D71ZHYWFYaORCzvpUI-FKXMkr0c6BH94x8yCU52ipQO5QkdcuzSYwa00IoEA37KSizinCzulJ3etlfLFYoi5_Aoba5c7pwX0OGd4eqYHzji4CldFur_yxmEUIDRt_equSjqQvp5XxQTlFWlyCCehMUqFjKzjA3bg3kj7RQHeewE0YUnoY6WDv-q3rsoVRsybfxguT-8WvyhskctKHShDttzCEoxA")' }}></div>
-                                    <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                                    <div className="absolute top-3 left-3">
-                                        <span className="px-3 py-1 bg-white/90 backdrop-blur-md text-black text-[10px] font-bold rounded uppercase tracking-wider shadow-sm font-display">
-                                            Mercado Primario
-                                        </span>
-                                    </div>
-                                    <div className="absolute bottom-4 left-4 text-white w-[calc(100%-32px)]">
-                                        <div className="flex items-center gap-1 mb-1 text-white/80">
-                                            <span className="material-symbols-outlined text-[16px]">location_on</span>
-                                            <span className="text-xs font-bold uppercase tracking-wide">Atacama, Chile</span>
-                                        </div>
-                                        <h3 className="text-xl font-black font-display leading-tight group-hover:text-primary transition-colors">Parque Solar Atacama IV</h3>
-                                    </div>
-                                </Link>
-                                <div className="flex flex-col flex-1 p-5 gap-5">
-                                    <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
-                                        <p className="text-[10px] uppercase font-bold text-gray-400 mb-2 tracking-wider">Cadena de Valor Energética</p>
-                                        <div className="flex items-center justify-between text-sm">
-                                            <div className="flex flex-col items-center gap-1 w-1/3">
-                                                <div className="size-9 rounded-full bg-white border border-gray-200 flex items-center justify-center text-orange-500 shadow-sm">
-                                                    <span className="material-symbols-outlined text-[20px]">solar_power</span>
+                        {/* Real Data Grid */}
+                        {isLoading ? (
+                            <div className="w-full h-40 flex items-center justify-center">
+                                <span className="text-gray-400">Cargando oportunidades...</span>
+                            </div>
+                        ) : contracts.length === 0 ? (
+                            <div className="w-full py-10 text-center bg-white rounded-xl border border-dashed border-gray-300">
+                                <span className="material-symbols-outlined text-4xl text-gray-300 mb-2">solar_power</span>
+                                <p className="text-gray-500 font-bold">No hay oportunidades activas en este momento.</p>
+                                <p className="text-sm text-gray-400">Vuelve pronto para ver nuevos proyectos.</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {contracts.map((contract) => (
+                                    <article key={contract.id} className="group relative flex flex-col bg-white rounded-2xl shadow-sm hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border border-gray-200 overflow-hidden h-full">
+                                        <Link href={`/contrato/${contract.id}`} className="block relative h-52 w-full overflow-hidden cursor-pointer">
+                                            <div
+                                                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                                                style={{ backgroundImage: `url("${contract.imageUrl || 'https://images.unsplash.com/photo-1509391366360-2e959784a276?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'}")` }} // Fallback image
+                                            ></div>
+                                            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                                            <div className="absolute top-3 left-3">
+                                                <span className="px-3 py-1 bg-white/90 backdrop-blur-md text-black text-[10px] font-bold rounded uppercase tracking-wider shadow-sm font-display">
+                                                    Mercado Primario
+                                                </span>
+                                            </div>
+                                            <div className="absolute bottom-4 left-4 text-white w-[calc(100%-32px)]">
+                                                <div className="flex items-center gap-1 mb-1 text-white/80">
+                                                    <span className="material-symbols-outlined text-[16px]">location_on</span>
+                                                    <span className="text-xs font-bold uppercase tracking-wide">{contract.generatorLocation || 'Ubicación General'}</span>
                                                 </div>
-                                                <span className="text-[10px] font-bold text-center leading-tight mt-1 text-slate-700">Generación<br />Solar</span>
+                                                <h3 className="text-xl font-black font-display leading-tight group-hover:text-primary transition-colors">{contract.name}</h3>
                                             </div>
-                                            <div className="flex-1 flex flex-col items-center px-1">
-                                                <div className="w-full border-t-2 border-dashed border-gray-300 relative top-2"></div>
-                                                <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded relative z-10 mt-1">PPA 5 Años</span>
-                                            </div>
-                                            <div className="flex flex-col items-center gap-1 w-1/3">
-                                                <div className="size-9 rounded-full bg-white border border-gray-200 flex items-center justify-center text-slate-700 shadow-sm">
-                                                    <span className="material-symbols-outlined text-[20px]">precision_manufacturing</span>
-                                                </div>
-                                                <span className="text-[10px] font-bold text-center leading-tight mt-1 text-slate-700">Industria<br />Minera</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="flex flex-col">
-                                            <span className="text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Rentabilidad Est.</span>
-                                            <span className="text-2xl font-black font-display text-black">8.2% <span className="text-xs font-bold text-gray-400">anual</span></span>
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className="text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Volumen Transado</span>
-                                            <span className="text-lg font-black font-display text-black flex items-center gap-1">
-                                                1.2 GWh
-                                                <span className="material-symbols-outlined text-green-600 text-[18px]">bolt</span>
-                                            </span>
-                                            <span className="text-[10px] font-medium text-gray-400">Energía limpia entregada</span>
-                                        </div>
-                                    </div>
-                                    <div className="mt-auto pt-4 border-t border-gray-100">
-                                        <div className="flex justify-between text-xs font-bold mb-2">
-                                            <span className="text-black">75% Financiado</span>
-                                            <span className="text-gray-500">$750k / $1M</span>
-                                        </div>
-                                        <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden mb-4">
-                                            <div className="bg-primary h-full rounded-full" style={{ width: '75%' }}></div>
-                                        </div>
-                                        <Link href="/contrato/sol-8821" className="w-full h-11 rounded-xl bg-black text-white hover:bg-gray-800 font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95">
-                                            Invertir Ahora
-                                            <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
                                         </Link>
-                                    </div>
-                                </div>
-                            </article>
+                                        <div className="flex flex-col flex-1 p-5 gap-5">
+                                            {/* Energy Value Chain - Dynamic Data */}
+                                            <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                                                <p className="text-[10px] uppercase font-bold text-gray-400 mb-2 tracking-wider">Cadena de Valor Energética</p>
+                                                <div className="flex items-center justify-between text-sm">
+                                                    <div className="flex flex-col items-center gap-1 w-1/3">
+                                                        <div className="size-9 rounded-full bg-white border border-gray-200 flex items-center justify-center text-orange-500 shadow-sm">
+                                                            <span className="material-symbols-outlined text-[20px]">
+                                                                {contract.energyType === 'WIND_ONSHORE' || contract.energyType === 'WIND_OFFSHORE' ? 'wind_power' :
+                                                                    contract.energyType === 'HYDRO' ? 'water_drop' : 'solar_power'}
+                                                            </span>
+                                                        </div>
+                                                        <span className="text-[10px] font-bold text-center leading-tight mt-1 text-slate-700">
+                                                            Generación<br />
+                                                            {contract.energyType === 'SOLAR' ? 'Solar' :
+                                                                contract.energyType === 'HYDRO' ? 'Hidro' : 'Eólica'}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex-1 flex flex-col items-center px-1">
+                                                        <div className="w-full border-t-2 border-dashed border-gray-300 relative top-2"></div>
+                                                        <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded relative z-10 mt-1">PPA {Math.round(contract.termMonths / 12)} Años</span>
+                                                    </div>
+                                                    <div className="flex flex-col items-center gap-1 w-1/3">
+                                                        <div className="size-9 rounded-full bg-white border border-gray-200 flex items-center justify-center text-slate-700 shadow-sm">
+                                                            <span className="material-symbols-outlined text-[20px]">factory</span>
+                                                        </div>
+                                                        <span className="text-[10px] font-bold text-center leading-tight mt-1 text-slate-700">
+                                                            Industria<br />
+                                                            {contract.buyerIndustry || 'General'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
 
-                            {/* Opportunity Card 2 */}
-                            <article className="group relative flex flex-col bg-white rounded-2xl shadow-sm hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border border-gray-200 overflow-hidden h-full">
-                                <Link href="/contrato/wind-2034" className="block relative h-52 w-full overflow-hidden cursor-pointer">
-                                    <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuArBCa_KmRxBZhDf3tf5o0ICZ4J77Mz8b_8wJNjmBf4m40KTsS1d4C3NHipD3z_GqrIz0FsESg2-YDcWSmu7eH7lbuPXMhSNXJ9GQIzRw2k9AwPctundxetBR1WWxrND3aVNFulRuXXCf3Tsd_C51YavEJx6hssCQq2fGcoNfMX7H-dowLG1bdrUHOhy6S3-mXjhn5khPD5V_ItED2oMk_BGygjZh9lwwgivXl1FKURXhxGcqJWr4I3sqhVKmW2eRJaBNGjyvqnFAg")' }}></div>
-                                    <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                                    <div className="absolute top-3 left-3">
-                                        <span className="px-3 py-1 bg-white/90 backdrop-blur-md text-black text-[10px] font-bold rounded uppercase tracking-wider shadow-sm font-display">
-                                            Mercado Primario
-                                        </span>
-                                    </div>
-                                    <div className="absolute bottom-4 left-4 text-white w-[calc(100%-32px)]">
-                                        <div className="flex items-center gap-1 mb-1 text-white/80">
-                                            <span className="material-symbols-outlined text-[16px]">location_on</span>
-                                            <span className="text-xs font-bold uppercase tracking-wide">Oaxaca, México</span>
-                                        </div>
-                                        <h3 className="text-xl font-black font-display leading-tight group-hover:text-primary transition-colors">Eólica del Sur - Fase II</h3>
-                                    </div>
-                                </Link>
-                                <div className="flex flex-col flex-1 p-5 gap-5">
-                                    <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
-                                        <p className="text-[10px] uppercase font-bold text-gray-400 mb-2 tracking-wider">Cadena de Valor Energética</p>
-                                        <div className="flex items-center justify-between text-sm">
-                                            <div className="flex flex-col items-center gap-1 w-1/3">
-                                                <div className="size-9 rounded-full bg-white border border-gray-200 flex items-center justify-center text-blue-500 shadow-sm">
-                                                    <span className="material-symbols-outlined text-[20px]">wind_power</span>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Rentabilidad Est.</span>
+                                                    <span className="text-2xl font-black font-display text-black">{contract.annualReturn}% <span className="text-xs font-bold text-gray-400">anual</span></span>
                                                 </div>
-                                                <span className="text-[10px] font-bold text-center leading-tight mt-1 text-slate-700">Generación<br />Eólica</span>
-                                            </div>
-                                            <div className="flex-1 flex flex-col items-center px-1">
-                                                <div className="w-full border-t-2 border-dashed border-gray-300 relative top-2"></div>
-                                                <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded relative z-10 mt-1">PPA 10 Años</span>
-                                            </div>
-                                            <div className="flex flex-col items-center gap-1 w-1/3">
-                                                <div className="size-9 rounded-full bg-white border border-gray-200 flex items-center justify-center text-purple-600 shadow-sm">
-                                                    <span className="material-symbols-outlined text-[20px]">storefront</span>
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Volumen Transado</span>
+                                                    <span className="text-lg font-black font-display text-black flex items-center gap-1">
+                                                        {contract.energyAmount} GWh
+                                                        <span className="material-symbols-outlined text-green-600 text-[18px]">bolt</span>
+                                                    </span>
+                                                    <span className="text-[10px] font-medium text-gray-400">Energía limpia entregada</span>
                                                 </div>
-                                                <span className="text-[10px] font-bold text-center leading-tight mt-1 text-slate-700">Cadena<br />Retail</span>
                                             </div>
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="flex flex-col">
-                                            <span className="text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Rentabilidad Est.</span>
-                                            <span className="text-2xl font-black font-display text-black">11.5% <span className="text-xs font-bold text-gray-400">anual</span></span>
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className="text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Volumen Transado</span>
-                                            <span className="text-lg font-black font-display text-black flex items-center gap-1">
-                                                5.4 GWh
-                                                <span className="material-symbols-outlined text-green-600 text-[18px]">bolt</span>
-                                            </span>
-                                            <span className="text-[10px] font-medium text-gray-400">Energía limpia entregada</span>
-                                        </div>
-                                    </div>
-                                    <div className="mt-auto pt-4 border-t border-gray-100">
-                                        <div className="flex justify-between text-xs font-bold mb-2">
-                                            <span className="text-black">40% Financiado</span>
-                                            <span className="text-gray-500">$800k / $2M</span>
-                                        </div>
-                                        <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden mb-4">
-                                            <div className="bg-primary h-full rounded-full" style={{ width: '40%' }}></div>
-                                        </div>
-                                        <Link href="/contrato/wind-2034" className="w-full h-11 rounded-xl bg-black text-white hover:bg-gray-800 font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95">
-                                            Invertir Ahora
-                                            <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-                                        </Link>
-                                    </div>
-                                </div>
-                            </article>
 
-                            {/* Opportunity Card 3 */}
-                            <article className="group relative flex flex-col bg-white rounded-2xl shadow-sm hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 border border-gray-200 overflow-hidden h-full hidden lg:flex">
-                                <Link href="/contrato/hyd-9982" className="block relative h-52 w-full overflow-hidden cursor-pointer">
-                                    <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuClT-Ga-iIO9ITfAHMHhrNhajCMQ08lvBv7D1-mpydprVY8n2Ok0bO8zaD4ow7SeykrWgGvS5Zy5sXXwCpY-PELw_KakEAoGtXTUpL0Y0KE3kx-Hpm14ZPid9Joe7GTjF4EVIR20qfLSzgscLCumO-UcWsuf5gZD2DDt4WUZkQnilNouQI0okqa1JJBTX7wSs9d88oOZWPsL1VUj4-_NKouI1mcJRMJPfrXHgZx8cCa4Qd3_tvEuAaKEm_0pvHBb5tJ-vqxpiZd31A")' }}></div>
-                                    <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                                    <div className="absolute top-3 left-3">
-                                        <span className="px-3 py-1 bg-primary text-black text-[10px] font-bold rounded uppercase tracking-wider shadow-sm font-display">
-                                            Mercado Primario
-                                        </span>
-                                    </div>
-                                    <div className="absolute bottom-4 left-4 text-white w-[calc(100%-32px)]">
-                                        <div className="flex items-center gap-1 mb-1 text-white/80">
-                                            <span className="material-symbols-outlined text-[16px]">location_on</span>
-                                            <span className="text-xs font-bold uppercase tracking-wide">Antioquia, CO</span>
-                                        </div>
-                                        <h3 className="text-xl font-black font-display leading-tight group-hover:text-primary transition-colors">Central Hidro Andina</h3>
-                                    </div>
-                                </Link>
-                                <div className="flex flex-col flex-1 p-5 gap-5">
-                                    <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
-                                        <p className="text-[10px] uppercase font-bold text-gray-400 mb-2 tracking-wider">Cadena de Valor Energética</p>
-                                        <div className="flex items-center justify-between text-sm">
-                                            <div className="flex flex-col items-center gap-1 w-1/3">
-                                                <div className="size-9 rounded-full bg-white border border-gray-200 flex items-center justify-center text-cyan-600 shadow-sm">
-                                                    <span className="material-symbols-outlined text-[20px]">water_drop</span>
+                                            <div className="mt-auto pt-4 border-t border-gray-100">
+                                                <div className="flex justify-between text-xs font-bold mb-2">
+                                                    <span className="text-black">
+                                                        {calculateProgress(contract.currentRaised, contract.totalCapacity)}% Financiado
+                                                    </span>
+                                                    <span className="text-gray-500">
+                                                        {formatCurrency(contract.currentRaised)} / {formatCurrency(contract.totalCapacity)}
+                                                    </span>
                                                 </div>
-                                                <span className="text-[10px] font-bold text-center leading-tight mt-1 text-slate-700">Generación<br />Hidro</span>
-                                            </div>
-                                            <div className="flex-1 flex flex-col items-center px-1">
-                                                <div className="w-full border-t-2 border-dashed border-gray-300 relative top-2"></div>
-                                                <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded relative z-10 mt-1">PPA 8 Años</span>
-                                            </div>
-                                            <div className="flex flex-col items-center gap-1 w-1/3">
-                                                <div className="size-9 rounded-full bg-white border border-gray-200 flex items-center justify-center text-teal-700 shadow-sm">
-                                                    <span className="material-symbols-outlined text-[20px]">factory</span>
+                                                <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden mb-4">
+                                                    <div
+                                                        className="bg-primary h-full rounded-full transition-all duration-1000"
+                                                        style={{ width: `${calculateProgress(contract.currentRaised, contract.totalCapacity)}%` }}
+                                                    ></div>
                                                 </div>
-                                                <span className="text-[10px] font-bold text-center leading-tight mt-1 text-slate-700">Industria<br />Agro</span>
+                                                <Link href={`/contrato/${contract.id}`} className="w-full h-11 rounded-xl bg-black text-white hover:bg-gray-800 font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95">
+                                                    Invertir Ahora
+                                                    <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                                                </Link>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="flex flex-col">
-                                            <span className="text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Rentabilidad Est.</span>
-                                            <span className="text-2xl font-black font-display text-black">7.8% <span className="text-xs font-bold text-gray-400">anual</span></span>
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className="text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Volumen Transado</span>
-                                            <span className="text-lg font-black font-display text-black flex items-center gap-1">
-                                                3.1 GWh
-                                                <span className="material-symbols-outlined text-green-600 text-[18px]">bolt</span>
-                                            </span>
-                                            <span className="text-[10px] font-medium text-gray-400">Energía limpia entregada</span>
-                                        </div>
-                                    </div>
-                                    <div className="mt-auto pt-4 border-t border-gray-100">
-                                        <div className="flex justify-between text-xs font-bold mb-2">
-                                            <span className="text-black">92% Financiado</span>
-                                            <span className="text-red-500 font-bold">¡Últimos Cupos!</span>
-                                        </div>
-                                        <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden mb-4">
-                                            <div className="bg-primary h-full rounded-full" style={{ width: '92%' }}></div>
-                                        </div>
-                                        <Link href="/contrato/hyd-9982" className="w-full h-11 rounded-xl bg-black text-white hover:bg-gray-800 font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95">
-                                            Invertir Ahora
-                                            <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-                                        </Link>
-                                    </div>
-                                </div>
-                            </article>
-
-                        </div>
+                                    </article>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
-                    {/* Secondary Market Teaser */}
+                    {/* Secondary Market Teaser (Static) */}
                     <div className="flex flex-col gap-5 pt-8 border-t border-gray-200">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -303,54 +253,9 @@ const Oportunidades: React.FC = () => {
                                 Ver todas las reventas
                             </Link>
                         </div>
-
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-70 hover:opacity-100 transition-opacity">
-                            {/* Secondary Market Card Example */}
-                            <article className="flex flex-col bg-white rounded-xl shadow-sm border border-gray-200 hover:border-gray-300 transition-colors h-full">
-                                <div className="p-5 flex flex-col gap-4 h-full">
-                                    <div className="flex justify-between items-start">
-                                        <div className="flex items-center gap-3">
-                                            <div className="size-10 bg-yellow-50 rounded-lg flex items-center justify-center text-yellow-600 border border-yellow-100">
-                                                <span className="material-symbols-outlined">solar_power</span>
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold font-display leading-tight text-black">Solar Norte I</h4>
-                                                <span className="text-xs text-gray-500">Antofagasta, CL</span>
-                                            </div>
-                                        </div>
-                                        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-[10px] font-bold uppercase rounded">Reventa</span>
-                                    </div>
-                                    <div className="p-3 bg-gray-50 rounded border border-gray-100">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="material-symbols-outlined text-[16px] text-gray-400">factory</span>
-                                            <span className="text-xs font-semibold text-gray-700">Cliente: Cementera Nacional</span>
-                                        </div>
-                                        <div className="w-full bg-gray-200 h-1.5 rounded-full mt-2">
-                                            <div className="bg-green-500 h-1.5 rounded-full" style={{ width: '60%' }}></div>
-                                        </div>
-                                        <div className="flex justify-between mt-1 text-[10px] text-gray-400 font-medium">
-                                            <span>Contrato iniciado 2021</span>
-                                            <span>Fin: 2031</span>
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4 mt-auto">
-                                        <div>
-                                            <span className="block text-xs text-gray-500 font-bold uppercase">Precio Venta</span>
-                                            <span className="block font-black text-lg font-display text-black">$2,450 USD</span>
-                                        </div>
-                                        <div>
-                                            <span className="block text-xs text-gray-500 font-bold uppercase">TIR Restante</span>
-                                            <span className="block font-black text-lg font-display text-green-600">7.5%</span>
-                                        </div>
-                                    </div>
-                                    <Link href="/contrato/solar-norte-1" className="w-full py-2 border border-black rounded-lg text-sm font-bold text-center hover:bg-black hover:text-white transition-colors text-black">
-                                        Ver en Mercado Secundario
-                                    </Link>
-                                </div>
-                            </article>
-
                             {/* View More Card */}
-                            <Link href="/mercado-secundario" className="flex flex-col bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 h-full items-center justify-center p-6 text-center hover:bg-white hover:border-primary hover:text-primary transition-all cursor-pointer group">
+                            <Link href="/mercado-secundario" className="flex flex-col bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 h-40 items-center justify-center p-6 text-center hover:bg-white hover:border-primary hover:text-primary transition-all cursor-pointer group">
                                 <div className="size-14 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 mb-3 group-hover:border-primary group-hover:text-primary transition-colors shadow-sm">
                                     <span className="material-symbols-outlined text-3xl">storefront</span>
                                 </div>
@@ -359,11 +264,8 @@ const Oportunidades: React.FC = () => {
                             </Link>
                         </div>
                     </div>
-
                 </div>
             </main>
         </div>
     );
-};
-
-export default Oportunidades;
+}

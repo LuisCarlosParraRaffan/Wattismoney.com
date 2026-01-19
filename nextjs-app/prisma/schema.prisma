@@ -243,6 +243,10 @@ model Contract {
   // Estado
   status          ContractStatus  @default(DRAFT)
   
+  // Tipos específicos
+  contractType    String?         // "Infraestructura", "Liquidez"
+  contractSubtype String?         // "Proyecto solar", "Smart grids", etc.
+  
   // Metadata
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
@@ -309,12 +313,14 @@ enum ContractStatus {
 }
 
 enum EnergyType {
-  SOLAR       // Energía solar
-  WIND        // Energía eólica
-  HYDRO       // Hidroeléctrica
-  BIOMASS     // Biomasa
-  GEOTHERMAL  // Geotérmica
-  HYBRID      // Híbrido
+  SOLAR          // Energía Solar Fotovoltaica
+  WIND_ONSHORE   // Energía Eólica Onshore
+  WIND_OFFSHORE  // Energía Eólica Offshore
+  HYDRO          // Hidroeléctrica
+  BIOMASS        // Biomasa
+  GEOTHERMAL     // Geotérmica
+  HYBRID         // Híbrido
+  SOLAR_DEFAULT  // Alias para retrocompatibilidad
 }
 
 enum InvestmentStatus {
