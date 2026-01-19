@@ -1,607 +1,360 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
+import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 
-interface ContractFormData {
+// Type definition for form data
+type ContractFormData = {
     name: string;
-    description: string;
-    imageUrl: string;
-    annualReturn: string;
-    totalCapacity: string;
-    minInvestment: string;
-    maxInvestment: string;
-    generator: string;
-    generatorLocation: string;
-    buyer: string;
-    buyerIndustry: string;
+    contractType: string;
+    contractSubtype: string;
     energyType: string;
-    energyAmount: string;
-    termValue: string;
-    termUnit: 'years' | 'months';
-    co2Emissions: string;
-}
+    annualReturn: number;
+    financingGoal: number;
+    minInvestment: number;
+    maxInvestment: number;
+    generatorName: string;
+    buyerName: string;
+    buyerIndustry: string;
+    energyVolume: number; // MWh
+    termDuration: number;
+    termUnit: string;
+    co2Avoided: number;
+};
 
-interface UploadedDocument {
-    id: string;
-    name: string;
-    size: string;
-    uploadedAt: string;
-}
-
-interface Props {
-    contractId?: string;
-}
-
-export default function ContractFormPage({ contractId }: Props) {
+export default function NewContractPage() {
     const router = useRouter();
-    const isEditing = !!contractId;
-    const [isLoading, setIsLoading] = useState(isEditing);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDocument[]>([
-        // Sample documents for UI demonstration
-        { id: '1', name: 'PPA_Contrato_Marco.pdf', size: '2.4 MB', uploadedAt: 'hace 2 min' },
-        { id: '2', name: 'Auditoría_Ambiental_2024.pdf', size: '1.8 MB', uploadedAt: 'hace 5 min' },
-    ]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [uploadingImage, setUploadingImage] = useState(false);
+    const [imageUrl, setImageUrl] = useState<string | null>(null);
+    const [uploadError, setUploadError] = useState<string | null>(null);
 
-    const [formData, setFormData] = useState<ContractFormData>({
-        name: '',
-        description: '',
-        imageUrl: '',
-        annualReturn: '',
-        totalCapacity: '',
-        minInvestment: '',
-        maxInvestment: '',
-        generator: '',
-        generatorLocation: '',
-        buyer: '',
-        buyerIndustry: '',
-        energyType: '',
-        energyAmount: '',
-        termValue: '',
-        termUnit: 'years',
-        co2Emissions: '',
-    });
+    // Form Hook
+    const { register, handleSubmit, formState: { errors } } = useForm<ContractFormData>();
 
-    // Load existing contract data if editing
-    useEffect(() => {
-        if (contractId) {
-            fetchContract();
-        }
-    }, [contractId]);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const fetchContract = async () => {
+    // Image Upload Handler
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploadingImage(true);
+        setUploadError(null);
+
         try {
-            const res = await fetch(`/api/admin/contracts/${contractId}`);
-            if (!res.ok) throw new Error('Error al cargar el contrato');
-            const data = await res.json();
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('type', 'contract-image');
 
-            // Convert API data to form data
-            const termMonths = data.contract.termMonths || 12;
-            const isYears = termMonths >= 12 && termMonths % 12 === 0;
-
-            setFormData({
-                name: data.contract.name || '',
-                description: data.contract.description || '',
-                imageUrl: data.contract.imageUrl || '',
-                annualReturn: data.contract.annualReturn?.toString() || '',
-                totalCapacity: data.contract.totalCapacity?.toString() || '',
-                minInvestment: data.contract.minInvestment?.toString() || '',
-                maxInvestment: data.contract.maxInvestment?.toString() || '',
-                generator: data.contract.generator || '',
-                generatorLocation: data.contract.generatorLocation || '',
-                buyer: data.contract.buyer || '',
-                buyerIndustry: data.contract.buyerIndustry || '',
-                energyType: data.contract.energyType || '',
-                energyAmount: data.contract.energyAmount?.toString() || '',
-                termValue: isYears ? (termMonths / 12).toString() : termMonths.toString(),
-                termUnit: isYears ? 'years' : 'months',
-                co2Emissions: data.contract.co2Emissions?.toString() || '',
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
             });
 
-            // Load documents if available
-            if (data.contract.documents?.length) {
-                setUploadedDocuments(data.contract.documents.map((doc: any) => ({
-                    id: doc.id,
-                    name: doc.name,
-                    size: 'PDF',
-                    uploadedAt: new Date(doc.createdAt).toLocaleDateString(),
-                })));
+            if (!response.ok) throw new Error('Error al subir imagen');
+
+            const data = await response.json();
+            setImageUrl(data.url);
+        } catch (error) {
+            console.error(error);
+            setUploadError('No se pudo subir la imagen. Intente de nuevo.');
+        } finally {
+            setUploadingImage(false);
+        }
+    };
+
+    // Submission Handler
+    const onSubmit = async (data: ContractFormData, action: 'draft' | 'publish') => {
+        setIsLoading(true);
+        try {
+            const payload = {
+                ...data,
+                imageUrl,
+                action
+            };
+
+            const response = await fetch('/api/admin/contracts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) throw new Error('Error al guardar el contrato');
+
+            const result = await response.json();
+            if (result.success) {
+                // Redirect back to contract list or dashboard
+                router.push('/admin/contracts');
+                router.refresh();
             }
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error desconocido');
+
+        } catch (error) {
+            console.error(error);
+            alert('Ocurrió un error al guardar el contrato.');
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    };
-
-    const parseNumber = (value: string): number => {
-        const cleaned = value.replace(/,/g, '');
-        return parseFloat(cleaned) || 0;
-    };
-
-    const getTermMonths = (): number => {
-        const value = parseInt(formData.termValue) || 0;
-        return formData.termUnit === 'years' ? value * 12 : value;
-    };
-
-    const buildContractPayload = (status: 'DRAFT' | 'ACTIVE') => ({
-        name: formData.name,
-        description: formData.description,
-        imageUrl: formData.imageUrl || null,
-        annualReturn: parseNumber(formData.annualReturn),
-        totalCapacity: parseNumber(formData.totalCapacity),
-        minInvestment: parseNumber(formData.minInvestment),
-        maxInvestment: parseNumber(formData.maxInvestment),
-        generator: formData.generator,
-        generatorLocation: formData.generatorLocation || null,
-        buyer: formData.buyer,
-        buyerIndustry: formData.buyerIndustry,
-        energyType: formData.energyType,
-        energyAmount: parseNumber(formData.energyAmount),
-        termMonths: getTermMonths(),
-        co2Emissions: parseNumber(formData.co2Emissions),
-        status,
-    });
-
-    const validateForm = (): string | null => {
-        if (!formData.name.trim()) return 'El nombre del contrato es obligatorio';
-        if (!formData.energyType) return 'Selecciona el tipo de energía';
-        if (!formData.annualReturn) return 'La rentabilidad anual es obligatoria';
-        if (!formData.totalCapacity) return 'La meta de financiación es obligatoria';
-        if (!formData.generator.trim()) return 'El generador energético es obligatorio';
-        if (!formData.buyer.trim()) return 'La empresa compradora es obligatoria';
-        if (!formData.termValue) return 'El plazo es obligatorio';
-        return null;
-    };
-
-    const handleSaveDraft = async () => {
-        setError(null);
-        setIsSubmitting(true);
-
-        try {
-            const payload = buildContractPayload('DRAFT');
-            const url = isEditing ? `/api/admin/contracts/${contractId}` : '/api/admin/contracts';
-            const method = isEditing ? 'PATCH' : 'POST';
-
-            const res = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-            });
-
-            if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.error || 'Error al guardar');
-            }
-
-            router.push('/admin/contracts');
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error desconocido');
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    const handlePublish = async () => {
-        const validationError = validateForm();
-        if (validationError) {
-            setError(validationError);
-            return;
-        }
-
-        setError(null);
-        setIsSubmitting(true);
-
-        try {
-            const payload = buildContractPayload('ACTIVE');
-            const url = isEditing ? `/api/admin/contracts/${contractId}` : '/api/admin/contracts';
-            const method = isEditing ? 'PATCH' : 'POST';
-
-            const res = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-            });
-
-            if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.error || 'Error al publicar');
-            }
-
-            router.push('/admin/contracts');
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error desconocido');
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    const removeDocument = (docId: string) => {
-        setUploadedDocuments(prev => prev.filter(d => d.id !== docId));
-    };
-
-    if (isLoading) {
-        return (
-            <div className="flex-1 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-            </div>
-        );
-    }
-
     return (
-        <>
+        <div className="max-w-[1000px] mx-auto px-6 py-10 font-sans text-slate-900">
             {/* Header */}
-            <header className="bg-white border-b border-gray-200 px-6 md:px-10 py-6 shrink-0">
-                <div className="max-w-4xl mx-auto flex flex-wrap justify-between items-start gap-4">
-                    <div>
-                        <div className="flex items-center gap-2 mb-2 text-sm text-gray-500">
-                            <Link href="/admin/contracts" className="hover:underline">Contratos</Link>
-                            <span className="material-symbols-outlined text-sm">chevron_right</span>
-                            <span className="font-bold text-black">{isEditing ? 'Editar Contrato' : 'Nuevo Contrato'}</span>
-                        </div>
-                        <h1 className="text-3xl font-extrabold text-black leading-tight">
-                            Admin: {isEditing ? 'Editar' : 'Nuevo'} Contrato
-                        </h1>
-                        <p className="text-gray-500 mt-1">Panel de administración para la creación y edición de contratos de energía.</p>
+            <div className="flex flex-wrap justify-between items-start gap-4 mb-10">
+                <div>
+                    <div className="flex items-center gap-2 mb-2 text-sm text-slate-500">
+                        <span className="hover:underline cursor-pointer" onClick={() => router.push('/admin/contracts')}>Contratos</span>
+                        <span className="material-symbols-outlined text-sm">chevron_right</span>
+                        <span className="font-bold text-black">Nuevo Contrato</span>
                     </div>
-                    <div className="flex gap-3">
-                        <button
-                            onClick={handleSaveDraft}
-                            disabled={isSubmitting}
-                            className="flex items-center justify-center rounded-xl h-12 px-6 bg-white border-2 border-primary text-black text-sm font-bold shadow-sm hover:bg-gray-50 transition-colors disabled:opacity-50"
-                        >
-                            Guardar Borrador
-                        </button>
-                        <button
-                            onClick={handlePublish}
-                            disabled={isSubmitting}
-                            className="flex items-center justify-center rounded-xl h-12 px-8 bg-primary text-black text-sm font-bold shadow-md hover:brightness-95 transition-all disabled:opacity-50"
-                        >
-                            {isSubmitting ? 'Guardando...' : 'Publicar Contrato'}
-                        </button>
-                    </div>
+                    <h1 className="text-4xl font-black text-black leading-tight">Admin: Nuevo/Editar Contrato</h1>
+                    <p className="text-slate-500 mt-2 text-lg">Panel de administración para la creación y edición de contratos de energía.</p>
                 </div>
-            </header>
 
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6 md:p-10 bg-slate-50">
-                <div className="max-w-4xl mx-auto space-y-8">
+                {/* Actions */}
+                <div className="flex gap-3 mt-4 md:mt-0">
+                    <button
+                        onClick={handleSubmit((data) => onSubmit(data, 'draft'))}
+                        disabled={isLoading}
+                        className="flex items-center justify-center rounded-xl h-12 px-6 bg-white border-2 border-primary text-black text-sm font-bold shadow-sm hover:bg-gray-50 transition-colors disabled:opacity-50"
+                    >
+                        Guardar Borrador
+                    </button>
+                    <button
+                        onClick={handleSubmit((data) => onSubmit(data, 'publish'))}
+                        disabled={isLoading}
+                        className="flex items-center justify-center rounded-xl h-12 px-8 bg-primary text-black text-sm font-bold shadow-md hover:bg-[#d1df0c] transition-all disabled:opacity-50"
+                    >
+                        {isLoading ? 'Guardando...' : 'Publicar Contrato'}
+                    </button>
+                </div>
+            </div>
 
-                    {/* Error Message */}
-                    {error && (
-                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-2">
-                            <span className="material-symbols-outlined">error</span>
-                            {error}
+            <form className="space-y-8">
+
+                {/* 1. Imagen Promocional */}
+                <section className="bg-white rounded-2xl shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] border border-gray-100 p-8">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-primary/20 rounded-lg">
+                            <span className="material-symbols-outlined text-black">image</span>
                         </div>
-                    )}
+                        <h2 className="text-xl font-bold text-black">Imagen Promocional</h2>
+                    </div>
 
-                    {/* Section 1: Imagen Promocional */}
-                    <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="p-2 bg-primary/20 rounded-lg">
-                                <span className="material-symbols-outlined text-black">image</span>
-                            </div>
-                            <h2 className="text-xl font-bold text-black">Imagen Promocional</h2>
-                        </div>
-                        <div className="w-full">
-                            {formData.imageUrl ? (
-                                <div className="relative group w-full aspect-[21/9] rounded-xl overflow-hidden border border-gray-200">
-                                    <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" />
-                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                        <button
-                                            type="button"
-                                            onClick={() => setFormData(prev => ({ ...prev, imageUrl: '' }))}
-                                            className="bg-white text-black px-4 py-2 rounded-lg font-bold text-sm"
-                                        >
-                                            Cambiar imagen
-                                        </button>
+                    <div className="w-full">
+                        <div
+                            onClick={() => fileInputRef.current?.click()}
+                            className={`relative group cursor-pointer w-full aspect-[21/9] rounded-xl border-2 border-dashed transition-all flex flex-col items-center justify-center overflow-hidden 
+                                ${imageUrl ? 'border-primary bg-white' : 'border-gray-300 bg-gray-50 hover:bg-primary/5 hover:border-primary'}
+                            `}
+                        >
+                            {imageUrl ? (
+                                <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${imageUrl})` }}>
+                                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <p className="text-white font-bold">Clic para cambiar imagen</p>
                                     </div>
                                 </div>
                             ) : (
-                                <div className="relative group cursor-pointer w-full aspect-[21/9] rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-primary/5 hover:border-primary transition-all flex flex-col items-center justify-center overflow-hidden">
-                                    <div className="flex flex-col items-center p-6 text-center">
+                                <div className="flex flex-col items-center p-6 text-center">
+                                    {uploadingImage ? (
+                                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-500 mb-2"></div>
+                                    ) : (
                                         <span className="material-symbols-outlined text-5xl text-gray-400 group-hover:text-primary mb-3 transition-colors">cloud_upload</span>
-                                        <p className="text-lg font-bold text-gray-700">Arrastra tu imagen aquí o haz clic para subir</p>
-                                        <p className="text-sm text-gray-500 mt-1">Soporta JPG y PNG de alta resolución</p>
-                                    </div>
-                                    <input
-                                        type="file"
-                                        accept=".jpg,.jpeg,.png"
-                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                        onChange={(e) => {
-                                            // For now, just show a placeholder
-                                            // In production, this would upload to cloud storage
-                                            if (e.target.files?.[0]) {
-                                                const url = URL.createObjectURL(e.target.files[0]);
-                                                setFormData(prev => ({ ...prev, imageUrl: url }));
-                                            }
-                                        }}
-                                    />
+                                    )}
+                                    <p className="text-lg font-bold text-gray-700">
+                                        {uploadingImage ? 'Subiendo...' : 'Arrastra tu imagen aquí o haz clic para subir'}
+                                    </p>
+                                    <p className="text-sm text-gray-500 mt-1">Soporta JPG y PNG de alta resolución</p>
                                 </div>
                             )}
+                            <input
+                                ref={fileInputRef}
+                                onChange={handleImageUpload}
+                                accept=".jpg, .jpeg, .png"
+                                className="hidden"
+                                type="file"
+                            />
                         </div>
-                    </section>
+                        {uploadError && <p className="text-red-500 text-sm mt-2">{uploadError}</p>}
+                    </div>
+                </section>
 
-                    {/* Section 2: Detalles y Finanzas */}
-                    <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="p-2 bg-primary/20 rounded-lg">
-                                <span className="material-symbols-outlined text-black">payments</span>
-                            </div>
-                            <h2 className="text-xl font-bold text-black">Detalles y Finanzas</h2>
+                {/* 2. Detalles y Finanzas */}
+                <section className="bg-white rounded-2xl shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] border border-gray-100 p-8">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-primary/20 rounded-lg">
+                            <span className="material-symbols-outlined text-black">payments</span>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                            {/* Nombre del Contrato - Full width */}
-                            <div className="col-span-1 md:col-span-2 space-y-2">
-                                <label className="text-sm font-bold text-gray-700">Nombre del Contrato *</label>
-                                <input
-                                    name="name"
-                                    value={formData.name}
-                                    onChange={handleChange}
-                                    className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all placeholder:text-gray-400"
-                                    placeholder="Ej: Parque Solar Almería III"
-                                />
-                            </div>
+                        <h2 className="text-xl font-bold text-black">Detalles y Finanzas</h2>
+                    </div>
 
-                            {/* Tipo de energía */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-gray-700">Tipo de energía *</label>
-                                <select
-                                    name="energyType"
-                                    value={formData.energyType}
-                                    onChange={handleChange}
-                                    className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all"
-                                >
-                                    <option value="" disabled>Seleccionar tipo</option>
-                                    <option value="SOLAR">Energía Solar Fotovoltaica</option>
-                                    <option value="WIND">Energía Eólica Onshore</option>
-                                    <option value="WIND_OFFSHORE">Energía Eólica Offshore</option>
-                                    <option value="BIOMASS">Biomasa</option>
-                                    <option value="HYDRO">Hidroeléctrica</option>
-                                    <option value="GEOTHERMAL">Geotérmica</option>
-                                    <option value="HYBRID">Híbrido</option>
-                                </select>
-                            </div>
-
-                            {/* Rentabilidad anual */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-gray-700">Rentabilidad anual (%) *</label>
-                                <div className="relative">
-                                    <input
-                                        name="annualReturn"
-                                        value={formData.annualReturn}
-                                        onChange={handleChange}
-                                        type="number"
-                                        step="0.1"
-                                        className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 pl-4 pr-10 transition-all font-medium"
-                                        placeholder="0.00"
-                                    />
-                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">%</span>
-                                </div>
-                            </div>
-
-                            {/* Meta financiación */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-gray-700">Meta financiación ($) *</label>
-                                <div className="relative">
-                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
-                                    <input
-                                        name="totalCapacity"
-                                        value={formData.totalCapacity}
-                                        onChange={handleChange}
-                                        type="number"
-                                        className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 pl-8 pr-4 transition-all font-medium"
-                                        placeholder="0.00"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Inversión mínima y máxima */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold text-gray-700">Inversión mínima ($)</label>
-                                    <div className="relative">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-bold">$</span>
-                                        <input
-                                            name="minInvestment"
-                                            value={formData.minInvestment}
-                                            onChange={handleChange}
-                                            type="number"
-                                            className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 pl-6 pr-3 transition-all font-medium text-sm"
-                                            placeholder="Min"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-bold text-gray-700">Inversión máxima ($)</label>
-                                    <div className="relative">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-bold">$</span>
-                                        <input
-                                            name="maxInvestment"
-                                            value={formData.maxInvestment}
-                                            onChange={handleChange}
-                                            type="number"
-                                            className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 pl-6 pr-3 transition-all font-medium text-sm"
-                                            placeholder="Max"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <div className="col-span-1 md:col-span-2 space-y-2">
+                            <label className="text-sm font-bold text-gray-700">Nombre del Contrato *</label>
+                            <input
+                                {...register('name', { required: true })}
+                                className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all placeholder:text-gray-400"
+                                placeholder="Ej: Parque Solar Almería III"
+                                type="text"
+                            />
                         </div>
-                    </section>
 
-                    {/* Section 3: Especificaciones */}
-                    <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="p-2 bg-primary/20 rounded-lg">
-                                <span className="material-symbols-outlined text-black">tune</span>
-                            </div>
-                            <h2 className="text-xl font-bold text-black">Especificaciones</h2>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-gray-700">Tipo de contrato</label>
+                            <select {...register('contractType')} className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all">
+                                <option value="">Seleccionar tipo</option>
+                                <option value="Infraestructura">Infraestructura</option>
+                                <option value="Liquidez">Liquidez en contratos</option>
+                            </select>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                            {/* Generador energético */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-gray-700">Generador energético *</label>
-                                <input
-                                    name="generator"
-                                    value={formData.generator}
-                                    onChange={handleChange}
-                                    className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all"
-                                    placeholder="Nombre de la empresa generadora"
-                                />
-                            </div>
 
-                            {/* Empresa compradora */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-gray-700">Empresa compradora *</label>
-                                <input
-                                    name="buyer"
-                                    value={formData.buyer}
-                                    onChange={handleChange}
-                                    className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all"
-                                    placeholder="Nombre del off-taker"
-                                />
-                            </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-gray-700">Subtipo de contrato</label>
+                            <select {...register('contractSubtype')} className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all">
+                                <option value="">Seleccionar subtipo</option>
+                                <option value="Proyecto solar">Proyecto solar</option>
+                                <option value="Proyecto eólico">Proyecto eólico</option>
+                                <option value="Infraestructura de carga">Infraestructura de carga</option>
+                                <option value="Smart grids">Smart grids</option>
+                            </select>
+                        </div>
 
-                            {/* Industria del comprador */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-gray-700">Industria del comprador</label>
-                                <select
-                                    name="buyerIndustry"
-                                    value={formData.buyerIndustry}
-                                    onChange={handleChange}
-                                    className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all"
-                                >
-                                    <option value="" disabled>Seleccionar industria</option>
-                                    <option value="Tecnología">Tecnología</option>
-                                    <option value="Manufactura">Manufactura</option>
-                                    <option value="Transporte">Transporte</option>
-                                    <option value="Retail">Retail</option>
-                                    <option value="Agroindustria">Agroindustria</option>
-                                    <option value="Minería">Minería</option>
-                                    <option value="Telecomunicaciones">Telecomunicaciones</option>
-                                    <option value="Otro">Otro</option>
-                                </select>
-                            </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-gray-700">Tipo de energía</label>
+                            <select {...register('energyType')} className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all">
+                                <option value="">Seleccionar tipo</option>
+                                <option value="Energía Solar Fotovoltaica">Energía Solar Fotovoltaica</option>
+                                <option value="Energía Eólica Onshore">Energía Eólica Onshore</option>
+                                <option value="Energía Eólica Offshore">Energía Eólica Offshore</option>
+                                <option value="Biomasa">Biomasa</option>
+                                <option value="Hidroeléctrica">Hidroeléctrica</option>
+                            </select>
+                        </div>
 
-                            {/* Volumen energía */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-gray-700">Volumen energía (MWh)</label>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-gray-700">Rentabilidad anual (%) *</label>
+                            <div className="relative">
                                 <input
-                                    name="energyAmount"
-                                    value={formData.energyAmount}
-                                    onChange={handleChange}
+                                    {...register('annualReturn', { required: true })}
+                                    className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 pl-4 pr-10 transition-all font-medium"
+                                    placeholder="0.00"
+                                    step="0.01"
                                     type="number"
-                                    className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all"
-                                    placeholder="0"
+                                />
+                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">%</span>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-gray-700">Meta financiación ($) *</label>
+                            <div className="relative">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">$</span>
+                                <input
+                                    {...register('financingGoal', { required: true })}
+                                    className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 pl-8 pr-4 transition-all font-medium"
+                                    placeholder="0.00"
+                                    type="number"
                                 />
                             </div>
+                        </div>
 
-                            {/* Plazo */}
+                        <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <label className="text-sm font-bold text-gray-700">Plazo *</label>
-                                <div className="flex gap-2">
-                                    <input
-                                        name="termValue"
-                                        value={formData.termValue}
-                                        onChange={handleChange}
-                                        type="number"
-                                        className="flex-1 rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all"
-                                        placeholder="Duración"
-                                    />
-                                    <select
-                                        name="termUnit"
-                                        value={formData.termUnit}
-                                        onChange={handleChange}
-                                        className="w-32 rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all"
-                                    >
-                                        <option value="years">Años</option>
-                                        <option value="months">Meses</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            {/* CO2 evitado */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold text-gray-700">CO2 evitado (toneladas)</label>
+                                <label className="text-sm font-bold text-gray-700">Inversión mínima ($)</label>
                                 <div className="relative">
-                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-outlined text-[20px]">co2</span>
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-bold">$</span>
                                     <input
-                                        name="co2Emissions"
-                                        value={formData.co2Emissions}
-                                        onChange={handleChange}
+                                        {...register('minInvestment')}
+                                        className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 pl-6 pr-3 transition-all font-medium text-sm"
+                                        placeholder="Min"
                                         type="number"
-                                        className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 pl-10 pr-4 transition-all"
-                                        placeholder="0"
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-700">Inversión máxima ($)</label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-bold">$</span>
+                                    <input
+                                        {...register('maxInvestment')}
+                                        className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 pl-6 pr-3 transition-all font-medium text-sm"
+                                        placeholder="Max"
+                                        type="number"
                                     />
                                 </div>
                             </div>
                         </div>
-                    </section>
+                    </div>
+                </section>
 
-                    {/* Section 4: Documentos */}
-                    <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="p-2 bg-primary/20 rounded-lg">
-                                <span className="material-symbols-outlined text-black">description</span>
-                            </div>
-                            <h2 className="text-xl font-bold text-black">Documentos</h2>
+                {/* 3. Especificaciones */}
+                <section className="bg-white rounded-2xl shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] border border-gray-100 p-8">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-primary/20 rounded-lg">
+                            <span className="material-symbols-outlined text-black">tune</span>
                         </div>
-                        <div className="space-y-4">
-                            {/* Upload area */}
-                            <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 flex flex-col items-center justify-center bg-gray-50 hover:bg-white hover:border-primary transition-all cursor-pointer">
-                                <span className="material-symbols-outlined text-4xl text-gray-400 mb-2">picture_as_pdf</span>
-                                <p className="text-sm font-bold text-black">Carga múltiple de PDFs</p>
-                                <p className="text-xs text-gray-500 mb-4">Verificaciones legales, contratos, auditorías</p>
-                                <button
-                                    type="button"
-                                    className="px-5 py-2 bg-black text-white text-xs font-bold rounded-lg hover:bg-gray-800 transition-colors"
-                                >
-                                    Seleccionar Archivos
-                                </button>
-                            </div>
+                        <h2 className="text-xl font-bold text-black">Especificaciones</h2>
+                    </div>
 
-                            {/* Uploaded documents list */}
-                            {uploadedDocuments.length > 0 && (
-                                <div className="rounded-xl border border-gray-100 overflow-hidden">
-                                    {uploadedDocuments.map((doc, index) => (
-                                        <div
-                                            key={doc.id}
-                                            className={`flex items-center justify-between p-4 bg-white hover:bg-gray-50 transition-colors ${index < uploadedDocuments.length - 1 ? 'border-b border-gray-50' : ''}`}
-                                        >
-                                            <div className="flex items-center gap-4">
-                                                <div className="bg-red-50 p-2 rounded-lg text-red-500">
-                                                    <span className="material-symbols-outlined">picture_as_pdf</span>
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm font-bold text-black">{doc.name}</p>
-                                                    <p className="text-xs text-gray-400">{doc.size} • Subido {doc.uploadedAt}</p>
-                                                </div>
-                                            </div>
-                                            <button
-                                                type="button"
-                                                onClick={() => removeDocument(doc.id)}
-                                                className="p-2 rounded-full hover:bg-gray-200 text-gray-400 hover:text-red-500 transition-colors"
-                                            >
-                                                <span className="material-symbols-outlined text-[20px]">delete</span>
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-gray-700">Generador energético</label>
+                            <input {...register('generatorName')} className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all" placeholder="Nombre de la empresa generadora" type="text" />
                         </div>
-                    </section>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-gray-700">Empresa compradora</label>
+                            <input {...register('buyerName')} className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all" placeholder="Nombre del off-taker" type="text" />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-gray-700">Industria del comprador</label>
+                            <select {...register('buyerIndustry')} className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all">
+                                <option value="">Seleccionar industria</option>
+                                <option value="Tecnología">Tecnología</option>
+                                <option value="Manufactura">Manufactura</option>
+                                <option value="Transporte">Transporte</option>
+                                <option value="Retail">Retail</option>
+                                <option value="Minería">Minería</option>
+                            </select>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-gray-700">Volumen energía (Total MWh)</label>
+                            <input {...register('energyVolume')} className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all" placeholder="0" type="number" />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-gray-700">Plazo</label>
+                            <div className="flex gap-2">
+                                <input {...register('termDuration')} className="flex-1 rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all" placeholder="Duración" type="number" />
+                                <select {...register('termUnit')} className="w-32 rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all">
+                                    <option value="Años">Años</option>
+                                    <option value="Meses">Meses</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-gray-700">CO2 evitado (toneladas)</label>
+                            <div className="relative">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-outlined text-[20px]">co2</span>
+                                <input {...register('co2Avoided')} className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 pl-10 px-4 transition-all" placeholder="0" type="number" />
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
-                </div>
-            </div>
-        </>
+                {/* 4. Documentos (Placeholder) */}
+                <section className="bg-white rounded-2xl shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] border border-gray-100 p-8 opacity-60">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-primary/20 rounded-lg">
+                            <span className="material-symbols-outlined text-black">description</span>
+                        </div>
+                        <h2 className="text-xl font-bold text-black">Documentos (Próximamente)</h2>
+                    </div>
+                    <p className="text-sm text-gray-500">La carga de documentos PPA y auditorías estará disponible en la siguiente versión.</p>
+                </section>
+
+            </form>
+        </div>
     );
 }
