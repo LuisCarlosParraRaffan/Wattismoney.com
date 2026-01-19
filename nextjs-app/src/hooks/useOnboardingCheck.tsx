@@ -38,40 +38,52 @@ export function useOnboardingCheck() {
                 }
 
                 const response = await fetch('/api/user/onboarding-status');
-                if (response.ok) {
-                    const data = await response.json();
-                    setStatus({
-                        userStatus: data.userStatus,
-                        hasKyc: data.hasKyc,
-                        hasInvestorProfile: data.hasInvestorProfile,
-                        isLoading: false,
-                    });
 
-                    // Redirect based on onboarding status
-                    const onboardingPaths = [
-                        '/kyc-upload',
-                        '/kyc-success',
-                        '/investor-profile',
-                        '/investor-profile-success',
-                        '/investor-quiz',
-                        '/investor-quiz-results'
-                    ];
-                    const isOnboardingPath = onboardingPaths.some(p => pathname.startsWith(p));
+                if (!response.ok) {
+                    // If user is not found or unauthorized, force logout/redirect
+                    if (response.status === 404 || response.status === 401) {
+                        console.error('User not found or unauthorized, redirecting to login');
+                        // Optional: force signout if using next-auth
+                        // signOut({ callbackUrl: '/login' }); 
+                        router.push('/login');
+                        return;
+                    }
+                    throw new Error(`API error: ${response.status}`);
+                }
 
-                    if (!isOnboardingPath) {
-                        // User is trying to access dashboard but hasn't completed onboarding
-                        if (!data.hasKyc) {
-                            router.push('/kyc-upload');
-                            return;
-                        }
-                        if (!data.hasInvestorProfile) {
-                            router.push('/investor-profile');
-                            return;
-                        }
+                const data = await response.json();
+                setStatus({
+                    userStatus: data.userStatus,
+                    hasKyc: data.hasKyc,
+                    hasInvestorProfile: data.hasInvestorProfile,
+                    isLoading: false,
+                });
+
+                // Redirect based on onboarding status
+                const onboardingPaths = [
+                    '/kyc-upload',
+                    '/kyc-success',
+                    '/investor-profile',
+                    '/investor-profile-success',
+                    '/investor-quiz',
+                    '/investor-quiz-results'
+                ];
+                const isOnboardingPath = onboardingPaths.some(p => pathname.startsWith(p));
+
+                if (!isOnboardingPath) {
+                    // User is trying to access dashboard but hasn't completed onboarding
+                    if (!data.hasKyc) {
+                        router.push('/kyc-upload');
+                        return;
+                    }
+                    if (!data.hasInvestorProfile) {
+                        router.push('/investor-profile');
+                        return;
                     }
                 }
             } catch (error) {
                 console.error('Error checking onboarding status:', error);
+                // Ensure loading stops even on error, but maybe redirect to error page or login
                 setStatus(prev => ({ ...prev, isLoading: false }));
             }
         };

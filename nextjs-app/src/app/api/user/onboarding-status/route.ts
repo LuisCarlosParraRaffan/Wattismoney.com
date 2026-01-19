@@ -29,7 +29,7 @@ export async function GET() {
         if (!user) {
             return NextResponse.json(
                 { error: 'Usuario no encontrado' },
-                { status: 404 }
+                { status: 401 }
             );
         }
 
