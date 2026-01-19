@@ -19,9 +19,17 @@ export default function DashboardLayoutClient({
     const [isOpportunitiesOpen, setIsOpportunitiesOpen] = useState(false);
     const [isAdminOpen, setIsAdminOpen] = useState(false);
 
+    // Fix hydration mismatch by ensuring content renders only on client after mount
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     // Check if user is admin
     const isAdmin = session?.user?.role === 'ADMIN' || session?.user?.role === 'SUPER_ADMIN';
     const isAdminRoute = pathname.startsWith('/admin');
+
+    if (!mounted) return null;
 
     // Show loading while checking onboarding status
     if (isLoading) {
