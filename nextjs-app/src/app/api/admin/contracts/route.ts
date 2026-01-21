@@ -3,6 +3,66 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { ContractStatus, EnergyType } from '@/generated/prisma';
 
+// GET /api/admin/contracts - List all contracts with pagination
+export async function GET(request: NextRequest) {
+    try {
+        // Verify Authentication & Admin Role
+        const session = await auth();
+
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        if (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN') {
+            return NextResponse.json({ error: 'Forbidden: Admin access only' }, { status: 403 });
+        }
+
+        // Parse query parameters
+        const { searchParams } = new URL(request.url);
+        const page = parseInt(searchParams.get('page') || '1');
+        const limit = parseInt(searchParams.get('limit') || '10');
+        const status = searchParams.get('status') as ContractStatus | null;
+
+        // Build where clause
+        const where = status ? { status } : {};
+
+        // Fetch contracts with counts
+        const [contracts, total] = await Promise.all([
+            prisma.contract.findMany({
+                where,
+                orderBy: { createdAt: 'desc' },
+                skip: (page - 1) * limit,
+                take: limit,
+                include: {
+                    _count: {
+                        select: {
+                            investments: true,
+                            documents: true,
+                        },
+                    },
+                },
+            }),
+            prisma.contract.count({ where }),
+        ]);
+
+        return NextResponse.json({
+            contracts,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+        });
+    } catch (error) {
+        console.error('Error fetching contracts:', error);
+        return NextResponse.json(
+            { error: 'Internal Server Error' },
+            { status: 500 }
+        );
+    }
+}
+
 export async function POST(request: NextRequest) {
     try {
         // 1. Verify Authentication & Admin Role
