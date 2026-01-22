@@ -1,10 +1,107 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { WattismoneyLogo } from '@/components/Icons';
 
+interface DashboardStats {
+    totalInvested: number;
+    totalContracts: number;
+    averageTIR: number;
+    expectedReturn: number;
+    netGain: number;
+    totalEnergy: number;
+    co2Avoided: number;
+    industriesImpacted: number;
+    energyTypeDistribution: {
+        type: string;
+        amount: number;
+        percentage: number;
+    }[];
+    activeInvestments: {
+        id: string;
+        contractId: string;
+        contractName: string;
+        contractLocation: string;
+        energyType: string;
+        investmentAmount: number;
+        expectedReturn: number;
+        annualReturn: number;
+        status: string;
+        contractStatus: string;
+        industry: string;
+        createdAt: string;
+    }[];
+}
+
 const Dashboard: React.FC = () => {
+    const [stats, setStats] = useState<DashboardStats | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const res = await fetch('/api/user/stats');
+                if (res.ok) {
+                    const data = await res.json();
+                    setStats(data);
+                }
+            } catch (error) {
+                console.error('Error fetching dashboard stats:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchStats();
+    }, []);
+
+    const formatCurrency = (value: number) => {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        }).format(value);
+    };
+
+    const getEnergyIcon = (type: string) => {
+        switch (type) {
+            case 'SOLAR': return 'sunny';
+            case 'WIND': return 'air';
+            case 'HYDRO': return 'water_drop';
+            default: return 'bolt';
+        }
+    };
+
+    const limitIndustryName = (name: string) => {
+        if (!name) return 'General';
+        if (name.length > 20) return name.substring(0, 20) + '...';
+        return name;
+    }
+
+    if (isLoading) {
+        return (
+            <div className="flex-1 flex items-center justify-center min-h-screen bg-gray-50">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
+
+    // Default values if no stats (new user)
+    const data = stats || {
+        totalInvested: 0,
+        totalContracts: 0,
+        averageTIR: 0,
+        expectedReturn: 0,
+        netGain: 0,
+        totalEnergy: 0,
+        co2Avoided: 0,
+        industriesImpacted: 0,
+        energyTypeDistribution: [],
+        activeInvestments: []
+    };
+
     return (
         <>
             {/* Header */}
@@ -46,19 +143,20 @@ const Dashboard: React.FC = () => {
                                 <span className="material-symbols-outlined text-9xl">bolt</span>
                             </div>
                             <div className="relative z-10">
-                                <p className="text-slate-500 text-xs font-bold uppercase tracking-wide mb-1">Energía Transaccionada</p>
+                                <p className="text-slate-500 text-xs font-bold uppercase tracking-wide mb-1">Energía Financiada</p>
                                 <div className="flex items-baseline gap-1">
-                                    <h3 className="text-3xl font-bold text-text-main">12.5 GWh</h3>
+                                    <h3 className="text-3xl font-bold text-text-main">{data.totalEnergy.toLocaleString()} GWh</h3>
                                 </div>
                                 <div className="mt-4 flex items-center gap-2">
                                     <div className="bg-green-50 text-green-700 px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1">
-                                        <span className="material-symbols-outlined text-sm">trending_up</span> +15%
+                                        <span className="material-symbols-outlined text-sm">energy_savings_leaf</span>
+                                        Renovable
                                     </div>
-                                    <span className="text-xs text-slate-500">vs mes anterior</span>
+                                    <span className="text-xs text-slate-500">Estimado total</span>
                                 </div>
                             </div>
                             <div className="h-1.5 w-full bg-gray-100 mt-4 rounded-full overflow-hidden">
-                                <div className="h-full bg-primary w-3/4"></div>
+                                <div className="h-full bg-primary w-full opacity-50"></div>
                             </div>
                         </div>
 
@@ -70,13 +168,18 @@ const Dashboard: React.FC = () => {
                             <div className="relative z-10">
                                 <p className="text-slate-500 text-xs font-bold uppercase tracking-wide mb-1">Industrias Apoyadas</p>
                                 <div className="flex items-baseline gap-1">
-                                    <h3 className="text-3xl font-bold text-text-main">8</h3>
+                                    <h3 className="text-3xl font-bold text-text-main">{data.industriesImpacted}</h3>
                                 </div>
-                                <div className="mt-4 flex -space-x-2 overflow-hidden">
-                                    <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-gray-100 flex items-center justify-center text-xs" title="Agro">🌾</div>
-                                    <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-gray-100 flex items-center justify-center text-xs" title="Textil">👕</div>
-                                    <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-gray-100 flex items-center justify-center text-xs" title="Manufactura">🏭</div>
-                                    <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-gray-200 flex items-center justify-center text-xs text-slate-500 text-[10px] font-bold">+5</div>
+                                <div className="mt-4 flex -space-x-2 overflow-hidden h-6">
+                                    {/* Placeholder avatars if count > 0 */}
+                                    {data.industriesImpacted > 0 && (
+                                        <>
+                                            <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-gray-100 flex items-center justify-center text-xs">🏭</div>
+                                            {data.industriesImpacted > 1 && <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-gray-100 flex items-center justify-center text-xs">🏢</div>}
+                                            {data.industriesImpacted > 2 && <div className="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-gray-200 flex items-center justify-center text-xs text-slate-500 text-[10px] font-bold">+{data.industriesImpacted - 2}</div>}
+                                        </>
+                                    )}
+                                    {data.industriesImpacted === 0 && <span className="text-xs text-slate-400">Sin industrias aún</span>}
                                 </div>
                             </div>
                             <div className="h-1.5 w-full bg-gray-100 mt-4 rounded-full overflow-hidden">
@@ -90,11 +193,11 @@ const Dashboard: React.FC = () => {
                             <div className="relative z-10">
                                 <p className="text-slate-500 text-xs font-bold uppercase tracking-wide mb-1">Impacto Ambiental</p>
                                 <div className="flex items-baseline gap-1">
-                                    <h3 className="text-3xl font-bold text-text-main">450 Ton</h3>
+                                    <h3 className="text-3xl font-bold text-text-main">{data.co2Avoided.toLocaleString()} Ton</h3>
                                     <span className="text-sm font-medium text-slate-500">CO2e</span>
                                 </div>
                                 <p className="text-xs text-slate-500 mt-4 leading-relaxed">
-                                    Equivalente a retirar <span className="font-bold text-text-main">98 autos</span> de circulación por un año.
+                                    Equivalente a retirar <span className="font-bold text-text-main">{Math.round(data.co2Avoided / 4.6)} autos</span> de circulación por un año.
                                 </p>
                             </div>
                         </div>
@@ -102,19 +205,19 @@ const Dashboard: React.FC = () => {
                         {/* Financial Performance */}
                         <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm relative overflow-hidden">
                             <div className="relative z-10">
-                                <p className="text-slate-500 text-xs font-bold uppercase tracking-wide mb-1">Rendimiento Financiero</p>
+                                <p className="text-slate-500 text-xs font-bold uppercase tracking-wide mb-1">Inversión Total</p>
                                 <div className="flex items-baseline gap-1">
-                                    <h3 className="text-3xl font-bold text-text-main">$12,450</h3>
+                                    <h3 className="text-3xl font-bold text-text-main">{formatCurrency(data.totalInvested)}</h3>
                                 </div>
                                 <div className="mt-4 flex items-center justify-between">
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] text-slate-500 uppercase font-bold">TIR Promedio</span>
-                                        <span className="text-sm font-bold text-green-600">8.4%</span>
+                                        <span className="text-[10px] text-slate-500 uppercase font-bold">TIR Prom.</span>
+                                        <span className="text-sm font-bold text-green-600">{data.averageTIR}%</span>
                                     </div>
                                     <div className="h-8 w-px bg-gray-200 mx-2"></div>
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] text-slate-500 uppercase font-bold">Ganancia Neta</span>
-                                        <span className="text-sm font-bold text-text-main">$984.00</span>
+                                        <span className="text-[10px] text-slate-500 uppercase font-bold">Ganancia Est.</span>
+                                        <span className="text-sm font-bold text-text-main">{formatCurrency(data.netGain)}</span>
                                     </div>
                                 </div>
                             </div>
@@ -130,7 +233,7 @@ const Dashboard: React.FC = () => {
                                     <h2 className="text-xl font-bold text-text-main">Flujo de Impacto</h2>
                                     <p className="text-sm text-slate-500">Tu inversión conectando generación limpia con consumo industrial.</p>
                                 </div>
-                                <button className="text-xs font-bold bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors">Ver Detalles</button>
+                                <Link href="/mi-impacto" className="text-xs font-bold bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors">Ver Detalles</Link>
                             </div>
 
                             <div className="relative w-full h-64 flex items-center justify-between px-4">
@@ -157,7 +260,7 @@ const Dashboard: React.FC = () => {
                                         <span className="material-symbols-outlined text-xl text-primary">account_balance_wallet</span>
                                     </div>
                                     <div className="mt-2 text-center">
-                                        <p className="text-xs font-bold">$12.4k Invertidos</p>
+                                        <p className="text-xs font-bold">{formatCurrency(data.totalInvested / 1000)}k Invertidos</p>
                                     </div>
                                 </div>
 
@@ -168,7 +271,7 @@ const Dashboard: React.FC = () => {
                                     </div>
                                     <div className="text-center bg-white p-2 rounded-lg shadow-sm border border-gray-100">
                                         <p className="font-bold text-sm">Industria</p>
-                                        <p className="text-xs text-slate-500">Manufactura</p>
+                                        <p className="text-xs text-slate-500">{data.industriesImpacted} Sectores</p>
                                     </div>
                                 </div>
                             </div>
@@ -180,7 +283,7 @@ const Dashboard: React.FC = () => {
                                 </div>
                                 <div className="text-center border-r border-gray-200">
                                     <p className="text-xs text-slate-500">Contratos Activos</p>
-                                    <p className="font-bold text-sm">4 PPAs</p>
+                                    <p className="font-bold text-sm">{data.totalContracts} PPAs</p>
                                 </div>
                                 <div className="text-center">
                                     <p className="text-xs text-slate-500">Destino</p>
@@ -189,63 +292,39 @@ const Dashboard: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Benefited Sectors */}
+                        {/* Benefited Sectors Distribution */}
                         <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm flex flex-col">
-                            <h3 className="text-lg font-bold text-text-main mb-6">Sectores Beneficiados</h3>
+                            <h3 className="text-lg font-bold text-text-main mb-6">Distribución de Energía</h3>
                             <div className="flex-1 flex flex-col justify-center space-y-6">
-
-                                <div className="group">
-                                    <div className="flex justify-between items-end mb-1">
-                                        <div className="flex items-center gap-2">
-                                            <span className="p-1.5 bg-primary/20 rounded-md text-black">
-                                                <span className="material-symbols-outlined text-sm">agriculture</span>
-                                            </span>
-                                            <span className="text-sm font-semibold">Agroindustria</span>
+                                {data.energyTypeDistribution.length > 0 ? (
+                                    data.energyTypeDistribution.map((item, index) => (
+                                        <div className="group" key={index}>
+                                            <div className="flex justify-between items-end mb-1">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="p-1.5 bg-gray-100 rounded-md text-black">
+                                                        <span className="material-symbols-outlined text-sm">{getEnergyIcon(item.type)}</span>
+                                                    </span>
+                                                    <span className="text-sm font-semibold">{item.type}</span>
+                                                </div>
+                                                <span className="text-sm font-bold">{item.percentage}%</span>
+                                            </div>
+                                            <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                                                <div
+                                                    className={`h-full rounded-full transition-all duration-1000 ${index === 0 ? 'bg-primary' : index === 1 ? 'bg-black' : 'bg-gray-400'}`}
+                                                    style={{ width: `${item.percentage}%` }}
+                                                ></div>
+                                            </div>
                                         </div>
-                                        <span className="text-sm font-bold">45%</span>
+                                    ))
+                                ) : (
+                                    <div className="text-center text-slate-400 py-10">
+                                        <p>No hay datos de distribución aún.</p>
                                     </div>
-                                    <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                                        <div className="bg-primary h-full rounded-full transition-all duration-1000 w-[45%]"></div>
-                                    </div>
-                                    <p className="text-xs text-slate-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">Riego solar y procesamiento.</p>
-                                </div>
-
-                                <div className="group">
-                                    <div className="flex justify-between items-end mb-1">
-                                        <div className="flex items-center gap-2">
-                                            <span className="p-1.5 bg-gray-100 rounded-md text-black">
-                                                <span className="material-symbols-outlined text-sm">checkroom</span>
-                                            </span>
-                                            <span className="text-sm font-semibold">Textil</span>
-                                        </div>
-                                        <span className="text-sm font-bold">30%</span>
-                                    </div>
-                                    <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                                        <div className="bg-black h-full rounded-full transition-all duration-1000 w-[30%]"></div>
-                                    </div>
-                                    <p className="text-xs text-slate-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">Fábricas de confección.</p>
-                                </div>
-
-                                <div className="group">
-                                    <div className="flex justify-between items-end mb-1">
-                                        <div className="flex items-center gap-2">
-                                            <span className="p-1.5 bg-gray-100 rounded-md text-black">
-                                                <span className="material-symbols-outlined text-sm">precision_manufacturing</span>
-                                            </span>
-                                            <span className="text-sm font-semibold">Metalmecánica</span>
-                                        </div>
-                                        <span className="text-sm font-bold">25%</span>
-                                    </div>
-                                    <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                                        <div className="bg-gray-400 h-full rounded-full transition-all duration-1000 w-[25%]"></div>
-                                    </div>
-                                    <p className="text-xs text-slate-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">Maquinaria pesada.</p>
-                                </div>
-
+                                )}
                             </div>
                             <div className="mt-6 pt-4 border-t border-gray-100">
                                 <p className="text-xs text-slate-500 italic">
-                                    *Porcentaje de la energía total distribuida a cada sector.
+                                    *Distribución basada en tus inversiones actuales.
                                 </p>
                             </div>
                         </div>
@@ -254,7 +333,7 @@ const Dashboard: React.FC = () => {
                     {/* Active Contracts Table */}
                     <section>
                         <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-xl font-bold text-text-main">Contratos Activos (PPA)</h2>
+                            <h2 className="text-xl font-bold text-text-main">Mis Inversiones Recientes</h2>
                             <Link href="/cartera" className="text-text-main underline decoration-primary decoration-2 text-sm font-bold hover:text-black flex items-center gap-1">
                                 Ver cartera completa <span className="material-symbols-outlined text-sm">arrow_forward</span>
                             </Link>
@@ -266,80 +345,54 @@ const Dashboard: React.FC = () => {
                                         <tr className="bg-gray-50/50 border-b border-gray-100">
                                             <th className="p-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Fuente de Energía</th>
                                             <th className="p-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Industria Receptora</th>
-                                            <th className="p-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Energía Suministrada</th>
-                                            <th className="p-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Impacto CO2</th>
+                                            <th className="p-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Mi Inversión</th>
+                                            <th className="p-5 text-xs font-bold text-slate-500 uppercase tracking-wider">TIR Contrato</th>
                                             <th className="p-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Estado</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
-                                        <tr className="hover:bg-gray-50 transition-colors">
-                                            <td className="p-5">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-text-main">
-                                                        <span className="material-symbols-outlined">sunny</span>
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-bold text-sm text-text-main">Solar Andalucía I</p>
-                                                        <p className="text-xs text-slate-500">Sevilla, España</p>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="p-5">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="material-symbols-outlined text-gray-400 text-lg">factory</span>
-                                                    <span className="text-sm font-medium text-text-main">Grupo AgroSur</span>
-                                                </div>
-                                            </td>
-                                            <td className="p-5">
-                                                <div className="text-sm font-bold text-text-main">4.2 MWh/mes</div>
-                                                <div className="w-20 bg-gray-200 h-1 rounded-full mt-1 overflow-hidden">
-                                                    <div className="bg-green-500 h-full" style={{ width: '80%' }}></div>
-                                                </div>
-                                            </td>
-                                            <td className="p-5">
-                                                <span className="text-sm text-slate-500 font-medium">-12 Ton</span>
-                                            </td>
-                                            <td className="p-5">
-                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/20 text-black border border-primary/20 text-xs font-bold">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                                                    Activo
-                                                </span>
-                                            </td>
-                                        </tr>
-                                        <tr className="hover:bg-gray-50 transition-colors">
-                                            <td className="p-5">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-lg bg-black flex items-center justify-center text-primary">
-                                                        <span className="material-symbols-outlined">air</span>
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-bold text-sm text-text-main">Eólica del Norte</p>
-                                                        <p className="text-xs text-slate-500">Galicia, España</p>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="p-5">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="material-symbols-outlined text-gray-400 text-lg">checkroom</span>
-                                                    <span className="text-sm font-medium text-text-main">Textiles Gallegos</span>
-                                                </div>
-                                            </td>
-                                            <td className="p-5">
-                                                <div className="text-sm font-bold text-text-main">2.8 MWh/mes</div>
-                                                <div className="w-20 bg-gray-200 h-1 rounded-full mt-1 overflow-hidden">
-                                                    <div className="bg-green-500 h-full" style={{ width: '65%' }}></div>
-                                                </div>
-                                            </td>
-                                            <td className="p-5">
-                                                <span className="text-sm text-slate-500 font-medium">-8.5 Ton</span>
-                                            </td>
-                                            <td className="p-5">
-                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/20 text-black border border-primary/20 text-xs font-bold">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                                                    Activo
-                                                </span>
-                                            </td>
-                                        </tr>
+                                        {data.activeInvestments.length > 0 ? (
+                                            data.activeInvestments.slice(0, 5).map((investment) => (
+                                                <tr key={investment.id} className="hover:bg-gray-50 transition-colors">
+                                                    <td className="p-5">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-text-main">
+                                                                <span className="material-symbols-outlined">{getEnergyIcon(investment.energyType)}</span>
+                                                            </div>
+                                                            <div>
+                                                                <p className="font-bold text-sm text-text-main">{investment.contractName}</p>
+                                                                <p className="text-xs text-slate-500">{investment.contractLocation}</p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-5">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="material-symbols-outlined text-gray-400 text-lg">factory</span>
+                                                            <span className="text-sm font-medium text-text-main">{limitIndustryName(investment.industry)}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-5">
+                                                        <div className="text-sm font-bold text-text-main">{formatCurrency(investment.investmentAmount)}</div>
+                                                        <div className="text-xs text-green-600">Esp: {formatCurrency(investment.expectedReturn)}</div>
+                                                    </td>
+                                                    <td className="p-5">
+                                                        <span className="text-sm text-slate-500 font-medium">{investment.annualReturn}%</span>
+                                                    </td>
+                                                    <td className="p-5">
+                                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/20 text-black border border-primary/20 text-xs font-bold">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                                                            Activo
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan={5} className="p-10 text-center text-slate-400">
+                                                    Aún no tienes inversiones activas. ¡Explora el mercado primario!
+                                                </td>
+                                            </tr>
+                                        )}
                                     </tbody>
                                 </table>
                             </div>

@@ -43,6 +43,12 @@ export default function ContractDetail() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [investAmount, setInvestAmount] = useState(1000);
+    const [isInvesting, setIsInvesting] = useState(false);
+    const [investError, setInvestError] = useState<string | null>(null);
+    const [investSuccess, setInvestSuccess] = useState<{
+        amount: number;
+        expectedReturn: number;
+    } | null>(null);
 
     useEffect(() => {
         fetchContract();
@@ -134,6 +140,85 @@ export default function ContractDetail() {
     }
 
     const progress = getProgress();
+
+    const handleInvest = async () => {
+        setIsInvesting(true);
+        setInvestError(null);
+
+        try {
+            const res = await fetch('/api/investments', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    contractId: contractId,
+                    amount: investAmount,
+                }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || 'Error al procesar la inversión');
+            }
+
+            setInvestSuccess({
+                amount: data.investment.amount,
+                expectedReturn: data.investment.expectedReturn,
+            });
+
+            // Update contract data to reflect new investment
+            fetchContract();
+
+        } catch (err) {
+            setInvestError(err instanceof Error ? err.message : 'Error desconocido');
+        } finally {
+            setIsInvesting(false);
+        }
+    };
+
+    if (investSuccess) {
+        return (
+            <div className="flex flex-col h-full bg-background-light font-display text-text-main">
+                <header className="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-6 md:px-10 shrink-0">
+                    <div className="flex items-center gap-4">
+                        <Link href="/cartera" className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                            <span className="material-symbols-outlined">arrow_back</span>
+                        </Link>
+                        <div>
+                            <h1 className="text-lg font-bold text-text-main">Inversión Exitosa</h1>
+                        </div>
+                    </div>
+                </header>
+                <main className="flex-1 flex items-center justify-center p-6 bg-gray-50">
+                    <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full text-center">
+                        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <span className="material-symbols-outlined text-5xl text-green-600">check_circle</span>
+                        </div>
+                        <h2 className="text-2xl font-black text-gray-800 mb-2">¡Inversión Confirmada!</h2>
+                        <p className="text-gray-600 mb-8">
+                            Has invertido exitosamente <span className="font-bold text-black">{formatCurrency(investSuccess.amount)}</span> en {contract?.name}.
+                        </p>
+
+                        <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-8">
+                            <p className="text-xs text-slate-500 uppercase font-bold mb-1">Retorno Esperado</p>
+                            <p className="text-xl font-bold text-green-600">{formatCurrency(investSuccess.expectedReturn)}</p>
+                        </div>
+
+                        <div className="flex flex-col gap-3">
+                            <Link href="/cartera" className="w-full py-4 bg-primary hover:bg-primary-hover text-black font-bold rounded-xl transition-colors">
+                                Ir a mi Cartera
+                            </Link>
+                            <Link href="/mercado-primario" className="w-full py-4 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold rounded-xl transition-colors">
+                                Ver más proyectos
+                            </Link>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col h-full bg-background-light font-display text-text-main">
@@ -265,6 +350,12 @@ export default function ContractDetail() {
                                     </div>
                                 </div>
 
+                                {investError && (
+                                    <div className="p-3 bg-red-50 text-red-600 border border-red-200 rounded-lg text-sm mb-4">
+                                        {investError}
+                                    </div>
+                                )}
+
                                 <div className="space-y-3">
                                     <label className="block">
                                         <span className="text-sm font-bold text-gray-700">Monto a invertir</span>
@@ -278,13 +369,22 @@ export default function ContractDetail() {
                                                 onChange={(e) => setInvestAmount(Number(e.target.value))}
                                                 min={Number(contract.minInvestment)}
                                                 max={Number(contract.maxInvestment)}
+                                                disabled={isInvesting}
                                             />
                                         </div>
                                     </label>
 
-                                    <button className="w-full py-4 bg-primary hover:bg-primary-hover text-black font-bold rounded-xl transition-colors flex items-center justify-center gap-2">
-                                        <span className="material-symbols-outlined">bolt</span>
-                                        Invertir Ahora
+                                    <button
+                                        onClick={handleInvest}
+                                        disabled={isInvesting}
+                                        className="w-full py-4 bg-primary hover:bg-primary-hover disabled:bg-gray-300 disabled:cursor-not-allowed text-black font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        {isInvesting ? (
+                                            <span className="animate-spin h-5 w-5 border-2 border-black border-t-transparent rounded-full"></span>
+                                        ) : (
+                                            <span className="material-symbols-outlined">bolt</span>
+                                        )}
+                                        {isInvesting ? 'Procesando...' : 'Invertir Ahora'}
                                     </button>
 
                                     <p className="text-xs text-gray-500 text-center">
