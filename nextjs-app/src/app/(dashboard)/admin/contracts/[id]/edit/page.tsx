@@ -22,6 +22,7 @@ interface ContractFormData {
     termUnit: 'years' | 'months';
     co2Emissions: string;
     status: string;
+    marketType: string;
 }
 
 interface UploadedDocument {
@@ -62,6 +63,7 @@ export default function EditContractPage() {
         termUnit: 'years',
         co2Emissions: '',
         status: 'DRAFT',
+        marketType: 'PRIMARY',
     });
 
     useEffect(() => {
@@ -95,6 +97,7 @@ export default function EditContractPage() {
                 termUnit: isYears ? 'years' : 'months',
                 co2Emissions: data.contract.co2Emissions?.toString() || '',
                 status: data.contract.status || 'DRAFT',
+                marketType: data.contract.marketType || 'PRIMARY',
             });
 
             if (data.contract.documents?.length) {
@@ -144,6 +147,7 @@ export default function EditContractPage() {
         energyAmount: parseNumber(formData.energyAmount),
         termMonths: getTermMonths(),
         co2Emissions: parseNumber(formData.co2Emissions),
+        marketType: formData.marketType,
         status,
     });
 
@@ -468,6 +472,20 @@ export default function EditContractPage() {
                                     <option value="GEOTHERMAL">Geotérmica</option>
                                     <option value="HYBRID">Híbrido</option>
                                 </select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-700">Tipo de Mercado *</label>
+                                <select
+                                    name="marketType"
+                                    value={formData.marketType}
+                                    onChange={handleChange}
+                                    className="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-primary focus:ring-primary h-12 px-4 transition-all"
+                                >
+                                    <option value="PRIMARY">Mercado Primario</option>
+                                    <option value="SECONDARY">Mercado Secundario</option>
+                                </select>
+                                <p className="text-xs text-gray-500">Primario: oportunidades nuevas. Secundario: posiciones de usuarios.</p>
                             </div>
 
                             <div className="space-y-2">
