@@ -5,20 +5,22 @@ export const dynamic = 'force-dynamic'; // Ensure we always fetch fresh data
 
 export async function GET(request: NextRequest) {
     try {
-        // Fetch only ACTIVE contracts
-        // You might want to include FUNDED ones too depending on UI requirements
+        const { searchParams } = new URL(request.url);
+        const marketType = searchParams.get('marketType') || 'PRIMARY';
+
+        // Fetch contracts filtered by marketType
         const contracts = await prisma.contract.findMany({
             where: {
                 status: {
                     in: ['ACTIVE', 'FUNDED', 'IN_PROGRESS']
-                }
+                },
+                marketType: marketType as 'PRIMARY' | 'SECONDARY'
             },
             orderBy: {
                 createdAt: 'desc'
             }
         });
 
-        // Transform if necessary, or return as is
         return NextResponse.json(contracts);
 
     } catch (error) {

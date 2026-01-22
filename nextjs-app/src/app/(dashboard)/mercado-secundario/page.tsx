@@ -3,71 +3,37 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-interface Listing {
+interface Contract {
     id: string;
-    askingPrice: number;
-    originalAmount: number;
-    commission: number;
-    createdAt: string;
-    investment: {
-        contract: {
-            id: string;
-            name: string;
-            imageUrl: string | null;
-            energyType: string;
-            annualReturn: number;
-            generatorLocation: string | null;
-        };
-    };
-    seller: {
-        id: string;
-        firstName: string | null;
-    };
+    name: string;
+    imageUrl: string | null;
+    energyType: string;
+    annualReturn: number;
+    totalCapacity: number;
+    currentRaised: number;
+    minInvestment: number;
+    generatorLocation: string | null;
 }
 
 export default function MercadoSecundario() {
-    const [listings, setListings] = useState<Listing[]>([]);
+    const [contracts, setContracts] = useState<Contract[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [isBuying, setIsBuying] = useState<string | null>(null);
 
     useEffect(() => {
-        fetchListings();
+        fetchContracts();
     }, []);
 
-    const fetchListings = async () => {
+    const fetchContracts = async () => {
         try {
-            const res = await fetch('/api/listings');
+            const res = await fetch('/api/contracts?marketType=SECONDARY');
             if (res.ok) {
                 const data = await res.json();
-                setListings(data.listings || []);
+                setContracts(data || []);
             }
         } catch (error) {
-            console.error('Error fetching listings:', error);
+            console.error('Error fetching contracts:', error);
         } finally {
             setIsLoading(false);
-        }
-    };
-
-    const handleBuy = async (listingId: string) => {
-        if (!confirm('¿Confirmas la compra de esta posición?')) return;
-
-        setIsBuying(listingId);
-        try {
-            const res = await fetch(`/api/listings/${listingId}/buy`, {
-                method: 'POST',
-            });
-
-            if (res.ok) {
-                alert('¡Compra exitosa! La posición ha sido añadida a tu cartera.');
-                fetchListings();
-            } else {
-                const data = await res.json();
-                alert(data.error || 'Error al procesar la compra');
-            }
-        } catch (error) {
-            alert('Error al procesar la compra');
-        } finally {
-            setIsBuying(null);
         }
     };
 
@@ -92,12 +58,17 @@ export default function MercadoSecundario() {
         }).format(value);
     };
 
+    const getProgress = (current: number, total: number) => {
+        if (!total) return 0;
+        return Math.min(Math.round((current / total) * 100), 100);
+    };
+
     return (
         <div className="flex flex-col h-full bg-background-light font-display text-text-main">
             <header className="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-6 md:px-10">
                 <div>
                     <h1 className="text-xl font-bold text-text-main">Mercado Secundario</h1>
-                    <p className="text-sm text-slate-500">Posiciones de otros inversores disponibles para compra</p>
+                    <p className="text-sm text-slate-500">Oportunidades de inversión del mercado secundario</p>
                 </div>
                 <Link href="/mercado-primario" className="px-4 py-2 bg-primary hover:bg-primary-hover text-black font-bold rounded-lg text-sm">
                     Ver Mercado Primario
@@ -115,11 +86,11 @@ export default function MercadoSecundario() {
                     )}
 
                     {/* Empty State */}
-                    {!isLoading && listings.length === 0 && (
+                    {!isLoading && contracts.length === 0 && (
                         <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
                             <span className="material-symbols-outlined text-6xl text-gray-300 mb-4">storefront</span>
-                            <h2 className="text-xl font-bold text-gray-700 mb-2">No hay posiciones disponibles</h2>
-                            <p className="text-gray-500 mb-6">Cuando otros usuarios vendan sus posiciones, aparecerán aquí.</p>
+                            <h2 className="text-xl font-bold text-gray-700 mb-2">No hay oportunidades disponibles</h2>
+                            <p className="text-gray-500 mb-6">Actualmente no hay contratos en el mercado secundario.</p>
                             <Link href="/mercado-primario" className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-black font-bold rounded-xl hover:brightness-95 transition-all">
                                 <span className="material-symbols-outlined">bolt</span>
                                 Invertir en Mercado Primario
@@ -127,43 +98,67 @@ export default function MercadoSecundario() {
                         </div>
                     )}
 
-                    {/* Listings Grid */}
-                    {!isLoading && listings.length > 0 && (
+                    {/* Contracts Grid */}
+                    {!isLoading && contracts.length > 0 && (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {listings.map((listing) => {
-                                const energy = getEnergyIcon(listing.investment.contract.energyType);
+                            {contracts.map((contract) => {
+                                const energy = getEnergyIcon(contract.energyType);
+                                const progress = getProgress(Number(contract.currentRaised), Number(contract.totalCapacity));
                                 return (
-                                    <div key={listing.id} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+                                    <Link href={`/contrato/${contract.id}`} key={contract.id} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+                                        {/* Image */}
+                                        <div className="w-full h-32 rounded-lg overflow-hidden mb-4 bg-gray-100">
+                                            {contract.imageUrl ? (
+                                                <img src={contract.imageUrl} alt={contract.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center bg-primary/10">
+                                                    <span className="material-symbols-outlined text-4xl text-primary">bolt</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Header */}
                                         <div className="flex items-center gap-3 mb-4">
                                             <div className={`w-10 h-10 rounded-lg ${energy.bg} flex items-center justify-center`}>
                                                 <span className="material-symbols-outlined">{energy.icon}</span>
                                             </div>
                                             <div>
-                                                <h3 className="font-bold text-text-main">{listing.investment.contract.name}</h3>
-                                                <p className="text-xs text-slate-500">{listing.investment.contract.generatorLocation || 'Ubicación N/A'}</p>
+                                                <h3 className="font-bold text-text-main">{contract.name}</h3>
+                                                <p className="text-xs text-slate-500">{contract.generatorLocation || 'Ubicación N/A'}</p>
                                             </div>
                                         </div>
+
+                                        {/* Stats */}
                                         <div className="flex justify-between mb-4">
                                             <div>
-                                                <span className="text-xs text-slate-500">Precio</span>
-                                                <p className="text-lg font-black text-text-main">{formatCurrency(Number(listing.askingPrice))}</p>
+                                                <span className="text-xs text-slate-500">Mín. Inversión</span>
+                                                <p className="text-lg font-black text-text-main">{formatCurrency(Number(contract.minInvestment))}</p>
                                             </div>
                                             <div>
                                                 <span className="text-xs text-slate-500">TIR</span>
-                                                <p className="text-lg font-black text-green-600">{Number(listing.investment.contract.annualReturn).toFixed(1)}%</p>
+                                                <p className="text-lg font-black text-green-600">{Number(contract.annualReturn).toFixed(1)}%</p>
                                             </div>
                                         </div>
-                                        <div className="text-xs text-gray-400 mb-4">
-                                            Vendedor: {listing.seller.firstName || 'Inversor'}
+
+                                        {/* Progress */}
+                                        <div className="mb-4">
+                                            <div className="flex justify-between text-xs text-gray-500 mb-1">
+                                                <span>Financiado</span>
+                                                <span>{progress}%</span>
+                                            </div>
+                                            <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                                                <div className="bg-primary h-full rounded-full" style={{ width: `${progress}%` }}></div>
+                                            </div>
                                         </div>
-                                        <button
-                                            onClick={() => handleBuy(listing.id)}
-                                            disabled={isBuying === listing.id}
-                                            className="w-full py-3 bg-purple-600 text-white rounded-lg font-bold text-sm hover:bg-purple-700 transition-colors disabled:opacity-50"
-                                        >
-                                            {isBuying === listing.id ? 'Comprando...' : 'Comprar Posición'}
-                                        </button>
-                                    </div>
+
+                                        {/* Badge */}
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-xs font-bold text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
+                                                Mercado Secundario
+                                            </span>
+                                            <span className="text-primary font-bold text-sm">Ver detalles →</span>
+                                        </div>
+                                    </Link>
                                 );
                             })}
                         </div>
