@@ -72,7 +72,7 @@ export default function EditContractPage() {
 
     const fetchContract = async () => {
         try {
-            const res = await fetch(`/api/admin/contracts/${contractId}`);
+            const res = await fetch(`/api/panel-admin/contracts/${contractId}`);
             if (!res.ok) throw new Error('Error al cargar el contrato');
             const data = await res.json();
 
@@ -168,7 +168,7 @@ export default function EditContractPage() {
 
         try {
             const payload = buildContractPayload('DRAFT');
-            const res = await fetch(`/api/admin/contracts/${contractId}`, {
+            const res = await fetch(`/api/panel-admin/contracts/${contractId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
@@ -179,7 +179,7 @@ export default function EditContractPage() {
                 throw new Error(data.error || 'Error al guardar');
             }
 
-            router.push('/admin/contracts');
+            router.push('/panel-admin/contracts');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error desconocido');
         } finally {
@@ -199,7 +199,7 @@ export default function EditContractPage() {
 
         try {
             const payload = buildContractPayload('ACTIVE');
-            const res = await fetch(`/api/admin/contracts/${contractId}`, {
+            const res = await fetch(`/api/panel-admin/contracts/${contractId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
@@ -210,7 +210,7 @@ export default function EditContractPage() {
                 throw new Error(data.error || 'Error al publicar');
             }
 
-            router.push('/admin/contracts');
+            router.push('/panel-admin/contracts');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error desconocido');
         } finally {
@@ -220,7 +220,7 @@ export default function EditContractPage() {
 
     const removeDocument = async (docId: string) => {
         try {
-            const res = await fetch(`/api/admin/contracts/${contractId}/documents?documentId=${docId}`, {
+            const res = await fetch(`/api/panel-admin/contracts/${contractId}/documents?documentId=${docId}`, {
                 method: 'DELETE',
             });
             if (res.ok) {
@@ -281,7 +281,7 @@ export default function EditContractPage() {
                 const uploadData = await uploadRes.json();
 
                 // 2. Save to database
-                const docRes = await fetch(`/api/admin/contracts/${contractId}/documents`, {
+                const docRes = await fetch(`/api/panel-admin/contracts/${contractId}/documents`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -340,7 +340,7 @@ export default function EditContractPage() {
                 <div className="max-w-4xl mx-auto flex flex-wrap justify-between items-start gap-4">
                     <div>
                         <div className="flex items-center gap-2 mb-2 text-sm text-gray-500">
-                            <Link href="/admin/contracts" className="hover:underline">Contratos</Link>
+                            <Link href="/panel-admin/contracts" className="hover:underline">Contratos</Link>
                             <span className="material-symbols-outlined text-sm">chevron_right</span>
                             <span className="font-bold text-black">Editar Contrato</span>
                         </div>

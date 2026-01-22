@@ -69,7 +69,7 @@ export default function UserDetailPage() {
 
     const fetchUser = async () => {
         try {
-            const res = await fetch(`/api/admin/users/${userId}`);
+            const res = await fetch(`/api/panel-admin/users/${userId}`);
             if (!res.ok) throw new Error('Error al cargar usuario');
             const data = await res.json();
             setUser(data.user);
@@ -85,7 +85,7 @@ export default function UserDetailPage() {
     const handleUpdateUser = async (updates: Record<string, string>) => {
         setIsSaving(true);
         try {
-            const res = await fetch(`/api/admin/users/${userId}`, {
+            const res = await fetch(`/api/panel-admin/users/${userId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updates),
@@ -104,7 +104,7 @@ export default function UserDetailPage() {
 
         setIsSaving(true);
         try {
-            const res = await fetch('/api/admin/kyc', {
+            const res = await fetch('/api/panel-admin/kyc', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -203,7 +203,7 @@ export default function UserDetailPage() {
                 <div className="text-center">
                     <span className="material-symbols-outlined text-6xl text-gray-300 mb-4 block">error</span>
                     <p className="text-gray-500">{error || 'Usuario no encontrado'}</p>
-                    <Link href="/admin/users" className="text-primary font-bold mt-4 inline-block">Volver a usuarios</Link>
+                    <Link href="/panel-admin/users" className="text-primary font-bold mt-4 inline-block">Volver a usuarios</Link>
                 </div>
             </div>
         );
@@ -217,9 +217,9 @@ export default function UserDetailPage() {
             {/* Header with breadcrumb */}
             <header className="bg-white border-b border-gray-200 px-6 md:px-10 py-4 shrink-0">
                 <div className="flex items-center gap-2 text-sm">
-                    <Link href="/admin" className="text-gray-500 hover:text-primary font-medium">Inicio</Link>
+                    <Link href="/panel-admin" className="text-gray-500 hover:text-primary font-medium">Inicio</Link>
                     <span className="text-gray-300">/</span>
-                    <Link href="/admin/users" className="text-gray-500 hover:text-primary font-medium">Usuarios</Link>
+                    <Link href="/panel-admin/users" className="text-gray-500 hover:text-primary font-medium">Usuarios</Link>
                     <span className="text-gray-300">/</span>
                     <span className="text-black font-semibold">Detalle de Usuario</span>
                 </div>

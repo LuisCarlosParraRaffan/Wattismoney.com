@@ -75,7 +75,7 @@ export default function NewContractPage() {
                 action
             };
 
-            const response = await fetch('/api/admin/contracts', {
+            const response = await fetch('/api/panel-admin/contracts', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ export default function NewContractPage() {
             const result = await response.json();
             if (result.success) {
                 // Redirect back to contract list or dashboard
-                router.push('/admin/contracts');
+                router.push('/panel-admin/contracts');
                 router.refresh();
             }
 
@@ -106,7 +106,7 @@ export default function NewContractPage() {
             <div className="flex flex-wrap justify-between items-start gap-4 mb-10">
                 <div>
                     <div className="flex items-center gap-2 mb-2 text-sm text-slate-500">
-                        <span className="hover:underline cursor-pointer" onClick={() => router.push('/admin/contracts')}>Contratos</span>
+                        <span className="hover:underline cursor-pointer" onClick={() => router.push('/panel-admin/contracts')}>Contratos</span>
                         <span className="material-symbols-outlined text-sm">chevron_right</span>
                         <span className="font-bold text-black">Nuevo Contrato</span>
                     </div>

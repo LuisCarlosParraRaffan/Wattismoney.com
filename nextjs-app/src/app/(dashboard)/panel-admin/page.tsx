@@ -46,7 +46,7 @@ export default function AdminDashboardPage() {
 
     const fetchStats = async () => {
         try {
-            const res = await fetch('/api/admin/stats');
+            const res = await fetch('/api/panel-admin/stats');
             if (!res.ok) throw new Error('Error al cargar estadísticas');
             const data = await res.json();
             setStats(data);
@@ -57,7 +57,7 @@ export default function AdminDashboardPage() {
 
     const fetchRecentUsers = async () => {
         try {
-            const res = await fetch('/api/admin/users?limit=5');
+            const res = await fetch('/api/panel-admin/users?limit=5');
             if (!res.ok) throw new Error('Error al cargar usuarios');
             const data = await res.json();
             setRecentUsers(data.users || []);
@@ -133,7 +133,7 @@ export default function AdminDashboardPage() {
                             Exportar Datos
                         </button>
                         <Link
-                            href="/admin/contracts/new"
+                            href="/panel-admin/contracts/new"
                             className="flex items-center gap-2 px-6 py-2.5 bg-primary text-black rounded-xl font-bold hover:brightness-95 transition-all shadow-sm"
                         >
                             <span className="material-symbols-outlined text-[20px]">add</span>
@@ -318,7 +318,7 @@ export default function AdminDashboardPage() {
                             <h4 className="font-bold text-lg mb-6">Accesos Rápidos</h4>
                             <div className="grid grid-cols-2 gap-4">
                                 <Link
-                                    href="/admin/contracts/new"
+                                    href="/panel-admin/contracts/new"
                                     className="flex flex-col items-center justify-center gap-3 p-6 bg-primary/10 border-2 border-primary/20 hover:border-primary rounded-2xl transition-all"
                                 >
                                     <div className="w-12 h-12 bg-primary flex items-center justify-center rounded-xl text-black">
@@ -327,7 +327,7 @@ export default function AdminDashboardPage() {
                                     <span className="font-bold text-sm text-black">Nuevo Contrato</span>
                                 </Link>
                                 <Link
-                                    href="/admin/kyc"
+                                    href="/panel-admin/kyc"
                                     className="flex flex-col items-center justify-center gap-3 p-6 bg-red-500/5 border-2 border-red-500/10 hover:border-red-500/30 rounded-2xl transition-all"
                                 >
                                     <div className="w-12 h-12 bg-red-500 flex items-center justify-center rounded-xl text-white">
@@ -358,7 +358,7 @@ export default function AdminDashboardPage() {
                     <section className="bg-white rounded-[32px] border border-gray-100 overflow-hidden shadow-sm">
                         <div className="p-8 border-b border-gray-100 flex justify-between items-center">
                             <h4 className="font-bold text-lg">Últimos Usuarios Registrados</h4>
-                            <Link href="/admin/users" className="text-primary text-sm font-bold hover:underline">
+                            <Link href="/panel-admin/users" className="text-primary text-sm font-bold hover:underline">
                                 Ver todos
                             </Link>
                         </div>
@@ -392,7 +392,7 @@ export default function AdminDashboardPage() {
                                             <td className="px-8 py-5 text-sm text-gray-500">{formatDate(user.createdAt)}</td>
                                             <td className="px-8 py-5 text-right">
                                                 <Link
-                                                    href={`/admin/users/${user.id}`}
+                                                    href={`/panel-admin/users/${user.id}`}
                                                     className="p-2 hover:bg-gray-100 rounded-lg inline-block"
                                                 >
                                                     <span className="material-symbols-outlined text-gray-400 text-sm">more_vert</span>

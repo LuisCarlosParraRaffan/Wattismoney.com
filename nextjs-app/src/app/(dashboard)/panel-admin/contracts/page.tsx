@@ -52,7 +52,7 @@ export default function ContractsListPage() {
             });
             if (statusFilter) params.append('status', statusFilter);
 
-            const res = await fetch(`/api/admin/contracts?${params}`);
+            const res = await fetch(`/api/panel-admin/contracts?${params}`);
             if (!res.ok) throw new Error('Error al cargar contratos');
             const data = await res.json();
             setContracts(data.contracts || []);
@@ -68,7 +68,7 @@ export default function ContractsListPage() {
         if (!confirm('¿Estás seguro de eliminar este contrato?')) return;
 
         try {
-            const res = await fetch(`/api/admin/contracts/${id}`, { method: 'DELETE' });
+            const res = await fetch(`/api/panel-admin/contracts/${id}`, { method: 'DELETE' });
             if (!res.ok) {
                 const data = await res.json();
                 throw new Error(data.error || 'Error al eliminar');
@@ -165,7 +165,7 @@ export default function ContractsListPage() {
                         <p className="text-gray-500 mt-1">Gestión integral del catálogo de energía renovable.</p>
                     </div>
                     <Link
-                        href="/admin/contracts/new"
+                        href="/panel-admin/contracts/new"
                         className="bg-primary text-black px-6 py-2.5 rounded-lg font-bold flex items-center gap-2 hover:opacity-90 transition-opacity"
                     >
                         <span className="material-symbols-outlined">add</span>
@@ -305,14 +305,14 @@ export default function ContractsListPage() {
                                                 <td className="px-6 py-4">
                                                     <div className="flex justify-center gap-2">
                                                         <Link
-                                                            href={`/admin/contracts/${contract.id}`}
+                                                            href={`/panel-admin/contracts/${contract.id}`}
                                                             className="p-1.5 rounded-lg text-gray-400 hover:text-black hover:bg-primary transition-all"
                                                             title="Ver"
                                                         >
                                                             <span className="material-symbols-outlined text-sm">visibility</span>
                                                         </Link>
                                                         <Link
-                                                            href={`/admin/contracts/${contract.id}/edit`}
+                                                            href={`/panel-admin/contracts/${contract.id}/edit`}
                                                             className="p-1.5 rounded-lg text-gray-400 hover:text-black hover:bg-primary transition-all"
                                                             title="Editar"
                                                         >

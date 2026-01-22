@@ -174,16 +174,16 @@ export default function DashboardLayoutClient({
 
                                 <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isAdminOpen || isAdminRoute ? 'max-h-60 opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
                                     <div className="pl-10 pr-2 flex flex-col gap-1">
-                                        <Link href="/admin" className={`block px-3 py-2 rounded-lg text-xs transition-colors ${pathname === '/admin' ? 'text-black font-bold bg-primary/20' : 'text-slate-500 hover:text-black hover:bg-gray-50'}`}>
+                                        <Link href="/panel-admin" className={`block px-3 py-2 rounded-lg text-xs transition-colors ${pathname === '/admin' ? 'text-black font-bold bg-primary/20' : 'text-slate-500 hover:text-black hover:bg-gray-50'}`}>
                                             Dashboard
                                         </Link>
-                                        <Link href="/admin/contracts" className={`block px-3 py-2 rounded-lg text-xs transition-colors ${pathname?.includes('/admin/contracts') ? 'text-black font-bold bg-primary/20' : 'text-slate-500 hover:text-black hover:bg-gray-50'}`}>
+                                        <Link href="/panel-admin/contracts" className={`block px-3 py-2 rounded-lg text-xs transition-colors ${pathname?.includes('/panel-admin/contracts') ? 'text-black font-bold bg-primary/20' : 'text-slate-500 hover:text-black hover:bg-gray-50'}`}>
                                             Contratos
                                         </Link>
-                                        <Link href="/admin/users" className={`block px-3 py-2 rounded-lg text-xs transition-colors ${pathname?.includes('/admin/users') ? 'text-black font-bold bg-primary/20' : 'text-slate-500 hover:text-black hover:bg-gray-50'}`}>
+                                        <Link href="/panel-admin/users" className={`block px-3 py-2 rounded-lg text-xs transition-colors ${pathname?.includes('/panel-admin/users') ? 'text-black font-bold bg-primary/20' : 'text-slate-500 hover:text-black hover:bg-gray-50'}`}>
                                             Usuarios
                                         </Link>
-                                        <Link href="/admin/kyc" className={`block px-3 py-2 rounded-lg text-xs transition-colors ${pathname?.includes('/admin/kyc') ? 'text-black font-bold bg-primary/20' : 'text-slate-500 hover:text-black hover:bg-gray-50'}`}>
+                                        <Link href="/panel-admin/kyc" className={`block px-3 py-2 rounded-lg text-xs transition-colors ${pathname?.includes('/panel-admin/kyc') ? 'text-black font-bold bg-primary/20' : 'text-slate-500 hover:text-black hover:bg-gray-50'}`}>
                                             Gestión KYC
                                         </Link>
                                     </div>

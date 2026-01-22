@@ -49,7 +49,7 @@ export default function AdminUsersPage() {
             });
             if (statusFilter) params.append('status', statusFilter);
 
-            const res = await fetch(`/api/admin/users?${params}`);
+            const res = await fetch(`/api/panel-admin/users?${params}`);
             if (!res.ok) throw new Error('Error al cargar usuarios');
             const data = await res.json();
             setUsers(data.users || []);
@@ -73,7 +73,7 @@ export default function AdminUsersPage() {
         if (!confirm(`¿Estás seguro de ${action} este usuario?`)) return;
 
         try {
-            const res = await fetch(`/api/admin/users/${userId}`, {
+            const res = await fetch(`/api/panel-admin/users/${userId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: newStatus }),
@@ -331,7 +331,7 @@ export default function AdminUsersPage() {
                                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                     <div className="flex items-center justify-end gap-2">
                                                         <Link
-                                                            href={`/admin/users/${user.id}`}
+                                                            href={`/panel-admin/users/${user.id}`}
                                                             className="text-gray-400 hover:text-primary transition-colors"
                                                             title="Ver detalle"
                                                         >

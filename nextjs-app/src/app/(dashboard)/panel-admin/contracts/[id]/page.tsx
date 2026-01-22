@@ -45,7 +45,7 @@ export default function ContractDetailPage() {
 
     const fetchContract = async () => {
         try {
-            const res = await fetch(`/api/admin/contracts/${contractId}`);
+            const res = await fetch(`/api/panel-admin/contracts/${contractId}`);
             if (!res.ok) throw new Error('Error al cargar el contrato');
             const data = await res.json();
             setContract(data.contract);
@@ -112,7 +112,7 @@ export default function ContractDetailPage() {
                 <div className="text-center">
                     <span className="material-symbols-outlined text-6xl text-gray-300 mb-4 block">error</span>
                     <p className="text-gray-500">{error || 'Contrato no encontrado'}</p>
-                    <Link href="/admin/contracts" className="text-primary font-bold mt-4 inline-block">Volver a contratos</Link>
+                    <Link href="/panel-admin/contracts" className="text-primary font-bold mt-4 inline-block">Volver a contratos</Link>
                 </div>
             </div>
         );
@@ -126,7 +126,7 @@ export default function ContractDetailPage() {
             <header className="bg-white border-b border-gray-200 px-6 md:px-10 py-6 shrink-0">
                 <div className="max-w-5xl mx-auto">
                     <div className="flex items-center gap-2 mb-3 text-sm text-gray-500">
-                        <Link href="/admin/contracts" className="hover:underline">Contratos</Link>
+                        <Link href="/panel-admin/contracts" className="hover:underline">Contratos</Link>
                         <span className="material-symbols-outlined text-sm">chevron_right</span>
                         <span className="font-bold text-black">Detalle</span>
                     </div>
@@ -136,7 +136,7 @@ export default function ContractDetailPage() {
                             {getStatusBadge(contract.status)}
                         </div>
                         <Link
-                            href={`/admin/contracts/${contract.id}/edit`}
+                            href={`/panel-admin/contracts/${contract.id}/edit`}
                             className="flex items-center gap-2 px-6 py-3 bg-primary text-black rounded-xl font-bold hover:brightness-95 transition-all"
                         >
                             <span className="material-symbols-outlined">edit</span>

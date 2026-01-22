@@ -37,7 +37,7 @@ export default function AdminKycPage() {
     const fetchKycDocs = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch('/api/admin/kyc');
+            const res = await fetch('/api/panel-admin/kyc');
             if (!res.ok) throw new Error('Error al cargar documentos KYC');
             const data = await res.json();
             setKycDocs(data.documents || []);
@@ -51,7 +51,7 @@ export default function AdminKycPage() {
     const handleApprove = async (documentId: string) => {
         setProcessingId(documentId);
         try {
-            const res = await fetch('/api/admin/kyc', {
+            const res = await fetch('/api/panel-admin/kyc', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ documentId, action: 'approve' }),
@@ -68,7 +68,7 @@ export default function AdminKycPage() {
     const handleReject = async (documentId: string) => {
         setProcessingId(documentId);
         try {
-            const res = await fetch('/api/admin/kyc', {
+            const res = await fetch('/api/panel-admin/kyc', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ documentId, action: 'reject', reason: rejectReason }),
