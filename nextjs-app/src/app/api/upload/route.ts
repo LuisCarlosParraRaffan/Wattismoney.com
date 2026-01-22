@@ -22,6 +22,25 @@ function getSupabaseClient(): SupabaseClient {
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
+// Determine bucket based on upload type
+function getBucketAndPath(type: string, userId: string, fileExtension: string): { bucket: string; path: string } {
+    const timestamp = Date.now();
+
+    // Contract assets go to separate bucket
+    if (type === 'contract-image' || type === 'contract-document') {
+        return {
+            bucket: 'contract-assets',
+            path: `contracts/${type === 'contract-image' ? 'images' : 'documents'}/${timestamp}.${fileExtension}`
+        };
+    }
+
+    // KYC documents stay in their original bucket (front, back, residence, etc.)
+    return {
+        bucket: 'kyc-documents',
+        path: `${userId}/${type || 'document'}_${timestamp}.${fileExtension}`
+    };
+}
+
 export async function POST(request: NextRequest) {
     try {
         // Verificar autenticación
@@ -35,7 +54,7 @@ export async function POST(request: NextRequest) {
 
         const formData = await request.formData();
         const file = formData.get('file') as File | null;
-        const type = formData.get('type') as string | null; // 'front', 'back', 'residence'
+        const type = formData.get('type') as string | null; // 'front', 'back', 'residence', 'contract-image', 'contract-document'
 
         if (!file) {
             return NextResponse.json(
@@ -61,9 +80,8 @@ export async function POST(request: NextRequest) {
         }
 
         // Generar nombre único para el archivo
-        const fileExtension = file.name.split('.').pop();
-        const timestamp = Date.now();
-        const fileName = `${session.user.id}/${type || 'document'}_${timestamp}.${fileExtension}`;
+        const fileExtension = file.name.split('.').pop() || 'bin';
+        const { bucket, path: filePath } = getBucketAndPath(type || 'document', session.user.id, fileExtension);
 
         // Convertir File a ArrayBuffer
         const arrayBuffer = await file.arrayBuffer();
@@ -72,8 +90,8 @@ export async function POST(request: NextRequest) {
         // Subir a Supabase Storage
         const client = getSupabaseClient();
         const { data, error } = await client.storage
-            .from('kyc-documents')
-            .upload(fileName, buffer, {
+            .from(bucket)
+            .upload(filePath, buffer, {
                 contentType: file.type,
                 cacheControl: '3600',
                 upsert: true,
@@ -82,20 +100,22 @@ export async function POST(request: NextRequest) {
         if (error) {
             console.error('Error uploading to Supabase:', error);
             return NextResponse.json(
-                { error: 'Error al subir el archivo' },
+                { error: `Error al subir el archivo: ${error.message}` },
                 { status: 500 }
             );
         }
 
         // Obtener URL pública del archivo
         const { data: publicUrlData } = client.storage
-            .from('kyc-documents')
+            .from(bucket)
             .getPublicUrl(data.path);
 
         return NextResponse.json({
             success: true,
             url: publicUrlData.publicUrl,
             path: data.path,
+            fileName: file.name,
+            fileSize: file.size,
         });
     } catch (error) {
         console.error('Upload error:', error);
@@ -105,3 +125,4 @@ export async function POST(request: NextRequest) {
         );
     }
 }
+

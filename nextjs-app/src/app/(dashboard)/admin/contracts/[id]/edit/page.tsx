@@ -27,6 +27,7 @@ interface ContractFormData {
 interface UploadedDocument {
     id: string;
     name: string;
+    url: string;
     size: string;
     uploadedAt: string;
 }
@@ -38,6 +39,8 @@ export default function EditContractPage() {
 
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isUploadingImage, setIsUploadingImage] = useState(false);
+    const [isUploadingDoc, setIsUploadingDoc] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDocument[]>([]);
 
@@ -98,8 +101,9 @@ export default function EditContractPage() {
                 setUploadedDocuments(data.contract.documents.map((doc: any) => ({
                     id: doc.id,
                     name: doc.name,
-                    size: 'PDF',
-                    uploadedAt: new Date(doc.createdAt).toLocaleDateString(),
+                    url: doc.url,
+                    size: doc.size ? `${Math.round(doc.size / 1024)} KB` : 'PDF',
+                    uploadedAt: new Date(doc.uploadedAt).toLocaleDateString(),
                 })));
             }
         } catch (err) {
@@ -210,8 +214,98 @@ export default function EditContractPage() {
         }
     };
 
-    const removeDocument = (docId: string) => {
-        setUploadedDocuments(prev => prev.filter(d => d.id !== docId));
+    const removeDocument = async (docId: string) => {
+        try {
+            const res = await fetch(`/api/admin/contracts/${contractId}/documents?documentId=${docId}`, {
+                method: 'DELETE',
+            });
+            if (res.ok) {
+                setUploadedDocuments(prev => prev.filter(d => d.id !== docId));
+            }
+        } catch (err) {
+            console.error('Error deleting document:', err);
+        }
+    };
+
+    const handleImageUpload = async (file: File) => {
+        setIsUploadingImage(true);
+        setError(null);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('type', 'contract-image');
+
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || 'Error al subir imagen');
+            }
+
+            const data = await res.json();
+            setFormData(prev => ({ ...prev, imageUrl: data.url }));
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Error al subir imagen');
+        } finally {
+            setIsUploadingImage(false);
+        }
+    };
+
+    const handleDocumentUpload = async (files: FileList) => {
+        setIsUploadingDoc(true);
+        setError(null);
+        try {
+            for (const file of Array.from(files)) {
+                // 1. Upload to storage
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('type', 'contract-document');
+
+                const uploadRes = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!uploadRes.ok) {
+                    const data = await uploadRes.json();
+                    throw new Error(data.error || 'Error al subir documento');
+                }
+
+                const uploadData = await uploadRes.json();
+
+                // 2. Save to database
+                const docRes = await fetch(`/api/admin/contracts/${contractId}/documents`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: file.name,
+                        url: uploadData.url,
+                        type: 'contract',
+                        size: file.size,
+                    }),
+                });
+
+                if (!docRes.ok) {
+                    throw new Error('Error al guardar documento');
+                }
+
+                const docData = await docRes.json();
+                setUploadedDocuments(prev => [...prev, {
+                    id: docData.document.id,
+                    name: file.name,
+                    url: uploadData.url,
+                    size: `${Math.round(file.size / 1024)} KB`,
+                    uploadedAt: new Date().toLocaleDateString(),
+                }]);
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Error al subir documentos');
+        } finally {
+            setIsUploadingDoc(false);
+        }
     };
 
     const getStatusLabel = (status: string) => {
@@ -292,6 +386,9 @@ export default function EditContractPage() {
                                 <span className="material-symbols-outlined text-black">image</span>
                             </div>
                             <h2 className="text-xl font-bold text-black">Imagen Promocional</h2>
+                            {isUploadingImage && (
+                                <span className="text-sm text-gray-500 animate-pulse">Subiendo...</span>
+                            )}
                         </div>
                         <div className="w-full">
                             {formData.imageUrl ? (
@@ -310,18 +407,22 @@ export default function EditContractPage() {
                             ) : (
                                 <div className="relative group cursor-pointer w-full aspect-[21/9] rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-primary/5 hover:border-primary transition-all flex flex-col items-center justify-center overflow-hidden">
                                     <div className="flex flex-col items-center p-6 text-center">
-                                        <span className="material-symbols-outlined text-5xl text-gray-400 group-hover:text-primary mb-3 transition-colors">cloud_upload</span>
+                                        {isUploadingImage ? (
+                                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-3"></div>
+                                        ) : (
+                                            <span className="material-symbols-outlined text-5xl text-gray-400 group-hover:text-primary mb-3 transition-colors">cloud_upload</span>
+                                        )}
                                         <p className="text-lg font-bold text-gray-700">Arrastra tu imagen aquí o haz clic para subir</p>
-                                        <p className="text-sm text-gray-500 mt-1">Soporta JPG y PNG de alta resolución</p>
+                                        <p className="text-sm text-gray-500 mt-1">Soporta JPG y PNG de alta resolución (máx 10MB)</p>
                                     </div>
                                     <input
                                         type="file"
-                                        accept=".jpg,.jpeg,.png"
-                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                        accept=".jpg,.jpeg,.png,.webp"
+                                        disabled={isUploadingImage}
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-wait"
                                         onChange={(e) => {
                                             if (e.target.files?.[0]) {
-                                                const url = URL.createObjectURL(e.target.files[0]);
-                                                setFormData(prev => ({ ...prev, imageUrl: url }));
+                                                handleImageUpload(e.target.files[0]);
                                             }
                                         }}
                                     />
@@ -545,16 +646,32 @@ export default function EditContractPage() {
                             <h2 className="text-xl font-bold text-black">Documentos</h2>
                         </div>
                         <div className="space-y-4">
-                            <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 flex flex-col items-center justify-center bg-gray-50 hover:bg-white hover:border-primary transition-all cursor-pointer">
-                                <span className="material-symbols-outlined text-4xl text-gray-400 mb-2">picture_as_pdf</span>
-                                <p className="text-sm font-bold text-black">Carga múltiple de PDFs</p>
-                                <p className="text-xs text-gray-500 mb-4">Verificaciones legales, contratos, auditorías</p>
-                                <button
-                                    type="button"
-                                    className="px-5 py-2 bg-black text-white text-xs font-bold rounded-lg hover:bg-gray-800 transition-colors"
-                                >
-                                    Seleccionar Archivos
-                                </button>
+                            <div className="relative border-2 border-dashed border-gray-200 rounded-xl p-8 flex flex-col items-center justify-center bg-gray-50 hover:bg-white hover:border-primary transition-all cursor-pointer">
+                                {isUploadingDoc ? (
+                                    <>
+                                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mb-2"></div>
+                                        <p className="text-sm font-bold text-black">Subiendo documentos...</p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className="material-symbols-outlined text-4xl text-gray-400 mb-2">picture_as_pdf</span>
+                                        <p className="text-sm font-bold text-black">Carga múltiple de PDFs</p>
+                                        <p className="text-xs text-gray-500 mb-4">Verificaciones legales, contratos, auditorías (máx 10MB)</p>
+                                        <span className="px-5 py-2 bg-black text-white text-xs font-bold rounded-lg">Seleccionar Archivos</span>
+                                    </>
+                                )}
+                                <input
+                                    type="file"
+                                    accept=".pdf"
+                                    multiple
+                                    disabled={isUploadingDoc}
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-wait"
+                                    onChange={(e) => {
+                                        if (e.target.files?.length) {
+                                            handleDocumentUpload(e.target.files);
+                                        }
+                                    }}
+                                />
                             </div>
 
                             {uploadedDocuments.length > 0 && (
