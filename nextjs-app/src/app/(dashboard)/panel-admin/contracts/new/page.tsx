@@ -75,7 +75,7 @@ export default function NewContractPage() {
                 action
             };
 
-            const response = await fetch('/api/panel-admin/contracts', {
+            const response = await fetch('/api/admin/contracts', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

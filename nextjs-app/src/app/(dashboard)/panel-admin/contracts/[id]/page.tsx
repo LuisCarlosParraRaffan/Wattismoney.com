@@ -45,7 +45,7 @@ export default function ContractDetailPage() {
 
     const fetchContract = async () => {
         try {
-            const res = await fetch(`/api/panel-admin/contracts/${contractId}`);
+            const res = await fetch(`/api/admin/contracts/${contractId}`);
             if (!res.ok) throw new Error('Error al cargar el contrato');
             const data = await res.json();
             setContract(data.contract);

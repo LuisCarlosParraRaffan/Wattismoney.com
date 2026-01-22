@@ -46,7 +46,7 @@ export default function AdminDashboardPage() {
 
     const fetchStats = async () => {
         try {
-            const res = await fetch('/api/panel-admin/stats');
+            const res = await fetch('/api/admin/stats');
             if (!res.ok) throw new Error('Error al cargar estadísticas');
             const data = await res.json();
             setStats(data);
@@ -57,7 +57,7 @@ export default function AdminDashboardPage() {
 
     const fetchRecentUsers = async () => {
         try {
-            const res = await fetch('/api/panel-admin/users?limit=5');
+            const res = await fetch('/api/admin/users?limit=5');
             if (!res.ok) throw new Error('Error al cargar usuarios');
             const data = await res.json();
             setRecentUsers(data.users || []);

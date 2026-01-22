@@ -52,7 +52,7 @@ export default function ContractsListPage() {
             });
             if (statusFilter) params.append('status', statusFilter);
 
-            const res = await fetch(`/api/panel-admin/contracts?${params}`);
+            const res = await fetch(`/api/admin/contracts?${params}`);
             if (!res.ok) throw new Error('Error al cargar contratos');
             const data = await res.json();
             setContracts(data.contracts || []);
@@ -68,7 +68,7 @@ export default function ContractsListPage() {
         if (!confirm('¿Estás seguro de eliminar este contrato?')) return;
 
         try {
-            const res = await fetch(`/api/panel-admin/contracts/${id}`, { method: 'DELETE' });
+            const res = await fetch(`/api/admin/contracts/${id}`, { method: 'DELETE' });
             if (!res.ok) {
                 const data = await res.json();
                 throw new Error(data.error || 'Error al eliminar');

@@ -69,7 +69,7 @@ export default function UserDetailPage() {
 
     const fetchUser = async () => {
         try {
-            const res = await fetch(`/api/panel-admin/users/${userId}`);
+            const res = await fetch(`/api/admin/users/${userId}`);
             if (!res.ok) throw new Error('Error al cargar usuario');
             const data = await res.json();
             setUser(data.user);
@@ -85,7 +85,7 @@ export default function UserDetailPage() {
     const handleUpdateUser = async (updates: Record<string, string>) => {
         setIsSaving(true);
         try {
-            const res = await fetch(`/api/panel-admin/users/${userId}`, {
+            const res = await fetch(`/api/admin/users/${userId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updates),
@@ -104,7 +104,7 @@ export default function UserDetailPage() {
 
         setIsSaving(true);
         try {
-            const res = await fetch('/api/panel-admin/kyc', {
+            const res = await fetch('/api/admin/kyc', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

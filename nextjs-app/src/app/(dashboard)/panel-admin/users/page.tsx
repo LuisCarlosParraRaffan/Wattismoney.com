@@ -49,7 +49,7 @@ export default function AdminUsersPage() {
             });
             if (statusFilter) params.append('status', statusFilter);
 
-            const res = await fetch(`/api/panel-admin/users?${params}`);
+            const res = await fetch(`/api/admin/users?${params}`);
             if (!res.ok) throw new Error('Error al cargar usuarios');
             const data = await res.json();
             setUsers(data.users || []);
@@ -73,7 +73,7 @@ export default function AdminUsersPage() {
         if (!confirm(`¿Estás seguro de ${action} este usuario?`)) return;
 
         try {
-            const res = await fetch(`/api/panel-admin/users/${userId}`, {
+            const res = await fetch(`/api/admin/users/${userId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: newStatus }),
