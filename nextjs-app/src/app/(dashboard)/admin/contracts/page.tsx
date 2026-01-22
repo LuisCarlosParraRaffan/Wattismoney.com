@@ -8,6 +8,7 @@ interface Contract {
     name: string;
     imageUrl: string | null;
     energyType: string;
+    marketType: string;
     annualReturn: number;
     totalCapacity: number;
     currentRaised: number;
@@ -36,6 +37,7 @@ export default function ContractsListPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
     const [energyFilter, setEnergyFilter] = useState('');
+    const [marketFilter, setMarketFilter] = useState('');
 
     useEffect(() => {
         fetchContracts();
@@ -119,6 +121,21 @@ export default function ContractsListPage() {
         );
     };
 
+    const getMarketBadge = (type: string) => {
+        if (type === 'SECONDARY') {
+            return (
+                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800">
+                    Secundario
+                </span>
+            );
+        }
+        return (
+            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
+                Primario
+            </span>
+        );
+    };
+
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('es-ES', {
             day: '2-digit',
@@ -134,7 +151,8 @@ export default function ContractsListPage() {
 
     const filteredContracts = contracts.filter(c =>
         c.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        (!energyFilter || c.energyType === energyFilter)
+        (!energyFilter || c.energyType === energyFilter) &&
+        (!marketFilter || c.marketType === marketFilter)
     );
 
     return (
@@ -200,6 +218,17 @@ export default function ContractsListPage() {
                                 <option value="BIOMASS">Biomasa</option>
                             </select>
                         </div>
+                        <div className="relative">
+                            <select
+                                value={marketFilter}
+                                onChange={(e) => setMarketFilter(e.target.value)}
+                                className="w-44 px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary focus:border-primary appearance-none bg-white pr-10"
+                            >
+                                <option value="">Mercado: Todos</option>
+                                <option value="PRIMARY">Primario</option>
+                                <option value="SECONDARY">Secundario</option>
+                            </select>
+                        </div>
                     </div>
 
                     {/* Error State */}
@@ -225,6 +254,7 @@ export default function ContractsListPage() {
                                         <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">Imagen</th>
                                         <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">Nombre</th>
                                         <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">Tipo Energía</th>
+                                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">Mercado</th>
                                         <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">Rentabilidad</th>
                                         <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500 text-right">Meta ($)</th>
                                         <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">Recaudado</th>
@@ -253,6 +283,7 @@ export default function ContractsListPage() {
                                                 </td>
                                                 <td className="px-6 py-4 font-bold">{contract.name}</td>
                                                 <td className="px-6 py-4">{getEnergyBadge(contract.energyType)}</td>
+                                                <td className="px-6 py-4">{getMarketBadge(contract.marketType)}</td>
                                                 <td className="px-6 py-4 text-green-600 font-bold">
                                                     {Number(contract.annualReturn).toFixed(1)}%
                                                 </td>

@@ -49,6 +49,8 @@ model User {
   sessions      Session[]
   kycDocuments  KycDocument[]
   investments   Investment[]
+  sellerListings SecondaryListing[] @relation("SellerListings")
+  buyerListings  SecondaryListing[] @relation("BuyerListings")
   
   // Índices para búsquedas frecuentes
   @@index([email])
@@ -242,6 +244,7 @@ model Contract {
   
   // Estado
   status          ContractStatus  @default(DRAFT)
+  marketType      MarketType      @default(PRIMARY)
   
   // Tipos específicos
   contractType    String?         // "Infraestructura", "Liquidez"
@@ -258,6 +261,7 @@ model Contract {
   
   @@index([status])
   @@index([energyType])
+  @@index([marketType])
 }
 
 model ContractDocument {
@@ -293,9 +297,38 @@ model Investment {
   
   user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   contract    Contract        @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  listing     SecondaryListing?
   
   @@index([userId])
   @@index([contractId])
+  @@index([status])
+}
+
+// ============================================
+// MERCADO SECUNDARIO
+// ============================================
+
+model SecondaryListing {
+  id            String        @id @default(cuid())
+  investmentId  String        @unique
+  sellerId      String
+  
+  askingPrice   Decimal       @db.Decimal(15, 2)
+  originalAmount Decimal      @db.Decimal(15, 2)
+  commission    Decimal       @db.Decimal(15, 2) // 3% para Wattismoney
+  
+  status        ListingStatus @default(ACTIVE)
+  
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  soldAt        DateTime?
+  buyerId       String?
+  
+  investment    Investment    @relation(fields: [investmentId], references: [id])
+  seller        User          @relation("SellerListings", fields: [sellerId], references: [id])
+  buyer         User?         @relation("BuyerListings", fields: [buyerId], references: [id])
+  
+  @@index([sellerId])
   @@index([status])
 }
 
@@ -328,5 +361,17 @@ enum InvestmentStatus {
   CONFIRMED   // Confirmada
   CANCELLED   // Cancelada
   REFUNDED    // Reembolsada
+  SOLD        // Vendida en mercado secundario
+}
+
+enum MarketType {
+  PRIMARY     // Mercado Primario
+  SECONDARY   // Mercado Secundario
+}
+
+enum ListingStatus {
+  ACTIVE      // Disponible para compra
+  SOLD        // Vendida
+  CANCELLED   // Cancelada por vendedor
 }
 
