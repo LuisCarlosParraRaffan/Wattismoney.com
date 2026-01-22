@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { checkAdminAccess } from '@/lib/requireAdmin';
 import prisma from '@/lib/prisma';
-import { ContractStatus, EnergyType } from '@/generated/prisma';
+import { ContractStatus, EnergyType, MarketType } from '@/generated/prisma';
 
 // GET /api/admin/contracts/[id] - Get contract details
 export async function GET(
@@ -76,6 +76,14 @@ export async function PATCH(
         if (body.energyType && !Object.values(EnergyType).includes(body.energyType)) {
             return NextResponse.json(
                 { error: 'Tipo de energía no válido' },
+                { status: 400 }
+            );
+        }
+
+        // Validate marketType if provided
+        if (body.marketType && !Object.values(MarketType).includes(body.marketType)) {
+            return NextResponse.json(
+                { error: 'Tipo de mercado no válido' },
                 { status: 400 }
             );
         }
