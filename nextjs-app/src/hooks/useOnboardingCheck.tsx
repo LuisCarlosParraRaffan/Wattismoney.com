@@ -8,6 +8,7 @@ interface OnboardingStatus {
     userStatus: string | null;
     hasKyc: boolean;
     hasInvestorProfile: boolean;
+    kycStatus: string | null;
     isLoading: boolean;
 }
 
@@ -19,6 +20,7 @@ export function useOnboardingCheck() {
         userStatus: null,
         hasKyc: false,
         hasInvestorProfile: false,
+        kycStatus: null,
         isLoading: true,
     });
 
@@ -32,6 +34,7 @@ export function useOnboardingCheck() {
                         userStatus: 'ACTIVE',
                         hasKyc: true,
                         hasInvestorProfile: true,
+                        kycStatus: 'APPROVED',
                         isLoading: false,
                     });
                     return;
@@ -43,8 +46,6 @@ export function useOnboardingCheck() {
                     // If user is not found or unauthorized, force logout/redirect
                     if (response.status === 404 || response.status === 401) {
                         console.error('User not found or unauthorized, redirecting to login');
-                        // Optional: force signout if using next-auth
-                        // signOut({ callbackUrl: '/login' }); 
                         router.push('/login');
                         return;
                     }
@@ -56,6 +57,7 @@ export function useOnboardingCheck() {
                     userStatus: data.userStatus,
                     hasKyc: data.hasKyc,
                     hasInvestorProfile: data.hasInvestorProfile,
+                    kycStatus: data.kycStatus,
                     isLoading: false,
                 });
 
@@ -63,27 +65,27 @@ export function useOnboardingCheck() {
                 const onboardingPaths = [
                     '/kyc-upload',
                     '/kyc-success',
-                    '/investor-profile',
-                    '/investor-profile-success',
                     '/investor-quiz',
                     '/investor-quiz-results'
                 ];
                 const isOnboardingPath = onboardingPaths.some(p => pathname.startsWith(p));
 
                 if (!isOnboardingPath) {
-                    // User is trying to access dashboard but hasn't completed onboarding
+                    // Step 1: If no KYC submitted at all, redirect to upload
                     if (!data.hasKyc) {
                         router.push('/kyc-upload');
                         return;
                     }
-                    if (!data.hasInvestorProfile) {
-                        router.push('/investor-profile');
+
+                    // Step 2: Only after KYC is APPROVED, check for investor profile
+                    // If KYC is pending/in review, don't force the questionnaire yet
+                    if (data.kycStatus === 'APPROVED' && !data.hasInvestorProfile) {
+                        router.push('/investor-quiz');
                         return;
                     }
                 }
             } catch (error) {
                 console.error('Error checking onboarding status:', error);
-                // Ensure loading stops even on error, but maybe redirect to error page or login
                 setStatus(prev => ({ ...prev, isLoading: false }));
             }
         };
@@ -99,7 +101,7 @@ export function withOnboardingCheck<P extends object>(
     WrappedComponent: React.ComponentType<P>
 ) {
     return function OnboardingCheckWrapper(props: P) {
-        const { isLoading, hasKyc, hasInvestorProfile } = useOnboardingCheck();
+        const { isLoading, hasKyc, hasInvestorProfile, kycStatus } = useOnboardingCheck();
 
         if (isLoading) {
             return (
@@ -112,7 +114,10 @@ export function withOnboardingCheck<P extends object>(
             );
         }
 
-        if (!hasKyc || !hasInvestorProfile) {
+        // Block only if: no KYC, OR (KYC approved but no investor profile)
+        const needsOnboarding = !hasKyc || (kycStatus === 'APPROVED' && !hasInvestorProfile);
+
+        if (needsOnboarding) {
             // Will be redirected by the hook
             return null;
         }

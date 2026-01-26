@@ -34,6 +34,14 @@ function getBucketAndPath(type: string, userId: string, fileExtension: string): 
         };
     }
 
+    // Avatar images go to user-avatars bucket
+    if (type === 'avatar') {
+        return {
+            bucket: 'user-avatars',
+            path: `${userId}/avatar_${timestamp}.${fileExtension}`
+        };
+    }
+
     // KYC documents stay in their original bucket (front, back, residence, etc.)
     return {
         bucket: 'kyc-documents',

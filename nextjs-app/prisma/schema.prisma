@@ -28,6 +28,15 @@ model User {
   dateOfBirth   DateTime?
   nationality   String?
   
+  // Perfil extendido
+  avatarUrl     String?
+  bio           String?   @db.Text
+  address       String?
+  city          String?
+  country       String?
+  preferredLanguage String? @default("es")
+  profilePublic Boolean   @default(false)
+  
   // Estado de la cuenta
   role          UserRole  @default(INVESTOR)
   status        UserStatus @default(PENDING_EMAIL_VERIFICATION)
@@ -38,6 +47,7 @@ model User {
   // Gamificación
   points        Int       @default(0)
   level         Int       @default(1)
+  levelName     String?   // "Pionero", "Magnate Solar", etc.
   
   // Timestamps
   createdAt     DateTime  @default(now())
@@ -51,6 +61,7 @@ model User {
   investments   Investment[]
   sellerListings SecondaryListing[] @relation("SellerListings")
   buyerListings  SecondaryListing[] @relation("BuyerListings")
+  badges        UserBadge[]
   
   // Índices para búsquedas frecuentes
   @@index([email])
@@ -375,3 +386,35 @@ enum ListingStatus {
   CANCELLED   // Cancelada por vendedor
 }
 
+// ============================================
+// GAMIFICACIÓN - INSIGNIAS
+// ============================================
+
+model Badge {
+  id          String   @id @default(cuid())
+  name        String   @unique // "Early Investor", etc.
+  description String?
+  icon        String   // Material Symbol icon name
+  color       String   // Gradient color: "yellow", "green", "blue", "purple"
+  category    String?  // "investment", "risk", "innovation"
+  pointsValue Int      @default(0) // XP que otorga al asignar
+  
+  createdAt   DateTime @default(now())
+  
+  users       UserBadge[]
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  badgeId   String
+  awardedAt DateTime @default(now())
+  awardedBy String?  // Admin ID que la otorgó
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, badgeId])
+  @@index([userId])
+  @@index([badgeId])
+}

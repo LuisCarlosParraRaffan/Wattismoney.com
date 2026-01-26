@@ -345,13 +345,13 @@ export async function sendKycApprovedEmail(
                 </h1>
                 
                 <p style="color: #666666; font-size: 16px; line-height: 1.7; margin: 0 0 24px 0;">
-                    Felicidades <strong>${firstName}</strong>, tu proceso de KYC ha sido exitoso. Ya eres parte de la comunidad <span style="color: #000; font-weight: 600;">Wattismoney</span>. Tienes acceso total para invertir en energía sostenible de forma segura.
+                    Felicidades <strong>${firstName}</strong>, tu proceso de KYC ha sido exitoso. Ya eres parte de la comunidad <span style="color: #000; font-weight: 600;">Wattismoney</span>. Solo falta un paso: completa tu perfil de inversor con nuestro cuestionario inteligente.
                 </p>
                 
-                ${getPrimaryButton('Completar Perfil de Inversor', `${BASE_URL}/investor-profile`)}
+                ${getPrimaryButton('🧠 Completar Quiz de Inversor', `${BASE_URL}/investor-quiz`)}
                 
-                <a href="${BASE_URL}/mercado-primario" style="color: #666; font-size: 14px; text-decoration: none;">
-                    Explorar Oportunidades →
+                <a href="${BASE_URL}/dashboard" style="color: #666; font-size: 14px; text-decoration: none;">
+                    Ir al Dashboard →
                 </a>
                 
                 <!-- Security note -->
@@ -652,5 +652,104 @@ export async function sendProfileCompleteEmail(
     } catch (error) {
         console.error('Error sending profile complete email:', error);
         return { success: false, error: 'Error al enviar email de felicitaciones' };
+    }
+}
+
+// ============================================================================
+// 7. CORREO DE NOTIFICACIÓN AL SUPER ADMIN - Nuevo usuario completó KYC
+// ============================================================================
+export async function sendAdminKycNotificationEmail(
+    userFirstName: string,
+    userLastName: string | null,
+    userEmail: string
+): Promise<EmailResult> {
+    // Get admin email from environment or use default
+    const adminEmail = process.env.SUPER_ADMIN_EMAIL || 'admin@wattismoney.com';
+
+    const userName = userLastName
+        ? `${userFirstName} ${userLastName}`
+        : userFirstName;
+
+    const content = `
+        ${getEmailHeader()}
+        <tr>
+            <td style="padding: 48px 40px; text-align: center;">
+                <!-- Notification Icon -->
+                <div style="width: 80px; height: 80px; background-color: rgba(34, 197, 94, 0.15); border-radius: 50%; margin: 0 auto 24px;">
+                    <table width="80" height="80" align="center" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td align="center" valign="middle">
+                                <span style="font-size: 40px;">🎉</span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <h1 style="color: #000000; font-family: 'Inter', Arial, sans-serif; font-size: 26px; font-weight: 700; margin: 0 0 16px 0;">
+                    Nuevo Usuario Verificado
+                </h1>
+                
+                <p style="color: #666666; font-size: 16px; line-height: 1.7; margin: 0 0 24px 0;">
+                    Un nuevo usuario ha completado exitosamente el proceso de registro y verificación KYC en <strong>Wattismoney</strong>.
+                </p>
+                
+                <!-- User Info Card -->
+                <div style="background-color: #f8f8f5; border-radius: 12px; padding: 24px; margin: 0 0 24px 0; text-align: left;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td style="padding: 8px 0;">
+                                <span style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Nombre</span>
+                                <p style="color: #000; font-size: 18px; font-weight: 600; margin: 4px 0 0 0;">${userName}</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 16px 0 8px 0; border-top: 1px solid #e5e5e5;">
+                                <span style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Correo Electrónico</span>
+                                <p style="color: #000; font-size: 16px; margin: 4px 0 0 0;">
+                                    <a href="mailto:${userEmail}" style="color: #000; text-decoration: none;">${userEmail}</a>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 16px 0 0 0; border-top: 1px solid #e5e5e5;">
+                                <span style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Estado</span>
+                                <p style="margin: 4px 0 0 0;">
+                                    <span style="background-color: #22c55e; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                                        ✓ KYC Aprobado
+                                    </span>
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                
+                ${getPrimaryButton('Ver en Panel Admin', `${BASE_URL}/panel-admin/users`)}
+                
+                <p style="color: #999; font-size: 13px; margin: 16px 0 0 0;">
+                    El usuario ahora procederá a completar su perfil de inversor.
+                </p>
+            </td>
+        </tr>
+        
+        ${getEmailFooter()}
+    `;
+
+    try {
+        const client = getResendClient();
+        if (!client) {
+            console.warn('Resend API key not configured, skipping admin notification');
+            return { success: false, error: 'Email service not configured' };
+        }
+        await client.emails.send({
+            from: FROM_EMAIL,
+            to: adminEmail,
+            subject: `🎉 Nuevo usuario verificado: ${userName}`,
+            html: wrapEmailContent(content),
+        });
+        console.log(`[Email] Admin notification sent for user: ${userEmail}`);
+        return { success: true };
+    } catch (error) {
+        console.error('Error sending admin notification email:', error);
+        return { success: false, error: 'Error al enviar notificación al admin' };
     }
 }

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { WattismoneyLogo } from '@/components/Icons';
 import { useOnboardingCheck } from '@/hooks/useOnboardingCheck';
 
@@ -23,6 +23,7 @@ export default function DashboardLayoutClient({
     // UI States
     const [isOpportunitiesOpen, setIsOpportunitiesOpen] = useState(false);
     const [isAdminOpen, setIsAdminOpen] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
 
     // CRITICAL FIX: Mounted state to prevent Hydration Mismatch (Error #310)
     const [mounted, setMounted] = useState(false);
@@ -74,6 +75,12 @@ export default function DashboardLayoutClient({
     };
 
     const isOpportunitiesActive = pathname?.includes('mercado') || false;
+
+    // Logout handler
+    const handleLogout = async () => {
+        setIsLoggingOut(true);
+        await signOut({ callbackUrl: '/' });
+    };
 
     return (
         <div className="bg-slate-50 text-slate-900 font-display h-screen flex overflow-hidden">
@@ -218,7 +225,31 @@ export default function DashboardLayoutClient({
 
             {/* Main Content Area */}
             <main className="flex-1 flex flex-col h-full overflow-hidden relative">
-                {children}
+                {/* Top Header Bar with Logout */}
+                <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-end px-6 shrink-0">
+                    <button
+                        onClick={handleLogout}
+                        disabled={isLoggingOut}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                    >
+                        {isLoggingOut ? (
+                            <>
+                                <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                                <span>Cerrando...</span>
+                            </>
+                        ) : (
+                            <>
+                                <span className="material-symbols-outlined text-[20px]">logout</span>
+                                <span>Cerrar Sesión</span>
+                            </>
+                        )}
+                    </button>
+                </header>
+
+                {/* Page Content */}
+                <div className="flex-1 overflow-auto">
+                    {children}
+                </div>
             </main>
         </div>
     );

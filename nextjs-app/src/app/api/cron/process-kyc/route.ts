@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { sendKycApprovedEmail } from '@/lib/email';
+import { sendKycApprovedEmail, sendAdminKycNotificationEmail } from '@/lib/email';
 
 // Duration in minutes before auto-approving KYC
 const APPROVAL_DELAY_MINUTES = 5;
@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
                         id: true,
                         email: true,
                         firstName: true,
+                        lastName: true,
                     },
                 },
             },
@@ -67,13 +68,21 @@ export async function GET(request: NextRequest) {
                     data: { status: 'ACTIVE' },
                 });
 
-                // Send approval email
+                // Send approval email to user
                 if (kyc.user?.email) {
                     await sendKycApprovedEmail(
                         kyc.user.email,
                         kyc.user.firstName || 'Usuario'
                     );
                     console.log(`[Cron] Sent approval email to ${kyc.user.email}`);
+
+                    // Send notification to super admin
+                    await sendAdminKycNotificationEmail(
+                        kyc.user.firstName || 'Usuario',
+                        kyc.user.lastName,
+                        kyc.user.email
+                    );
+                    console.log(`[Cron] Sent admin notification for ${kyc.user.email}`);
                 }
 
                 approved++;

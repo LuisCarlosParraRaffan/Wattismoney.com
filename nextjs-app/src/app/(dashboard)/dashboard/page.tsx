@@ -65,6 +65,14 @@ const Dashboard: React.FC = () => {
         }).format(value);
     };
 
+    // Use explicit locale to prevent hydration mismatch
+    const formatNumber = (value: number, decimals: number = 2) => {
+        return new Intl.NumberFormat('en-US', {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals,
+        }).format(value);
+    };
+
     const getEnergyIcon = (type: string) => {
         switch (type) {
             case 'SOLAR': return 'sunny';
@@ -145,7 +153,7 @@ const Dashboard: React.FC = () => {
                             <div className="relative z-10">
                                 <p className="text-slate-500 text-xs font-bold uppercase tracking-wide mb-1">Energía Financiada</p>
                                 <div className="flex items-baseline gap-1">
-                                    <h3 className="text-3xl font-bold text-text-main">{data.totalEnergy.toLocaleString()} GWh</h3>
+                                    <h3 className="text-3xl font-bold text-text-main">{formatNumber(data.totalEnergy, 2)} GWh</h3>
                                 </div>
                                 <div className="mt-4 flex items-center gap-2">
                                     <div className="bg-green-50 text-green-700 px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1">
@@ -193,7 +201,7 @@ const Dashboard: React.FC = () => {
                             <div className="relative z-10">
                                 <p className="text-slate-500 text-xs font-bold uppercase tracking-wide mb-1">Impacto Ambiental</p>
                                 <div className="flex items-baseline gap-1">
-                                    <h3 className="text-3xl font-bold text-text-main">{data.co2Avoided.toLocaleString()} Ton</h3>
+                                    <h3 className="text-3xl font-bold text-text-main">{formatNumber(data.co2Avoided, 1)} Ton</h3>
                                     <span className="text-sm font-medium text-slate-500">CO2e</span>
                                 </div>
                                 <p className="text-xs text-slate-500 mt-4 leading-relaxed">

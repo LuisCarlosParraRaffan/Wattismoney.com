@@ -12,8 +12,12 @@ interface UserDetail {
     phone: string | null;
     dateOfBirth: string | null;
     nationality: string | null;
+    avatarUrl: string | null;
     role: string;
     status: string;
+    points: number;
+    level: number;
+    levelName: string | null;
     createdAt: string;
     lastLoginAt: string | null;
     investorProfile: {
@@ -49,6 +53,21 @@ interface UserDetail {
     };
 }
 
+interface Badge {
+    id: string;
+    name: string;
+    icon: string;
+    color: string;
+    description: string | null;
+    pointsValue: number;
+}
+
+interface UserBadge {
+    id: string;
+    awardedAt: string;
+    badge: Badge;
+}
+
 export default function UserDetailPage() {
     const params = useParams();
     const router = useRouter();
@@ -63,8 +82,15 @@ export default function UserDetailPage() {
     const [selectedStatus, setSelectedStatus] = useState('');
     const [selectedRole, setSelectedRole] = useState('');
 
+    // Gamification state
+    const [gamification, setGamification] = useState({ points: 0, level: 1, levelName: '' });
+    const [userBadges, setUserBadges] = useState<UserBadge[]>([]);
+    const [availableBadges, setAvailableBadges] = useState<Badge[]>([]);
+    const [selectedBadgeId, setSelectedBadgeId] = useState('');
+
     useEffect(() => {
         fetchUser();
+        fetchBadges();
     }, [userId]);
 
     const fetchUser = async () => {
@@ -75,6 +101,11 @@ export default function UserDetailPage() {
             setUser(data.user);
             setSelectedStatus(data.user.status);
             setSelectedRole(data.user.role);
+            setGamification({
+                points: data.user.points || 0,
+                level: data.user.level || 1,
+                levelName: data.user.levelName || '',
+            });
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error desconocido');
         } finally {
@@ -82,7 +113,7 @@ export default function UserDetailPage() {
         }
     };
 
-    const handleUpdateUser = async (updates: Record<string, string>) => {
+    const handleUpdateUser = async (updates: Record<string, string | number>) => {
         setIsSaving(true);
         try {
             const res = await fetch(`/api/admin/users/${userId}`, {
@@ -92,6 +123,78 @@ export default function UserDetailPage() {
             });
             if (!res.ok) throw new Error('Error al actualizar usuario');
             await fetchUser();
+        } catch (err) {
+            alert(err instanceof Error ? err.message : 'Error');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const fetchBadges = async () => {
+        try {
+            const res = await fetch(`/api/admin/users/${userId}/badges`);
+            if (res.ok) {
+                const data = await res.json();
+                setUserBadges(data.userBadges || []);
+                setAvailableBadges(data.availableBadges || []);
+            }
+        } catch {
+            // Badges are optional
+        }
+    };
+
+    const handleUpdateGamification = async () => {
+        setIsSaving(true);
+        try {
+            const res = await fetch(`/api/admin/users/${userId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(gamification),
+            });
+            if (!res.ok) throw new Error('Error al actualizar gamificación');
+            await fetchUser();
+            alert('Gamificación actualizada correctamente');
+        } catch (err) {
+            alert(err instanceof Error ? err.message : 'Error');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleAssignBadge = async () => {
+        if (!selectedBadgeId) return;
+        setIsSaving(true);
+        try {
+            const res = await fetch(`/api/admin/users/${userId}/badges`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ badgeId: selectedBadgeId }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Error al asignar insignia');
+            await fetchBadges();
+            await fetchUser();
+            setSelectedBadgeId('');
+            alert(data.message);
+        } catch (err) {
+            alert(err instanceof Error ? err.message : 'Error');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleRemoveBadge = async (badgeId: string) => {
+        if (!confirm('¿Estás seguro de quitar esta insignia?')) return;
+        setIsSaving(true);
+        try {
+            const res = await fetch(`/api/admin/users/${userId}/badges?badgeId=${badgeId}`, {
+                method: 'DELETE',
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Error al quitar insignia');
+            await fetchBadges();
+            await fetchUser();
+            alert(data.message);
         } catch (err) {
             alert(err instanceof Error ? err.message : 'Error');
         } finally {
@@ -428,8 +531,8 @@ export default function UserDetailPage() {
                                         onClick={() => handleUpdateUser({ status: user.status === 'SUSPENDED' ? 'ACTIVE' : 'SUSPENDED' })}
                                         disabled={isSaving}
                                         className={`col-span-1 h-9 rounded text-xs font-bold flex items-center justify-center gap-1 transition-colors ${user.status === 'SUSPENDED'
-                                                ? 'bg-green-50 border border-green-200 text-green-600 hover:bg-green-100'
-                                                : 'bg-white border border-red-200 text-red-600 hover:bg-red-50'
+                                            ? 'bg-green-50 border border-green-200 text-green-600 hover:bg-green-100'
+                                            : 'bg-white border border-red-200 text-red-600 hover:bg-red-50'
                                             } disabled:opacity-50`}
                                     >
                                         <span className="material-symbols-outlined text-[16px]">
@@ -601,7 +704,7 @@ export default function UserDetailPage() {
                                 </div>
                             </section>
 
-                            {/* Gamification */}
+                            {/* Gamification - Editable */}
                             <section className="bg-gray-900 rounded-xl shadow-lg overflow-hidden text-white relative">
                                 <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
                                 <div className="p-5 relative z-10 flex flex-col gap-4">
@@ -610,19 +713,125 @@ export default function UserDetailPage() {
                                             <span className="material-symbols-outlined text-primary text-[18px]">emoji_events</span>
                                             Gamificación
                                         </h2>
-                                        <span className="text-primary text-[10px] font-bold uppercase tracking-widest border border-primary/30 px-2 py-0.5 rounded-full">
-                                            Nivel {Math.floor((user._count?.investments || 0) / 2) + 1}
-                                        </span>
+                                        <button
+                                            onClick={handleUpdateGamification}
+                                            disabled={isSaving}
+                                            className="text-primary hover:underline text-xs font-bold disabled:opacity-50"
+                                        >
+                                            Guardar
+                                        </button>
+                                    </div>
+
+                                    {/* Editable Fields */}
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Puntos XP</label>
+                                            <input
+                                                type="number"
+                                                value={gamification.points}
+                                                onChange={(e) => setGamification({ ...gamification, points: parseInt(e.target.value) || 0 })}
+                                                className="w-full rounded-lg bg-gray-800 border-gray-700 text-white text-sm p-2"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Nivel</label>
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                value={gamification.level}
+                                                onChange={(e) => setGamification({ ...gamification, level: parseInt(e.target.value) || 1 })}
+                                                className="w-full rounded-lg bg-gray-800 border-gray-700 text-white text-sm p-2"
+                                            />
+                                        </div>
                                     </div>
                                     <div>
-                                        <div className="flex justify-between text-xs mb-1">
-                                            <span className="text-gray-400">XP Total</span>
-                                            <span className="font-bold">{((user._count?.investments || 0) * 500)} pts</span>
-                                        </div>
-                                        <div className="h-1.5 w-full bg-gray-700 rounded-full overflow-hidden">
-                                            <div className="h-full bg-primary rounded-full" style={{ width: `${Math.min(((user._count?.investments || 0) * 20), 100)}%` }}></div>
-                                        </div>
+                                        <label className="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Nombre del Nivel</label>
+                                        <input
+                                            type="text"
+                                            value={gamification.levelName}
+                                            onChange={(e) => setGamification({ ...gamification, levelName: e.target.value })}
+                                            placeholder="Ej: Magnate Solar"
+                                            className="w-full rounded-lg bg-gray-800 border-gray-700 text-white text-sm p-2"
+                                        />
                                     </div>
+
+                                    {/* Auto-calculated info */}
+                                    <div className="text-[10px] text-gray-500 border-t border-gray-700 pt-2">
+                                        XP Auto (inversiones × 1000): {(user._count?.investments || 0) * 1000} pts
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* Badges Management */}
+                            <section className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                                <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                                    <h2 className="text-sm font-bold text-black flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-primary text-[18px]">military_tech</span>
+                                        Insignias ({userBadges.length})
+                                    </h2>
+                                </div>
+                                <div className="p-4 flex flex-col gap-4">
+                                    {/* Assign Badge */}
+                                    <div className="flex gap-2">
+                                        <select
+                                            value={selectedBadgeId}
+                                            onChange={(e) => setSelectedBadgeId(e.target.value)}
+                                            className="flex-1 rounded-lg border-gray-300 text-sm"
+                                        >
+                                            <option value="">Seleccionar insignia...</option>
+                                            {availableBadges.map((badge) => (
+                                                <option key={badge.id} value={badge.id}>
+                                                    {badge.name} (+{badge.pointsValue} XP)
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <button
+                                            onClick={handleAssignBadge}
+                                            disabled={!selectedBadgeId || isSaving}
+                                            className="px-3 py-1.5 bg-primary text-black text-xs font-bold rounded-lg disabled:opacity-50 hover:brightness-95"
+                                        >
+                                            Asignar
+                                        </button>
+                                    </div>
+
+                                    {/* User Badges List */}
+                                    {userBadges.length > 0 ? (
+                                        <div className="space-y-2">
+                                            {userBadges.map((ub) => (
+                                                <div key={ub.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${ub.badge.color === 'yellow' ? 'from-yellow-100 to-yellow-300' :
+                                                                ub.badge.color === 'green' ? 'from-green-100 to-green-300' :
+                                                                    ub.badge.color === 'purple' ? 'from-purple-100 to-purple-300' :
+                                                                        'from-blue-100 to-blue-300'
+                                                            } flex items-center justify-center`}>
+                                                            <span className={`material-symbols-outlined text-base ${ub.badge.color === 'yellow' ? 'text-yellow-700' :
+                                                                    ub.badge.color === 'green' ? 'text-green-700' :
+                                                                        ub.badge.color === 'purple' ? 'text-purple-700' :
+                                                                            'text-blue-700'
+                                                                }`}>
+                                                                {ub.badge.icon}
+                                                            </span>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-xs font-bold text-gray-800">{ub.badge.name}</p>
+                                                            <p className="text-[10px] text-gray-500">+{ub.badge.pointsValue} XP</p>
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleRemoveBadge(ub.badge.id)}
+                                                        disabled={isSaving}
+                                                        className="p-1 text-red-500 hover:bg-red-50 rounded disabled:opacity-50"
+                                                        title="Quitar insignia"
+                                                    >
+                                                        <span className="material-symbols-outlined text-[16px]">close</span>
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-center text-gray-500 text-xs py-2">Sin insignias asignadas</p>
+                                    )}
                                 </div>
                             </section>
 

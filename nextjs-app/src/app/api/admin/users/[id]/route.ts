@@ -59,7 +59,7 @@ export async function GET(
     }
 }
 
-// PATCH /api/admin/users/[id] - Update user
+// PATCH /api/admin/users/[id] - Update user (admin can update all fields)
 export async function PATCH(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
@@ -71,11 +71,10 @@ export async function PATCH(
 
     try {
         const body = await request.json();
-        const { status, role } = body;
 
-        // Validate status
+        // Validate status if provided
         const validStatuses = Object.values(UserStatus);
-        if (status && !validStatuses.includes(status)) {
+        if (body.status && !validStatuses.includes(body.status)) {
             return NextResponse.json(
                 { error: 'Estado no válido' },
                 { status: 400 }
@@ -83,16 +82,53 @@ export async function PATCH(
         }
 
         // Only SUPER_ADMIN can change roles
-        if (role && session?.user?.role !== 'SUPER_ADMIN') {
+        if (body.role && session?.user?.role !== 'SUPER_ADMIN') {
             return NextResponse.json(
                 { error: 'Solo SUPER_ADMIN puede cambiar roles' },
                 { status: 403 }
             );
         }
 
+        // All fields that admin can update
+        const allowedFields = [
+            'firstName',
+            'lastName',
+            'phone',
+            'dateOfBirth',
+            'nationality',
+            'avatarUrl',
+            'bio',
+            'address',
+            'city',
+            'country',
+            'preferredLanguage',
+            'profilePublic',
+            'status',
+            'role',
+            'points',
+            'level',
+            'levelName',
+        ];
+
         const updateData: Record<string, unknown> = {};
-        if (status) updateData.status = status;
-        if (role) updateData.role = role;
+        for (const field of allowedFields) {
+            if (body[field] !== undefined) {
+                updateData[field] = body[field];
+            }
+        }
+
+        // Handle dateOfBirth conversion
+        if (updateData.dateOfBirth && typeof updateData.dateOfBirth === 'string') {
+            updateData.dateOfBirth = new Date(updateData.dateOfBirth);
+        }
+
+        // Handle numeric conversions
+        if (updateData.points !== undefined) {
+            updateData.points = Number(updateData.points);
+        }
+        if (updateData.level !== undefined) {
+            updateData.level = Number(updateData.level);
+        }
 
         const user = await prisma.user.update({
             where: { id },
@@ -102,12 +138,27 @@ export async function PATCH(
                 email: true,
                 firstName: true,
                 lastName: true,
+                phone: true,
+                avatarUrl: true,
+                bio: true,
+                address: true,
+                city: true,
+                country: true,
+                preferredLanguage: true,
+                profilePublic: true,
                 role: true,
                 status: true,
+                points: true,
+                level: true,
+                levelName: true,
+                updatedAt: true,
             },
         });
 
-        return NextResponse.json({ user });
+        return NextResponse.json({
+            message: 'Usuario actualizado correctamente',
+            user
+        });
     } catch (err) {
         console.error('Error updating user:', err);
         return NextResponse.json(
