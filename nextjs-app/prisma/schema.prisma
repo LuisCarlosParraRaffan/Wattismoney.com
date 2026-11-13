@@ -62,6 +62,8 @@ model User {
   sellerListings SecondaryListing[] @relation("SellerListings")
   buyerListings  SecondaryListing[] @relation("BuyerListings")
   badges        UserBadge[]
+  wallet        Wallet?
+  transactions  Transaction[]
   
   // Índices para búsquedas frecuentes
   @@index([email])
@@ -260,6 +262,11 @@ model Contract {
   // Tipos específicos
   contractType    String?         // "Infraestructura", "Liquidez"
   contractSubtype String?         // "Proyecto solar", "Smart grids", etc.
+  paymentFrequency String?        @default("MONTHLY") // "MONTHLY", "QUARTERLY", "ANNUAL"
+  
+  // Web3 / RWA Metadata
+  treasuryWallet  String?         // Dirección EVM de tesorería/vault del proyecto
+  tokenSymbol     String?         // Identificador simbólico RWA (ej. "WIM-SOL-01")
   
   // Metadata
   createdAt       DateTime        @default(now())
@@ -269,6 +276,7 @@ model Contract {
   // Relaciones
   documents       ContractDocument[]
   investments     Investment[]
+  transactions    Transaction[]
   
   @@index([status])
   @@index([energyType])
@@ -299,8 +307,14 @@ model Investment {
   amount      Decimal         @db.Decimal(15, 2)
   status      InvestmentStatus @default(PENDING)
   
+  // Método de pago e información de origen
+  paymentRail PaymentRail     @default(INTERNAL_WALLET)
+  currency    String          @default("USD")
+  txHash      String?         // Hash on-chain si se pagó directamente con Crypto
+  
   // Datos calculados
   expectedReturn Decimal?     @db.Decimal(15, 2)
+  accruedYield   Decimal      @db.Decimal(15, 2) @default(0)
   
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
@@ -309,10 +323,106 @@ model Investment {
   user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   contract    Contract        @relation(fields: [contractId], references: [id], onDelete: Cascade)
   listing     SecondaryListing?
+  transactions Transaction[]
   
   @@index([userId])
   @@index([contractId])
   @@index([status])
+}
+
+// ============================================
+// BILLETERA HÍBRIDA (FIAT + CRYPTO) Y LIBRO MAYOR
+// ============================================
+
+model Wallet {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  
+  // Saldos equivalentes en USD
+  fiatBalance       Decimal  @db.Decimal(15, 2) @default(0) // Disponible en Fiat (USD)
+  cryptoBalanceUsdc Decimal  @db.Decimal(15, 6) @default(0) // Disponible en Stablecoins (USDC/USDT)
+  lockedBalance     Decimal  @db.Decimal(15, 2) @default(0) // Retenido en retiros/órdenes pendientes
+  totalDeposited    Decimal  @db.Decimal(15, 2) @default(0) // Total depositado histórico
+  totalWithdrawn    Decimal  @db.Decimal(15, 2) @default(0) // Total retirado histórico
+  totalYieldEarned  Decimal  @db.Decimal(15, 2) @default(0) // Rendimientos históricos recibidos
+  
+  // Configuración Web3 vinculada
+  evmWalletAddress  String?
+  preferredChainId  Int?     @default(137) // 137: Polygon, 8453: Base, 42161: Arbitrum, 1: Ethereum
+  
+  // Configuración bancaria para retiros Fiat
+  bankName          String?
+  bankAccountType   String?  // "Ahorros", "Corriente", "IBAN", "ACH"
+  bankAccountNumber String?
+  bankAccountHolder String?
+  bankRoutingOrIban String?
+  bankRoutingOrSwift String?
+  bankCountry       String?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions      Transaction[]
+}
+
+model Transaction {
+  id                String            @id @default(cuid())
+  userId            String
+  walletId          String
+  
+  type              TransactionType
+  status            TransactionStatus @default(PENDING)
+  paymentRail       PaymentRail
+  
+  // Importes financieros (base USD)
+  amount            Decimal           @db.Decimal(15, 2) // Monto bruto en USD
+  fee               Decimal           @db.Decimal(15, 2) @default(0) // Comisión
+  netAmount         Decimal           @db.Decimal(15, 2) // Monto neto en USD
+  
+  // Moneda / Token original
+  currency          String            @default("USD") // "USD", "EUR", "COP", "MXN", "USDC", "USDT", "ETH"
+  originalAmount    Decimal?          @db.Decimal(18, 6)
+  exchangeRate      Decimal?          @db.Decimal(18, 6) @default(1)
+  
+  // Trazabilidad Web3 / Blockchain
+  txHash            String?           @unique
+  chainId           Int?              // 1 (ETH), 137 (Polygon), 8453 (Base), 42161 (Arbitrum)
+  networkName       String?           // "Polygon", "Base", "Arbitrum", "Ethereum"
+  tokenSymbol       String?           // "USDC", "USDT", "ETH"
+  tokenAddress      String?
+  fromAddress       String?
+  toAddress         String?
+  
+  // Trazabilidad Pasarelas Fiat (Stripe, Wompi, MercadoPago) y Transferencias Bancarias
+  externalId        String?           // ID en Stripe / Wompi / MercadoPago
+  externalReference String?           // Referencia externa alternativa
+  bankReference     String?           // Número de comprobante / referencia bancaria
+  receiptUrl        String?           // URL del comprobante de transferencia bancaria
+  bankName          String?
+  description       String?
+  adminNotes        String?
+  reviewedBy        String?
+  reviewedAt        DateTime?
+  
+  // Vínculos opcionales con contratos o inversiones
+  contractId        String?
+  investmentId      String?
+  listingId         String?
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  wallet            Wallet            @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  contract          Contract?         @relation(fields: [contractId], references: [id], onDelete: SetNull)
+  investment        Investment?       @relation(fields: [investmentId], references: [id], onDelete: SetNull)
+  
+  @@index([userId])
+  @@index([walletId])
+  @@index([status])
+  @@index([type])
+  @@index([paymentRail])
 }
 
 // ============================================
@@ -384,6 +494,35 @@ enum ListingStatus {
   ACTIVE      // Disponible para compra
   SOLD        // Vendida
   CANCELLED   // Cancelada por vendedor
+}
+
+enum TransactionType {
+  DEPOSIT_FIAT
+  DEPOSIT_CRYPTO
+  WITHDRAWAL_FIAT
+  WITHDRAWAL_CRYPTO
+  INVESTMENT_PRIMARY
+  SECONDARY_PURCHASE
+  SECONDARY_SALE
+  YIELD_DISTRIBUTION
+  REFUND
+}
+
+enum TransactionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REJECTED
+  CANCELLED
+}
+
+enum PaymentRail {
+  INTERNAL_WALLET
+  STRIPE
+  LATAM_GATEWAY
+  BANK_TRANSFER
+  WEB3_DIRECT
 }
 
 // ============================================

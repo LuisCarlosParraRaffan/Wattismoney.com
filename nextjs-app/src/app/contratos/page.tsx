@@ -72,7 +72,7 @@ export default function LandingContratos() {
                                 Wattismoney opera como un banco de energía verde, gestionando contratos de suministro para las industrias más exigentes del país. Rentabilidad sólida, impacto medible.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-3 mt-4">
-                                <Link href="/oportunidades" className="flex items-center justify-center rounded-lg h-12 px-8 bg-primary hover:bg-[#dcdc11] text-black text-base font-bold shadow-sm transition-transform active:scale-95 cursor-pointer">
+                                <Link href="/mercado-primario" className="flex items-center justify-center rounded-lg h-12 px-8 bg-primary hover:bg-[#dcdc11] text-black text-base font-bold shadow-sm transition-transform active:scale-95 cursor-pointer">
                                     Ver Oportunidades
                                 </Link>
                                 <Link href="/como-funciona" className="flex items-center justify-center rounded-lg h-12 px-8 bg-white border border-gray-200 hover:bg-gray-50 text-black text-base font-bold transition-colors cursor-pointer">

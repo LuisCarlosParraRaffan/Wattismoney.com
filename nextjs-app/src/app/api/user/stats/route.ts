@@ -21,6 +21,7 @@ export async function GET() {
                         id: true,
                         name: true,
                         annualReturn: true,
+                        totalCapacity: true,
                         energyType: true,
                         energyAmount: true,
                         generatorLocation: true,
@@ -66,8 +67,11 @@ export async function GET() {
 
         for (const investment of investments) {
             const contract = investment.contract;
-            // Estimate energy based on investment proportion of total capacity
-            const energyProportion = Number(investment.amount) / totalInvested;
+            // Estimate energy based on investment proportion of contract's total financing capacity
+            const contractCapacity = Number(contract.totalCapacity || 0);
+            const energyProportion = contractCapacity > 0
+                ? Math.min(1, Number(investment.amount) / contractCapacity)
+                : 0;
             totalEnergy += Number(contract.energyAmount || 0) * energyProportion;
             totalCO2Avoided += Number(contract.co2Emissions || 0) * energyProportion;
         }

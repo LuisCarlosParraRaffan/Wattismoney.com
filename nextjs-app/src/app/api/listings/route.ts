@@ -28,6 +28,11 @@ export async function GET(request: NextRequest) {
                                     energyType: true,
                                     annualReturn: true,
                                     generatorLocation: true,
+                                    buyerIndustry: true,
+                                    termMonths: true,
+                                    totalCapacity: true,
+                                    currentRaised: true,
+                                    endDate: true,
                                 },
                             },
                         },
@@ -36,6 +41,8 @@ export async function GET(request: NextRequest) {
                         select: {
                             id: true,
                             firstName: true,
+                            lastName: true,
+                            level: true,
                         },
                     },
                 },
@@ -67,6 +74,11 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
         }
 
+        const price = Number(askingPrice);
+        if (price <= 0) {
+            return NextResponse.json({ error: 'El precio de venta debe ser mayor a 0' }, { status: 400 });
+        }
+
         // Verify investment exists and belongs to user
         const investment = await prisma.investment.findUnique({
             where: { id: investmentId },
@@ -85,28 +97,37 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Solo puedes vender inversiones confirmadas' }, { status: 400 });
         }
 
-        if (investment.listing) {
-            return NextResponse.json({ error: 'Esta inversión ya está en venta' }, { status: 400 });
+        if (investment.listing && investment.listing.status === 'ACTIVE') {
+            return NextResponse.json({ error: 'Esta inversión ya está publicada en el Mercado Secundario' }, { status: 400 });
         }
 
-        // Calculate commission
-        const price = Number(askingPrice);
+        // Calculate commission (3%)
         const commission = price * COMMISSION_RATE;
 
-        // Create listing
-        const listing = await prisma.secondaryListing.create({
-            data: {
-                investmentId,
-                sellerId: session.user.id,
-                askingPrice: price,
-                originalAmount: Number(investment.amount),
-                commission,
-            },
-        });
+        // Create or reactivate listing
+        const listing = investment.listing
+            ? await prisma.secondaryListing.update({
+                  where: { id: investment.listing.id },
+                  data: {
+                      askingPrice: price,
+                      originalAmount: Number(investment.amount),
+                      commission,
+                      status: 'ACTIVE',
+                  },
+              })
+            : await prisma.secondaryListing.create({
+                  data: {
+                      investmentId,
+                      sellerId: session.user.id,
+                      askingPrice: price,
+                      originalAmount: Number(investment.amount),
+                      commission,
+                  },
+              });
 
         return NextResponse.json({ success: true, listing });
     } catch (error) {
         console.error('Error creating listing:', error);
-        return NextResponse.json({ error: 'Error interno' }, { status: 500 });
+        return NextResponse.json({ error: 'Error interno al publicar listado' }, { status: 500 });
     }
 }

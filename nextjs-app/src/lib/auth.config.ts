@@ -12,12 +12,16 @@ export const authConfig = {
             const isOnDashboard = nextUrl.pathname.startsWith('/dashboard') ||
                 nextUrl.pathname.startsWith('/cartera') ||
                 nextUrl.pathname.startsWith('/mercado-primario') ||
+                nextUrl.pathname.startsWith('/mercado-secundario') ||
                 nextUrl.pathname.startsWith('/mi-impacto') ||
                 nextUrl.pathname.startsWith('/perfil') ||
                 nextUrl.pathname.startsWith('/ajustes') ||
+                nextUrl.pathname.startsWith('/clasificacion') ||
+                nextUrl.pathname.startsWith('/contrato/') ||
                 nextUrl.pathname.startsWith('/ayuda');
 
-            const isOnAdmin = nextUrl.pathname.startsWith('/admin');
+            const isOnAdmin = nextUrl.pathname.startsWith('/panel-admin') ||
+                nextUrl.pathname.startsWith('/admin');
 
             const isOnAuth = nextUrl.pathname.startsWith('/login') ||
                 nextUrl.pathname.startsWith('/signup');

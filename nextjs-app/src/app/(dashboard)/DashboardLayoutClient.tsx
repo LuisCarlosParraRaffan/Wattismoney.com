@@ -18,11 +18,12 @@ export default function DashboardLayoutClient({
     const { data: session } = useSession();
 
     // Onboarding check
-    const { isLoading, hasKyc, hasInvestorProfile } = useOnboardingCheck();
+    const { isLoading, hasKyc, hasInvestorProfile, kycStatus } = useOnboardingCheck();
 
     // UI States
     const [isOpportunitiesOpen, setIsOpportunitiesOpen] = useState(false);
     const [isAdminOpen, setIsAdminOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
 
     // CRITICAL FIX: Mounted state to prevent Hydration Mismatch (Error #310)
@@ -33,13 +34,14 @@ export default function DashboardLayoutClient({
 
     // Helper logic
     const isAdmin = session?.user?.role === 'ADMIN' || session?.user?.role === 'SUPER_ADMIN';
-    const isAdminRoute = pathname?.startsWith('/admin') || false;
+    const isAdminRoute = pathname?.startsWith('/panel-admin') || pathname?.startsWith('/admin') || false;
 
-    // Auto-expand menu if current path is within opportunities
+    // Auto-expand menu if current path is within opportunities & close mobile menu on route change
     useEffect(() => {
         if (pathname?.includes('mercado-primario') || pathname?.includes('mercado-secundario')) {
             setIsOpportunitiesOpen(true);
         }
+        setIsMobileMenuOpen(false);
     }, [pathname]);
 
     // 1. First protection: Don't render anything until mounted on client
@@ -84,14 +86,28 @@ export default function DashboardLayoutClient({
 
     return (
         <div className="bg-slate-50 text-slate-900 font-display h-screen flex overflow-hidden">
-            {/* Sidebar - Hidden on mobile, fixed on desktop */}
-            <aside className="w-64 bg-white border-r border-gray-200 flex flex-col justify-between z-20 hidden md:flex shrink-0">
+            {/* Mobile Backdrop */}
+            {isMobileMenuOpen && (
+                <div
+                    className="fixed inset-0 bg-black/50 backdrop-blur-xs z-30 md:hidden"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                />
+            )}
+
+            {/* Sidebar - Slide-over on mobile, fixed on desktop */}
+            <aside className={`w-64 bg-white border-r border-gray-200 flex flex-col justify-between z-40 shrink-0 fixed md:static inset-y-0 left-0 transform transition-transform duration-200 ease-in-out ${isMobileMenuOpen ? 'translate-x-0 flex' : '-translate-x-full hidden md:flex md:translate-x-0'}`}>
                 <div className="flex flex-col h-full">
                     {/* Sidebar Header / Logo */}
-                    <div className="h-20 flex items-center px-6 border-b border-gray-100">
+                    <div className="h-20 flex items-center justify-between px-6 border-b border-gray-100">
                         <Link href="/dashboard" className="flex items-center gap-3 group">
                             <WattismoneyLogo className="h-10 w-auto transition-transform group-hover:scale-105" />
                         </Link>
+                        <button
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                        >
+                            <span className="material-symbols-outlined text-[20px]">close</span>
+                        </button>
                     </div>
 
                     {/* Navigation Links */}
@@ -179,13 +195,16 @@ export default function DashboardLayoutClient({
                                     <span className={`material-symbols-outlined text-[20px] transition-transform duration-200 ${isAdminOpen ? 'rotate-180' : ''}`}>expand_more</span>
                                 </button>
 
-                                <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isAdminOpen || isAdminRoute ? 'max-h-60 opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
+                                <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isAdminOpen || isAdminRoute ? 'max-h-72 opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
                                     <div className="pl-10 pr-2 flex flex-col gap-1">
-                                        <Link href="/panel-admin" className={`block px-3 py-2 rounded-lg text-xs transition-colors ${pathname === '/admin' ? 'text-black font-bold bg-primary/20' : 'text-slate-500 hover:text-black hover:bg-gray-50'}`}>
+                                        <Link href="/panel-admin" className={`block px-3 py-2 rounded-lg text-xs transition-colors ${pathname === '/panel-admin' ? 'text-black font-bold bg-primary/20' : 'text-slate-500 hover:text-black hover:bg-gray-50'}`}>
                                             Dashboard
                                         </Link>
                                         <Link href="/panel-admin/contracts" className={`block px-3 py-2 rounded-lg text-xs transition-colors ${pathname?.includes('/panel-admin/contracts') ? 'text-black font-bold bg-primary/20' : 'text-slate-500 hover:text-black hover:bg-gray-50'}`}>
                                             Contratos
+                                        </Link>
+                                        <Link href="/panel-admin/transactions" className={`block px-3 py-2 rounded-lg text-xs transition-colors ${pathname?.includes('/panel-admin/transactions') ? 'text-black font-bold bg-primary/20' : 'text-slate-500 hover:text-black hover:bg-gray-50'}`}>
+                                            Tesorería y Pagos
                                         </Link>
                                         <Link href="/panel-admin/users" className={`block px-3 py-2 rounded-lg text-xs transition-colors ${pathname?.includes('/panel-admin/users') ? 'text-black font-bold bg-primary/20' : 'text-slate-500 hover:text-black hover:bg-gray-50'}`}>
                                             Usuarios
@@ -225,26 +244,74 @@ export default function DashboardLayoutClient({
 
             {/* Main Content Area */}
             <main className="flex-1 flex flex-col h-full overflow-hidden relative">
-                {/* Top Header Bar with Logout */}
-                <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-end px-6 shrink-0">
-                    <button
-                        onClick={handleLogout}
-                        disabled={isLoggingOut}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                    >
-                        {isLoggingOut ? (
-                            <>
-                                <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-                                <span>Cerrando...</span>
-                            </>
-                        ) : (
-                            <>
-                                <span className="material-symbols-outlined text-[20px]">logout</span>
-                                <span>Cerrar Sesión</span>
-                            </>
-                        )}
-                    </button>
+                {/* Top Header Bar with Mobile Menu & Logout */}
+                <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 shrink-0">
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setIsMobileMenuOpen(true)}
+                            className="md:hidden p-2 rounded-lg text-slate-600 hover:bg-gray-100 transition-colors"
+                            aria-label="Abrir menú"
+                        >
+                            <span className="material-symbols-outlined">menu</span>
+                        </button>
+                        <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500">
+                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                            <span>Red Energética Activa • Liquidación Híbrida Fiat + Web3</span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <Link
+                            href="/cartera"
+                            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-primary/20 hover:bg-primary/40 text-black rounded-lg transition-colors"
+                        >
+                            <span className="material-symbols-outlined text-[16px]">account_balance_wallet</span>
+                            <span>Mi Billetera</span>
+                        </Link>
+                        <button
+                            onClick={handleLogout}
+                            disabled={isLoggingOut}
+                            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                        >
+                            {isLoggingOut ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                                    <span>Cerrando...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <span className="material-symbols-outlined text-[20px]">logout</span>
+                                    <span className="hidden sm:inline">Cerrar Sesión</span>
+                                </>
+                            )}
+                        </button>
+                    </div>
                 </header>
+
+                {/* KYC Status Banner for non-approved users */}
+                {!isAdmin && kycStatus && kycStatus !== 'APPROVED' && (
+                    <div className={`px-6 py-2.5 text-xs font-medium flex items-center justify-between shrink-0 border-b ${
+                        kycStatus === 'REJECTED'
+                            ? 'bg-red-50 text-red-800 border-red-200'
+                            : 'bg-amber-50 text-amber-900 border-amber-200'
+                    }`}>
+                        <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-[18px]">
+                                {kycStatus === 'REJECTED' ? 'error' : 'verified_user'}
+                            </span>
+                            <span>
+                                {kycStatus === 'REJECTED'
+                                    ? 'Tu verificación de identidad (KYC) requiere correcciones antes de poder invertir.'
+                                    : 'Tu documentación KYC está en revisión por nuestro equipo de cumplimiento. Puedes explorar oportunidades mientras se aprueba.'}
+                            </span>
+                        </div>
+                        {kycStatus === 'REJECTED' && (
+                            <Link href="/kyc-upload" className="font-bold underline hover:no-underline ml-4 shrink-0">
+                                Subir documentos nuevamente →
+                            </Link>
+                        )}
+                    </div>
+                )}
 
                 {/* Page Content */}
                 <div className="flex-1 overflow-auto">

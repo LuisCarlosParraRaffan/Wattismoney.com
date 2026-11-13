@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { checkAdminAccess } from '@/lib/requireAdmin';
 import prisma from '@/lib/prisma';
 import { KycStatus, UserStatus } from '@/generated/prisma';
+import { sendKycApprovedEmail, sendKycRejectedEmail } from '@/lib/email';
 
 // GET /api/admin/kyc - List KYC documents pending review
 export async function GET(request: Request) {
@@ -10,18 +11,19 @@ export async function GET(request: Request) {
 
     try {
         const { searchParams } = new URL(request.url);
-        const status = searchParams.get('status') || 'SUBMITTED';
+        const statusParam = searchParams.get('status') || 'SUBMITTED';
         const page = parseInt(searchParams.get('page') || '1');
         const limit = parseInt(searchParams.get('limit') || '20');
 
         const skip = (page - 1) * limit;
+        const whereClause = statusParam === 'ALL' ? {} : { status: statusParam as KycStatus };
 
         const [documents, total] = await Promise.all([
             prisma.kycDocument.findMany({
-                where: { status: status as KycStatus },
+                where: whereClause,
                 skip,
                 take: limit,
-                orderBy: { submittedAt: 'asc' }, // Oldest first
+                orderBy: { submittedAt: 'desc' },
                 include: {
                     user: {
                         select: {
@@ -34,7 +36,7 @@ export async function GET(request: Request) {
                     },
                 },
             }),
-            prisma.kycDocument.count({ where: { status: status as KycStatus } }),
+            prisma.kycDocument.count({ where: whereClause }),
         ]);
 
         return NextResponse.json({
@@ -62,16 +64,18 @@ export async function PATCH(request: Request) {
 
     try {
         const body = await request.json();
-        const { documentId, action, rejectionReason } = body;
+        const { documentId, action, rejectionReason, reason } = body;
+        const normalizedAction = String(action || '').toUpperCase();
+        const finalReason = rejectionReason || reason || 'Documentación incompleta o ilegible';
 
-        if (!documentId || !action) {
+        if (!documentId || !normalizedAction) {
             return NextResponse.json(
                 { error: 'documentId y action son requeridos' },
                 { status: 400 }
             );
         }
 
-        if (action !== 'APPROVE' && action !== 'REJECT') {
+        if (normalizedAction !== 'APPROVE' && normalizedAction !== 'REJECT') {
             return NextResponse.json(
                 { error: 'action debe ser APPROVE o REJECT' },
                 { status: 400 }
@@ -96,8 +100,8 @@ export async function PATCH(request: Request) {
             const updatedDoc = await tx.kycDocument.update({
                 where: { id: documentId },
                 data: {
-                    status: action === 'APPROVE' ? KycStatus.APPROVED : KycStatus.REJECTED,
-                    rejectionReason: action === 'REJECT' ? rejectionReason : null,
+                    status: normalizedAction === 'APPROVE' ? KycStatus.APPROVED : KycStatus.REJECTED,
+                    rejectionReason: normalizedAction === 'REJECT' ? finalReason : null,
                     reviewedAt: new Date(),
                     reviewedBy: session?.user?.id,
                 },
@@ -107,12 +111,22 @@ export async function PATCH(request: Request) {
             await tx.user.update({
                 where: { id: document.userId },
                 data: {
-                    status: action === 'APPROVE' ? UserStatus.ACTIVE : UserStatus.KYC_REJECTED,
+                    status: normalizedAction === 'APPROVE' ? UserStatus.ACTIVE : UserStatus.KYC_REJECTED,
                 },
             });
 
             return updatedDoc;
         });
+
+        // Send notification email asynchronously (do not fail API if Resend fails)
+        if (document.user?.email) {
+            const fullName = [document.user.firstName, document.user.lastName].filter(Boolean).join(' ');
+            if (normalizedAction === 'APPROVE') {
+                sendKycApprovedEmail(document.user.email, fullName).catch(console.error);
+            } else {
+                sendKycRejectedEmail(document.user.email, finalReason, fullName).catch(console.error);
+            }
+        }
 
         return NextResponse.json({ document: result });
     } catch (err) {

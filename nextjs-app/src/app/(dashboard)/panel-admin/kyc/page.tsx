@@ -10,8 +10,10 @@ interface KycDocument {
     frontImageUrl: string | null;
     backImageUrl: string | null;
     selfieUrl: string | null;
-    addressProofUrl: string | null;
+    proofOfResidenceUrl?: string | null;
+    addressProofUrl?: string | null;
     status: string;
+    rejectionReason?: string | null;
     submittedAt: string;
     user: {
         id: string;
@@ -26,18 +28,19 @@ export default function AdminKycPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState<'SUBMITTED' | 'APPROVED' | 'REJECTED' | 'ALL'>('SUBMITTED');
     const [processingId, setProcessingId] = useState<string | null>(null);
     const [rejectingId, setRejectingId] = useState<string | null>(null);
     const [rejectReason, setRejectReason] = useState('Imagen borrosa');
 
     useEffect(() => {
-        fetchKycDocs();
-    }, []);
+        fetchKycDocs(statusFilter);
+    }, [statusFilter]);
 
-    const fetchKycDocs = async () => {
+    const fetchKycDocs = async (status: string = statusFilter) => {
         setIsLoading(true);
         try {
-            const res = await fetch('/api/admin/kyc');
+            const res = await fetch(`/api/admin/kyc?status=${status}`);
             if (!res.ok) throw new Error('Error al cargar documentos KYC');
             const data = await res.json();
             setKycDocs(data.documents || []);
@@ -54,10 +57,10 @@ export default function AdminKycPage() {
             const res = await fetch('/api/admin/kyc', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ documentId, action: 'approve' }),
+                body: JSON.stringify({ documentId, action: 'APPROVE' }),
             });
             if (!res.ok) throw new Error('Error al aprobar');
-            fetchKycDocs();
+            fetchKycDocs(statusFilter);
         } catch (err) {
             alert(err instanceof Error ? err.message : 'Error');
         } finally {
@@ -71,11 +74,11 @@ export default function AdminKycPage() {
             const res = await fetch('/api/admin/kyc', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ documentId, action: 'reject', reason: rejectReason }),
+                body: JSON.stringify({ documentId, action: 'REJECT', rejectionReason: rejectReason }),
             });
             if (!res.ok) throw new Error('Error al rechazar');
             setRejectingId(null);
-            fetchKycDocs();
+            fetchKycDocs(statusFilter);
         } catch (err) {
             alert(err instanceof Error ? err.message : 'Error');
         } finally {
@@ -153,15 +156,25 @@ export default function AdminKycPage() {
                                 placeholder="Buscar por nombre, email o DNI..."
                             />
                         </div>
-                        <div className="flex gap-2">
-                            <button className="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-sm font-medium flex items-center gap-2">
-                                <span className="material-symbols-outlined text-lg">filter_list</span>
-                                Filtrar: Pendientes
-                            </button>
-                            <button className="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-sm font-medium flex items-center gap-2">
-                                <span className="material-symbols-outlined text-lg">sort</span>
-                                Ordenar: Fecha
-                            </button>
+                        <div className="flex flex-wrap gap-2">
+                            {([
+                                { key: 'SUBMITTED', label: 'Pendientes' },
+                                { key: 'APPROVED', label: 'Aprobados' },
+                                { key: 'REJECTED', label: 'Rechazados' },
+                                { key: 'ALL', label: 'Todos' },
+                            ] as const).map((tab) => (
+                                <button
+                                    key={tab.key}
+                                    onClick={() => setStatusFilter(tab.key)}
+                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                        statusFilter === tab.key
+                                            ? 'bg-primary text-black font-bold shadow-xs'
+                                            : 'border border-gray-300 bg-white hover:bg-gray-50 text-gray-700'
+                                    }`}
+                                >
+                                    {tab.label}
+                                </button>
+                            ))}
                         </div>
                     </div>
 
@@ -262,10 +275,10 @@ export default function AdminKycPage() {
                                                         )}
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
-                                                        {doc.addressProofUrl ? (
-                                                            <a href={doc.addressProofUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-600 hover:underline">
-                                                                <span className="material-symbols-outlined text-lg">picture_as_pdf</span>
-                                                                <span className="text-sm">Ver PDF</span>
+                                                        {(doc.proofOfResidenceUrl || doc.addressProofUrl) ? (
+                                                            <a href={doc.proofOfResidenceUrl || doc.addressProofUrl || '#'} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-600 hover:underline">
+                                                                <span className="material-symbols-outlined text-lg">description</span>
+                                                                <span className="text-sm">Ver comprobante</span>
                                                             </a>
                                                         ) : (
                                                             <span className="text-xs text-gray-400 italic">No disponible</span>

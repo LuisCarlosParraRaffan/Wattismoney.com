@@ -77,9 +77,8 @@ export function useOnboardingCheck() {
                         return;
                     }
 
-                    // Step 2: Only after KYC is APPROVED, check for investor profile
-                    // If KYC is pending/in review, don't force the questionnaire yet
-                    if (data.kycStatus === 'APPROVED' && !data.hasInvestorProfile) {
+                    // Step 2: Once KYC is submitted/approved, require investor profile quiz
+                    if (!data.hasInvestorProfile) {
                         router.push('/investor-quiz');
                         return;
                     }
@@ -114,8 +113,8 @@ export function withOnboardingCheck<P extends object>(
             );
         }
 
-        // Block only if: no KYC, OR (KYC approved but no investor profile)
-        const needsOnboarding = !hasKyc || (kycStatus === 'APPROVED' && !hasInvestorProfile);
+        // Block if no KYC or no investor profile
+        const needsOnboarding = !hasKyc || !hasInvestorProfile;
 
         if (needsOnboarding) {
             // Will be redirected by the hook
