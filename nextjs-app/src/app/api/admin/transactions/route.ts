@@ -182,7 +182,8 @@ export async function PATCH(request: NextRequest) {
                         throw new ReviewError('La inversión asociada no está en estado pendiente.');
                     }
 
-                    const earnedXp = Math.max(10, Math.floor(amount / 10));
+                    // 1 XP por cada $40.000 COP confirmados (≈ USD 12): 2 M → 50 XP, 20 M → 500 XP.
+                    const earnedXp = Math.max(10, Math.floor(amount / 40000));
                     const updatedUser = await tx.user.update({
                         where: { id: txRecord.userId },
                         data: { points: { increment: earnedXp } },

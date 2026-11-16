@@ -259,7 +259,7 @@ export default function DashboardLayoutClient({
                         </button>
                         <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500">
                             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                            <span>Red Energética Activa • Liquidación Híbrida Fiat + Web3</span>
+                            <span>Inversiones en pesos colombianos • Validación de Tesorería</span>
                         </div>
                     </div>
 
@@ -269,7 +269,7 @@ export default function DashboardLayoutClient({
                             className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-primary/20 hover:bg-primary/40 text-black rounded-lg transition-colors"
                         >
                             <span className="material-symbols-outlined text-[16px]">account_balance_wallet</span>
-                            <span>Mi Billetera</span>
+                            <span>Mi Cartera</span>
                         </Link>
                         <button
                             onClick={handleLogout}

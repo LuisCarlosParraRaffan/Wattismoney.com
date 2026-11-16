@@ -461,7 +461,7 @@ export default function CarteraPage() {
                     <div>
                         <div className="flex items-center gap-2">
                             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-primary/30 text-black uppercase tracking-wider">
-                                Billetera Híbrida Fiat + Web3
+                                Inversiones en pesos colombianos
                             </span>
                             {(connectedWeb3Address || wallet.evmWalletAddress) && (
                                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-purple-100 text-purple-800 border border-purple-200">
@@ -533,7 +533,9 @@ export default function CarteraPage() {
                 )}
 
                 {/* 4 Financial Summary Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div className={`grid grid-cols-1 sm:grid-cols-2 gap-5 ${FEATURES.internalWallet ? 'lg:grid-cols-4' : ''}`}>
+                    {FEATURES.internalWallet && (
+                    <>
                     {/* Card 1: Fiat Liquidity */}
                     <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-xs flex flex-col justify-between">
                         <div className="flex items-center justify-between mb-3">
@@ -575,6 +577,9 @@ export default function CarteraPage() {
                         </div>
                     </div>
 
+                    </>
+                    )}
+
                     {/* Card 3: Active PPA Portfolio */}
                     <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-xs flex flex-col justify-between">
                         <div className="flex items-center justify-between mb-3">
@@ -610,7 +615,7 @@ export default function CarteraPage() {
                                 ${totalExpectedReturn.toLocaleString('es-CO', { maximumFractionDigits: 0 })}
                             </p>
                             <p className="text-xs text-gray-300 mt-1">
-                                Ganancia neta est.: +${Math.max(0, totalExpectedReturn - totalInvested).toLocaleString('es-CO', { maximumFractionDigits: 0 })} USD
+                                Ganancia neta est.: +${Math.max(0, totalExpectedReturn - totalInvested).toLocaleString('es-CO', { maximumFractionDigits: 0 })} COP
                             </p>
                         </div>
                     </div>
@@ -640,6 +645,7 @@ export default function CarteraPage() {
                         <span className="material-symbols-outlined text-[18px]">receipt_long</span>
                         Historial de Transacciones ({transactions.length})
                     </button>
+                    {FEATURES.withdrawals && (
                     <button
                         onClick={() => setActiveTab('settings')}
                         className={`px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors ${
@@ -651,6 +657,7 @@ export default function CarteraPage() {
                         <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
                         Cuentas de Retiro y Wallet Web3
                     </button>
+                    )}
                 </div>
 
                 {/* TAB 1: MIS INVERSIONES */}
@@ -660,7 +667,7 @@ export default function CarteraPage() {
                             <div>
                                 <h2 className="text-lg font-bold text-slate-900">Portafolio de Contratos Energéticos</h2>
                                 <p className="text-xs text-slate-500">
-                                    Puedes mantener tus contratos hasta el vencimiento para recibir dividendos o vender tu posición en el Mercado Secundario.
+                                    Aquí ves cada inversión y su estado: pendiente mientras Tesorería valida tu transferencia, confirmada cuando el abono queda verificado.
                                 </p>
                             </div>
                             <Link
