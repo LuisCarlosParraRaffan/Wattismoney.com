@@ -222,7 +222,7 @@ const KYCUpload: React.FC = () => {
                                         className="peer sr-only"
                                     />
                                     <div className="flex items-center justify-center py-2.5 rounded-md text-sm font-bold text-gray-500 peer-checked:bg-primary peer-checked:text-black peer-checked:shadow-sm transition-all">
-                                        DNI / NIE
+                                        Cédula (CC / CE)
                                     </div>
                                 </label>
                                 <label className="flex-1 cursor-pointer">

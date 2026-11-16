@@ -76,15 +76,21 @@ export const SUPPORTED_EVM_CHAINS: SupportedChain[] = [
     },
 ];
 
-export const TREASURY_EVM_WALLET =
-    process.env.NEXT_PUBLIC_TREASURY_EVM_WALLET ||
-    '0x71C95911E9a5D330f4D621842EC243EE1343292e';
+// Sin valores por defecto: una dirección o cuenta equivocada envía dinero a un tercero.
+export const TREASURY_EVM_WALLET = process.env.NEXT_PUBLIC_TREASURY_EVM_WALLET || '';
+
+const bankName = process.env.NEXT_PUBLIC_TREASURY_BANK_NAME || '';
+const bankAccountNumber = process.env.NEXT_PUBLIC_TREASURY_BANK_ACCOUNT || '';
+const bankBeneficiary = process.env.NEXT_PUBLIC_TREASURY_BENEFICIARY || '';
 
 export const TREASURY_BANK_DETAILS = {
-    bankName: process.env.NEXT_PUBLIC_TREASURY_BANK_NAME || 'Bancolombia / Mercury Bank USD',
-    accountNumber: process.env.NEXT_PUBLIC_TREASURY_BANK_ACCOUNT || '912-0048291-01 (COP/USD) • SWIFT: COLOCOBM',
-    beneficiary: process.env.NEXT_PUBLIC_TREASURY_BENEFICIARY || 'Wattismoney Energy SPV S.A.S.',
-    nit: '901.842.119-4',
+    bankName,
+    accountType: process.env.NEXT_PUBLIC_TREASURY_BANK_ACCOUNT_TYPE || '',
+    accountNumber: bankAccountNumber,
+    beneficiary: bankBeneficiary,
+    beneficiaryId: process.env.NEXT_PUBLIC_TREASURY_BENEFICIARY_ID || '',
+    /** true solo si la cuenta recaudadora está completamente configurada */
+    configured: Boolean(bankName && bankAccountNumber && bankBeneficiary),
 };
 
 /**

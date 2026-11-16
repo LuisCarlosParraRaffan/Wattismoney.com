@@ -14,6 +14,11 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
+    // Este seed crea usuarios de demostración con contraseñas conocidas: jamás contra producción.
+    if (process.env.ALLOW_DEMO_SEED !== 'true') {
+        throw new Error('Seed de demostración bloqueado. Usa ALLOW_DEMO_SEED=true solo en una base de datos local.');
+    }
+
     console.log('🌱 Iniciando seeding de la base de datos...');
 
     // Limpiar datos existentes (solo en desarrollo)

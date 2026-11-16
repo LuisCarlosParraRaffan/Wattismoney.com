@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { FEATURES } from '@/lib/features';
+import { featureDisabled } from '@/lib/guards';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 
@@ -62,6 +64,8 @@ export async function GET(request: NextRequest) {
 
 // POST /api/listings - Create new listing (sell position)
 export async function POST(request: NextRequest) {
+    if (!FEATURES.secondaryMarket) return featureDisabled('El mercado secundario');
+
     try {
         const session = await auth();
         if (!session?.user?.id) {

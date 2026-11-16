@@ -9,6 +9,7 @@ import {
     getChainById,
 } from '@/lib/web3-config';
 import { useWeb3Wallet } from '@/hooks/useWeb3Wallet';
+import { FEATURES } from '@/lib/features';
 
 interface Investment {
     id: string;
@@ -473,10 +474,11 @@ export default function CarteraPage() {
                             Mi Cartera y Liquidez Energética
                         </h1>
                         <p className="text-sm text-slate-500">
-                            Gestiona tu liquidez en Dólares (USD) y Stablecoins (USDC/USDT), invierte en proyectos PPA o liquida posiciones.
+                            Consulta tus inversiones en pesos colombianos (COP) y el estado de cada transferencia.
                         </p>
                     </div>
 
+                    {(FEATURES.walletDeposits || FEATURES.withdrawals) && (
                     <div className="flex flex-wrap items-center gap-3">
                         <button
                             onClick={() => {
@@ -506,6 +508,7 @@ export default function CarteraPage() {
                             Retirar
                         </button>
                     </div>
+                    )}
                 </div>
 
                 {/* Feedback Banner */}
@@ -584,7 +587,7 @@ export default function CarteraPage() {
                         </div>
                         <div>
                             <p className="text-3xl font-black text-slate-900">
-                                ${totalInvested.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                ${totalInvested.toLocaleString('es-CO', { maximumFractionDigits: 0 })}
                             </p>
                             <p className="text-xs text-slate-500 mt-1">
                                 {activeInvestments.length} contrato{activeInvestments.length !== 1 ? 's' : ''} activo{activeInvestments.length !== 1 ? 's' : ''}
@@ -604,10 +607,10 @@ export default function CarteraPage() {
                         </div>
                         <div>
                             <p className="text-3xl font-black text-primary">
-                                ${totalExpectedReturn.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                ${totalExpectedReturn.toLocaleString('es-CO', { maximumFractionDigits: 0 })}
                             </p>
                             <p className="text-xs text-gray-300 mt-1">
-                                Ganancia neta est.: +${Math.max(0, totalExpectedReturn - totalInvested).toLocaleString('en-US', { minimumFractionDigits: 2 })} USD
+                                Ganancia neta est.: +${Math.max(0, totalExpectedReturn - totalInvested).toLocaleString('es-CO', { maximumFractionDigits: 0 })} USD
                             </p>
                         </div>
                     </div>
@@ -731,7 +734,7 @@ export default function CarteraPage() {
                                                         </Link>
                                                     </td>
                                                     <td className="px-6 py-4 font-black text-slate-900">
-                                                        ${Number(inv.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}{' '}
+                                                        ${Number(inv.amount).toLocaleString('es-CO', { maximumFractionDigits: 0 })}{' '}
                                                         <span className="text-xs font-normal text-slate-500">
                                                             {inv.currency || 'USD'}
                                                         </span>
@@ -740,7 +743,7 @@ export default function CarteraPage() {
                                                         {Number(inv.contract.annualReturn)}%
                                                     </td>
                                                     <td className="px-6 py-4 font-bold text-slate-800">
-                                                        ${Number(inv.expectedReturn || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                                        ${Number(inv.expectedReturn || 0).toLocaleString('es-CO', { maximumFractionDigits: 0 })}
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-slate-100 text-slate-700">
@@ -757,7 +760,7 @@ export default function CarteraPage() {
                                                     </td>
                                                     <td className="px-6 py-4">{getStatusBadge(inv)}</td>
                                                     <td className="px-6 py-4 text-right">
-                                                        {canSell && (
+                                                        {FEATURES.secondaryMarket && canSell && (
                                                             <button
                                                                 onClick={() => openSellModal(inv)}
                                                                 className="px-3.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 rounded-lg text-xs font-bold transition-colors cursor-pointer"
@@ -1229,7 +1232,7 @@ export default function CarteraPage() {
                                             </p>
                                             <p className="text-slate-600">
                                                 <strong>Beneficiario:</strong> {TREASURY_BANK_DETAILS.beneficiary} (NIT{' '}
-                                                {TREASURY_BANK_DETAILS.nit})
+                                                {TREASURY_BANK_DETAILS.beneficiaryId})
                                             </p>
                                         </div>
                                         <div>

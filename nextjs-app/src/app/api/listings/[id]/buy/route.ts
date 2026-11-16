@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { FEATURES } from '@/lib/features';
+import { featureDisabled } from '@/lib/guards';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { getOrCreateWallet, verifyOnChainTransaction, calculateUserLevel } from '@/lib/wallet';
@@ -9,6 +11,8 @@ export async function POST(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    if (!FEATURES.secondaryMarket) return featureDisabled('El mercado secundario');
+
     const session = await auth();
     if (!session?.user?.id) {
         return NextResponse.json({ error: 'No autorizado' }, { status: 401 });

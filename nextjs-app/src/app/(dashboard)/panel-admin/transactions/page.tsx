@@ -308,7 +308,7 @@ export default function AdminTransactionsPage() {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 font-black text-slate-900">
-                                                ${tx.netAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}{' '}
+                                                ${tx.netAmount.toLocaleString('es-CO', { maximumFractionDigits: 0 })}{' '}
                                                 <span className="text-xs font-bold text-slate-500">{tx.currency}</span>
                                             </td>
                                             <td className="px-6 py-4 max-w-xs">

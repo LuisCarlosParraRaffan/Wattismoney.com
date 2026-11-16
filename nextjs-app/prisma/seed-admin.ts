@@ -4,8 +4,13 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function seedAdmin() {
-    const adminEmail = process.env.ADMIN_EMAIL || 'l.parra@klikenergy.com';
-    const adminPassword = process.env.ADMIN_PASSWORD || '@Runescape2026*';
+    // Las credenciales del administrador solo llegan por variables de entorno: nunca en el código.
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+
+    if (!adminEmail || !adminPassword || adminPassword.length < 14) {
+        throw new Error('Define ADMIN_EMAIL y ADMIN_PASSWORD (mínimo 14 caracteres) como variables de entorno.');
+    }
 
     console.log(`Seeding admin user: ${adminEmail}`);
 

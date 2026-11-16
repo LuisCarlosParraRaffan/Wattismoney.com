@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { FEATURES } from '@/lib/features';
+import { featureDisabled } from '@/lib/guards';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getOrCreateWallet, calculateUserLevel } from '@/lib/wallet';
 
 // POST /api/investments - Create a new investment from Internal Hybrid Wallet
 export async function POST(request: NextRequest) {
+    if (!FEATURES.internalWallet) return featureDisabled('La inversión con saldo de billetera');
+
     try {
         const session = await auth();
         if (!session?.user?.id) {

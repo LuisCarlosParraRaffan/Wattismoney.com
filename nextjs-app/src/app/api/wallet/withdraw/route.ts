@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { FEATURES } from '@/lib/features';
+import { featureDisabled } from '@/lib/guards';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { getOrCreateWallet } from '@/lib/wallet';
 import { getChainById } from '@/lib/web3-config';
 
 export async function POST(request: NextRequest) {
+    if (!FEATURES.withdrawals) return featureDisabled('El retiro de fondos');
+
     try {
         const session = await auth();
         if (!session?.user?.id) {

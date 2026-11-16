@@ -12,6 +12,7 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:seed": "npx tsx prisma/seed.ts",
+    "db:reset-suesca": "npx tsx prisma/reset-and-seed-suesca.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {

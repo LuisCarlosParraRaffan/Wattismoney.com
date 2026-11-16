@@ -21,6 +21,14 @@ function getSupabaseClient(): SupabaseClient {
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+// La extensión se deriva del tipo validado, nunca del nombre que envía el cliente.
+const EXTENSION_BY_TYPE: Record<string, string> = {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+    'application/pdf': 'pdf',
+};
+const ADMIN_ONLY_UPLOADS = ['contract-image', 'contract-document'];
 
 // Determine bucket based on upload type
 function getBucketAndPath(type: string, userId: string, fileExtension: string): { bucket: string; path: string } {
@@ -45,7 +53,7 @@ function getBucketAndPath(type: string, userId: string, fileExtension: string): 
     // KYC documents stay in their original bucket (front, back, residence, etc.)
     return {
         bucket: 'kyc-documents',
-        path: `${userId}/${type || 'document'}_${timestamp}.${fileExtension}`
+        path: `${userId}/${(type || 'document').replace(/[^a-z0-9-]/gi, '')}_${timestamp}.${fileExtension}`
     };
 }
 
@@ -63,6 +71,13 @@ export async function POST(request: NextRequest) {
         const formData = await request.formData();
         const file = formData.get('file') as File | null;
         const type = formData.get('type') as string | null; // 'front', 'back', 'residence', 'contract-image', 'contract-document'
+
+        if (type && ADMIN_ONLY_UPLOADS.includes(type)) {
+            const role = session.user.role;
+            if (role !== 'ADMIN' && role !== 'SUPER_ADMIN') {
+                return NextResponse.json({ error: 'Acceso no autorizado' }, { status: 403 });
+            }
+        }
 
         if (!file) {
             return NextResponse.json(
@@ -88,7 +103,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Generar nombre único para el archivo
-        const fileExtension = file.name.split('.').pop() || 'bin';
+        const fileExtension = EXTENSION_BY_TYPE[file.type];
         const { bucket, path: filePath } = getBucketAndPath(type || 'document', session.user.id, fileExtension);
 
         // Convertir File a ArrayBuffer

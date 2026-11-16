@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { FEATURES } from '@/lib/features';
+import { featureDisabled } from '@/lib/guards';
 import { checkAdminAccess } from '@/lib/requireAdmin';
 import { prisma } from '@/lib/prisma';
 import { getOrCreateWallet, calculateUserLevel } from '@/lib/wallet';
 import { TransactionStatus } from '@/generated/prisma';
+
+/** Error de negocio al revisar una transacción: revierte la operación y se muestra al admin. */
+class ReviewError extends Error {}
 
 // GET /api/admin/transactions - List platform transactions & pending treasury approvals
 export async function GET(request: NextRequest) {
@@ -113,9 +118,24 @@ export async function PATCH(request: NextRequest) {
         }
 
         const amount = Number(txRecord.amount);
+        const approve = normalizedAction === 'APPROVE';
+        const reviewerId = session?.user?.id;
 
         await prisma.$transaction(async (tx) => {
-            if (normalizedAction === 'APPROVE') {
+            // 0. Reclamar la transacción: solo una revisión puede pasarla de PENDING a su estado final.
+            const claimed = await tx.transaction.updateMany({
+                where: { id: transactionId, status: 'PENDING' },
+                data: {
+                    status: approve ? 'COMPLETED' : 'REJECTED',
+                    adminNotes: adminNotes || (approve ? 'Aprobado por Tesorería' : 'Rechazado por Tesorería'),
+                    ...(approve && txHash ? { txHash } : {}),
+                    reviewedBy: reviewerId,
+                    reviewedAt: new Date(),
+                },
+            });
+            if (claimed.count !== 1) throw new ReviewError('Esta transacción ya fue revisada.');
+
+            if (approve) {
                 // 1. Aprobar Depósito Fiat por Transferencia Bancaria
                 if (txRecord.type === 'DEPOSIT_FIAT') {
                     await tx.wallet.update({
@@ -128,28 +148,38 @@ export async function PATCH(request: NextRequest) {
                 }
 
                 // 2. Aprobar Inversión Primaria por Transferencia Bancaria
-                if (txRecord.type === 'INVESTMENT_PRIMARY' && txRecord.investmentId && txRecord.contractId) {
-                    await tx.investment.update({
-                        where: { id: txRecord.investmentId },
+                if (txRecord.type === 'INVESTMENT_PRIMARY') {
+                    if (!txRecord.investmentId || !txRecord.contractId) {
+                        throw new ReviewError('La transacción no está vinculada a una inversión y un proyecto.');
+                    }
+
+                    const contract = await tx.contract.findUnique({ where: { id: txRecord.contractId } });
+                    if (!contract) throw new ReviewError('El proyecto de esta inversión ya no existe.');
+
+                    const raised = Number(contract.currentRaised);
+                    const capacity = Number(contract.totalCapacity);
+                    if (raised + amount > capacity) {
+                        throw new ReviewError('Aprobar esta inversión superaría la meta de recaudo del proyecto.');
+                    }
+
+                    // Bloqueo optimista: solo aplica si nadie más movió el recaudo entretanto.
+                    const updatedContract = await tx.contract.updateMany({
+                        where: { id: contract.id, currentRaised: contract.currentRaised },
                         data: {
-                            status: 'CONFIRMED',
-                            confirmedAt: new Date(),
+                            currentRaised: { increment: amount },
+                            ...(raised + amount >= capacity ? { status: 'FUNDED' as const } : {}),
                         },
                     });
+                    if (updatedContract.count !== 1) {
+                        throw new ReviewError('El recaudo del proyecto cambió mientras aprobabas. Intenta de nuevo.');
+                    }
 
-                    const contract = await tx.contract.findUnique({
-                        where: { id: txRecord.contractId },
+                    const confirmed = await tx.investment.updateMany({
+                        where: { id: txRecord.investmentId, status: 'PENDING' },
+                        data: { status: 'CONFIRMED', confirmedAt: new Date() },
                     });
-
-                    if (contract) {
-                        const newRaised = Number(contract.currentRaised) + amount;
-                        await tx.contract.update({
-                            where: { id: contract.id },
-                            data: {
-                                currentRaised: { increment: amount },
-                                ...(newRaised >= Number(contract.totalCapacity) ? { status: 'FUNDED' } : {}),
-                            },
-                        });
+                    if (confirmed.count !== 1) {
+                        throw new ReviewError('La inversión asociada no está en estado pendiente.');
                     }
 
                     const earnedXp = Math.max(10, Math.floor(amount / 10));
@@ -176,22 +206,10 @@ export async function PATCH(request: NextRequest) {
                         },
                     });
                 }
-
-                await tx.transaction.update({
-                    where: { id: transactionId },
-                    data: {
-                        status: 'COMPLETED',
-                        adminNotes: adminNotes || 'Aprobado por Tesorería',
-                        ...(txHash ? { txHash } : {}),
-                        reviewedBy: session?.user?.id,
-                        reviewedAt: new Date(),
-                    },
-                });
             } else {
-                // REJECT
                 if (txRecord.type === 'INVESTMENT_PRIMARY' && txRecord.investmentId) {
-                    await tx.investment.update({
-                        where: { id: txRecord.investmentId },
+                    await tx.investment.updateMany({
+                        where: { id: txRecord.investmentId, status: 'PENDING' },
                         data: { status: 'CANCELLED' },
                     });
                 }
@@ -215,16 +233,6 @@ export async function PATCH(request: NextRequest) {
                         },
                     });
                 }
-
-                await tx.transaction.update({
-                    where: { id: transactionId },
-                    data: {
-                        status: 'REJECTED',
-                        adminNotes: adminNotes || 'Rechazado por Tesorería',
-                        reviewedBy: session?.user?.id,
-                        reviewedAt: new Date(),
-                    },
-                });
             }
         });
 
@@ -236,6 +244,9 @@ export async function PATCH(request: NextRequest) {
                     : 'Transacción rechazada y saldos reversados',
         });
     } catch (err) {
+        if (err instanceof ReviewError) {
+            return NextResponse.json({ error: err.message }, { status: 409 });
+        }
         console.error('Error in PATCH /api/admin/transactions:', err);
         return NextResponse.json({ error: 'Error al actualizar transacción' }, { status: 500 });
     }
@@ -243,6 +254,8 @@ export async function PATCH(request: NextRequest) {
 
 // POST /api/admin/transactions - Distribute PPA Energy Yields to all active investors of a contract
 export async function POST(request: NextRequest) {
+    if (!FEATURES.yieldDistribution) return featureDisabled('La dispersión de rendimientos');
+
     const { error, session } = await checkAdminAccess();
     if (error) return error;
 

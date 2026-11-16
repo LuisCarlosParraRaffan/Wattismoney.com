@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { WattismoneyLogo } from '@/components/Icons';
 import { useOnboardingCheck } from '@/hooks/useOnboardingCheck';
+import { FEATURES } from '@/lib/features';
 
 export default function DashboardLayoutClient({
     children,
@@ -136,9 +137,11 @@ export default function DashboardLayoutClient({
                                     <Link href="/mercado-primario" className={`block px-3 py-2 rounded-lg text-xs transition-colors ${pathname === '/mercado-primario' ? 'text-black font-bold bg-primary/20' : 'text-slate-500 hover:text-black hover:bg-gray-50'}`}>
                                         Mercado Principal
                                     </Link>
+                                    {FEATURES.secondaryMarket && (
                                     <Link href="/mercado-secundario" className={`block px-3 py-2 rounded-lg text-xs transition-colors ${pathname === '/mercado-secundario' ? 'text-black font-bold bg-primary/20' : 'text-slate-500 hover:text-black hover:bg-gray-50'}`}>
                                         Mercado Secundario
                                     </Link>
+                                    )}
                                 </div>
                             </div>
                         </div>

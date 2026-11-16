@@ -85,13 +85,14 @@ export async function verifyOnChainTransaction(
             }
         }
     } catch (err) {
-        console.warn('RPC verification warning (fallback to optimistic verification):', err);
+        console.warn('RPC verification error:', err);
     }
 
-    // Si aún está indexándose en el nodo RPC o es entorno de pruebas/demo, permitimos hash válido de 66 caracteres
+    // Cierre seguro: si la red no confirma la transacción, NO se da por válida.
     return {
-        verified: true,
-        isSimulated: true,
+        verified: false,
+        isSimulated: false,
         explorerLink,
+        reason: 'La transacción aún no pudo verificarse en la blockchain. Intenta de nuevo en unos minutos.',
     };
 }
